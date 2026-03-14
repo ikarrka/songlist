@@ -1,0 +1,123 @@
+:root {
+    /* Page background and text */
+    --background: #f8f9fa;
+    --fontcolor: #212529;
+
+    /* Основные цвета */
+    --chord-color: #28a745;
+    --key-green: #228b22;
+
+    /* Фоновые цвета */
+    --bank-bg: #d4edda;
+    --voice-bg: #333333;
+    --split-bg: #87ceeb;
+    --button-bg: #eeeeee;
+
+    /* Текстовые цвета */
+    --bank-text: #000000;
+    --voice-text: #ffffff;
+    --split-text: #000000;
+
+    /* Границы */
+    --bank-border: #000000;
+    --voice-border: #000000;
+    --split-border: #000000;
+    --table-border: #000000;
+    --button-border: #cccccc;
+
+    /* Surfaces (modals, cards, loader) */
+    --surface-bg: #ffffff;
+    --surface-text: #212529;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+
+    /* Table structure part colors */
+    --color-intro: #336699;
+    --color-verse: #212529;
+    --color-chorus: #dc3545;
+    --color-instr: #28a745;
+    --color-coda: #8b4513;
+    --color-bridge: #8a2be2;
+    --color-prechorus: #008b8b;
+    --color-interlude: #9acd32;
+
+    /* Buttons and controls */
+    --sl-btn-bg: #eeeeee;
+    --sl-btn-border: #888888;
+    --transpose-btn-bg: transparent;
+    --transpose-btn-border: transparent;
+    --transpose-btn-color: #212529;
+    --tool-btn-bg: transparent;
+    --tool-btn-color: #212529;
+    --scroll-btn-bg: #444444;
+    --scroll-btn-color: #ffffff;
+    --setlist-modal-bg: #ffffff;
+    --setlist-btn-bg: #1976d2;
+    --setlist-btn-hover: #125ca1;
+
+    /* Accent / links */
+    --accent-blue: #0077cc;
+    --accent-song: #000066;
+    --accent-midi: rgb(0, 119, 204);
+    --accent-toggle-song: #555555;
+    --iframe-close-bg: rgba(0, 0, 0, 0.7);
+    --iframe-container-bg: #ffffff;
+    --iframe-container-shadow: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] {
+    --background: #1a1a1a;
+    --fontcolor: #e4e4e7;
+    --artist-color: #e4e4e7;
+
+    --chord-color: #4ade80;
+    --key-green: #4ade80;
+
+    --bank-bg: #1e3a1e;
+    --voice-bg: #404040;
+    --split-bg: #2a4a5a;
+    --button-bg: #2d2d2d;
+
+    --bank-text: #e4e4e7;
+    --voice-text: #e4e4e7;
+    --split-text: #e4e4e7;
+
+    --bank-border: #404040;
+    --voice-border: #404040;
+    --split-border: #404040;
+    --table-border: #404040;
+    --button-border: #555555;
+
+    --surface-bg: #2d2d2d;
+    --surface-text: #e4e4e7;
+    --overlay-bg: rgba(0, 0, 0, 0.75);
+
+    --color-intro: #60a5fa;
+    --color-verse: #e4e4e7;
+    --color-chorus: #f87171;
+    --color-instr: #4ade80;
+    --color-coda: #d4a574;
+    --color-bridge: #a78bfa;
+    --color-prechorus: #2dd4bf;
+    --color-interlude: #bef264;
+
+    --sl-btn-bg: #3d3d3d;
+    --sl-btn-border: #555555;
+    --transpose-btn-bg: transparent;
+    --transpose-btn-border: transparent;
+    --transpose-btn-color: #e4e4e7;
+    --tool-btn-bg: transparent;
+    --tool-btn-color: #e4e4e7;
+    --scroll-btn-bg: #404040;
+    --scroll-btn-color: #e4e4e7;
+    --setlist-modal-bg: #2d2d2d;
+    --setlist-btn-bg: #2563eb;
+    --setlist-btn-hover: #3b82f6;
+
+    --accent-blue: #60a5fa;
+    --accent-song: #93c5fd;
+    --accent-midi: rgb(96, 165, 250);
+    --accent-toggle-song: #a1a1aa;
+    --iframe-close-bg: rgba(0, 0, 0, 0.8);
+    --iframe-container-bg: #2d2d2d;
+    --iframe-container-shadow: rgba(0, 0, 0, 0.6);
+}
