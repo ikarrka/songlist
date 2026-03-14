@@ -1,8 +1,45 @@
+/* ==========================================================================
+   MUSIC.CSS — logical order: base → layout → accordion → content → tables
+   → blocks → buttons/tools → modals → overlays → misc → media
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BASE / GLOBAL
+   -------------------------------------------------------------------------- */
 body {
   background-color: var(--background);
   color: var(--fontcolor);
 }
 
+table {
+  width: 100%;
+}
+
+img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  vertical-align: top;
+}
+
+a {
+  float: right;
+}
+
+pre {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+chord,
+yt {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. HEADER / PAGE CHROME
+   -------------------------------------------------------------------------- */
 #themeToggle {
   font-size: 1.25em;
   padding: 4px 10px;
@@ -25,22 +62,11 @@ body {
 .band-select {
   font-size: 1.5em;
   font-weight: bold;
-  /* padding: 0.5em; */
 }
 
-img {
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  /* display: block; */
-  object-fit: contain;
-  vertical-align: top;
-}
-
-table {
-  width: 100%;
-}
-
+/* --------------------------------------------------------------------------
+   3. ACCORDION (song blocks)
+   -------------------------------------------------------------------------- */
 .accordion {
   position: relative;
   padding-bottom: 5px;
@@ -55,6 +81,7 @@ table {
   width: 100%;
   background: var(--button-bg);
   border-color: var(--button-border);
+  color: var(--fontcolor);
 }
 
 .accordion .content {
@@ -67,7 +94,47 @@ table {
   max-height: 5000px;
 }
 
-/* === ТЕКСТОВЫЕ ЭЛЕМЕНТЫ === */
+.reordered {
+  color: var(--fontcolor);
+}
+
+.toggle-button {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toggle-button span:not(:empty) {
+  margin-right: 3px;
+}
+
+.toggle-button span:last-child {
+  margin-right: 0;
+}
+
+.toggle-button .artist {
+  font-weight: 500;
+  color: var(--artist-color, var(--fontcolor));
+}
+
+.toggle-button .song {
+  font-style: italic;
+  opacity: 0.9;
+  color: var(--accent-song);
+}
+
+.toggle-button .song-key {
+  font-weight: bold;
+  color: var(--accent-blue);
+}
+
+.toggle-button .bank {
+  color: var(--accent-toggle-song);
+}
+
+/* --------------------------------------------------------------------------
+   4. CONTENT TYPOGRAPHY / TEXT ELEMENTS
+   -------------------------------------------------------------------------- */
 .key {
   font-size: 1.5em;
   font-weight: bold;
@@ -88,12 +155,38 @@ table {
   font-size: 1.2em;
 }
 
-/* === ССЫЛКИ === */
-a {
-  float: right;
+.chord {
+  font-weight: bold;
+  color: var(--chord-color);
+  display: inline-block;
+  transform: scaleY(1.3);
 }
 
-/* === ТАБЛИЦА СТРУКТУРЫ === */
+.scene {
+  font-weight: bolder;
+  color: var(--accent-song);
+}
+
+.tilde-text {
+  font-weight: bold;
+  color: var(--accent-blue);
+}
+
+bblue {
+  display: inline;
+  font-weight: bold;
+  color: var(--accent-blue);
+}
+
+bigb {
+  display: inline;
+  font-weight: bold;
+  font-size: 1.4em;
+}
+
+/* --------------------------------------------------------------------------
+   5. STRUCTURE TABLE (song layout)
+   -------------------------------------------------------------------------- */
 table.structure {
   border-collapse: collapse;
   border: 1px solid var(--table-border);
@@ -110,80 +203,10 @@ table.structure {
   word-break: break-word;
 }
 
-/* === БЛОКИ КОНТЕНТА (BANK, VOICE, SPLIT и др.) === */
-.midi,
-.pad,
-.bank,
-.split,
-.voice {
-  border: 1px solid;
-  border-radius: 6px;
-  padding: 5px;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  margin: 0 5px;
-  display: inline-flex;
-}
-
-.voice {
-  margin-bottom: 5px;
-}
-
-/* Индивидуальные стили блоков */
-.bank {
-  background-color: var(--bank-bg);
-  color: var(--bank-text);
-  border-color: var(--bank-border);
-}
-
-.voice {
-  background-color: var(--voice-bg);
-  color: var(--voice-text);
-  border-color: var(--voice-border);
-}
-
-.split {
-  background-color: var(--split-bg);
-  color: var(--split-text);
-  border-color: var(--split-border);
-}
-
-
-/* === АДАПТИВНЫЕ СТИЛИ === */
-@media (min-width: 768px) and (hover: none) and (pointer: coarse) {
-  pre:not([class]) {
-    font-size: 16px;
-    width: 100%;
-    overflow-x: auto;
-  }
-}
-
-/* === АККОРДЫ === */
-.chord {
-  font-weight: bold;
-  color: var(--chord-color);
-  display: inline-block;
-  transform: scaleY(1.3);
-}
-
-/* === ЧЕКЛИСТ === */
-.checklist-item {
-  margin-bottom: 0.5em;
-  display: flex;
-  align-items: center;
-}
-
-.checkmark {
-  margin-right: 0.5em;
-  cursor: pointer;
-}
-
-/* === ПЕРВАЯ КОЛОНКА ТАБЛИЦЫ === */
 table.structure tr.songpart td:first-child {
   width: 5%;
 }
 
-/* Общие стили для всех частей песни */
 table.structure tr.intro td:first-child,
 table.structure tr.verse td:first-child,
 table.structure tr.chorus td:first-child,
@@ -197,7 +220,6 @@ table.structure tr.interlude td:first-child {
   font-size: 1.5em;
 }
 
-/* Цветовая дифференциация частей песни */
 table.structure tr.intro td:first-child {
   color: var(--color-intro);
 }
@@ -230,225 +252,44 @@ table.structure tr.interlude td:first-child {
   color: var(--color-interlude);
 }
 
-.sl-btn {
-  font-size: 10px;
-  padding: 2px 5px;
-  border: 1px solid var(--sl-btn-border);
-  border-radius: 3px 0 0 3px;
-  background-color: var(--sl-btn-bg);
-  cursor: pointer;
-  margin: 5px;
-  float: right;
-}
-
-/* Оверлей */
-/* === IFRAME ОВЕРЛЕЙ === */
-.iframe-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--overlay-bg);
-  z-index: 10000;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-/* Контейнер для iframe (даёт границу и тень) */
-.iframe-container {
-  position: relative;
-  width: 90%;
-  max-width: 1200px;
-  height: 80%;
-  max-height: 900px;
-  background: var(--iframe-container-bg);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px var(--iframe-container-shadow);
-}
-
-/* Сам iframe */
-.iframe-container iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-}
-
-/* Кнопка закрыть */
-.iframe-close-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  background: var(--iframe-close-bg);
-  color: #fff;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-/* Немного адаптивности: на узких экранах контейнер занимает весь экран */
-/* Адаптивность для мобильных */
-@media (max-width: 640px) {
-  .iframe-container {
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-    max-width: none;
-    max-height: none;
-  }
-}
-
-/* делаем ячейку позиционированной */
-.transpose-cell {
-  position: relative;
-}
-
-/* контейнер кнопок */
-.tool-buttons {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  display: inline-flex;
-  gap: 6px;
-  /* расстояние между кнопками (чуть больше) */
-  z-index: 10;
-}
-
-/* сами кнопки */
-.transpose-btn {
-  font-size: 14px;
-  padding: 4px 8px;
-  background: var(--transpose-btn-bg);
-  border: none;
-  border-radius: 3px;
-  color: var(--transpose-btn-color);
-  cursor: pointer;
-}
-
-.square-green-button {
-  user-select: none;
-  /* Форма и размер */
-  width: 60px;
-  height: 60px;
-
-  /* Цвета */
-  background-color: #4CAF50;
-  /* Зеленый фон */
-  color: #000000;
-  /* Черный текст */
-
-  /* Граница */
-  border: 2px solid #000000;
-  /* Черная граница толщиной 2px */
-
-  /* Шрифт */
-  font-size: 20px;
-  font-weight: bold;
-  /* Жирный шрифт */
+/* --------------------------------------------------------------------------
+   6. CONTENT BLOCKS (bank, voice, split, midi, pad)
+   -------------------------------------------------------------------------- */
+.midi,
+.pad,
+.bank,
+.split,
+.voice {
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 5px;
   font-family: Arial, sans-serif;
-  /* Базовые стили и центрирование */
-  display: inline-flex;
-  align-items: center;
-  /* Центрирует содержимое по вертикали */
-  justify-content: center;
-  /* Центрирует содержимое по горизонтали */
-  cursor: pointer;
-  border-radius: 5px;
-
-  margin-top: 5px;
-  margin-bottom: 5px;
-
-}
-
-/* 🔸 при клике — временное свечение рамки */
-.square-green-button:active {
-  animation: flash-border 0.25s;
-}
-
-/* 🔸 сама анимация: короткая вспышка белого */
-@keyframes flash-border {
-  0% {
-    border-color: #000000;
-    box-shadow: none;
-  }
-
-  25% {
-    border-color: #ffff99;
-    box-shadow: 0 0 6px #ffff99;
-  }
-
-  50% {
-    border-color: #ffffff;
-    box-shadow: 0 0 10px #ffffff;
-  }
-
-  75% {
-    border-color: #ffff99;
-    box-shadow: 0 0 6px #ffff99;
-  }
-
-  100% {
-    border-color: #000000;
-    box-shadow: none;
-  }
-}
-
-.square-green-button.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  /* 🔒 блокирует клики */
-}
-
-/* .toggle-button span {
-  margin-right: 5px;
-} */
-
-.toggle-button span:not(:empty) {
-  margin-right: 3px;
-}
-
-/* Последний элемент без отступа */
-.toggle-button span:last-child {
-  margin-right: 0;
-}
-
-/* Можно добавить базовое выравнивание и стилистику */
-.toggle-button {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Примеры стилистики по классам */
-.toggle-button .artist {
-  font-weight: 500;
-  color: var(--artist-color, var(--fontcolor));
-}
-
-.toggle-button .song {
-  font-style: italic;
-  opacity: 0.9;
-  color: var(--accent-song);
-}
-
-.toggle-button .song-key {
   font-weight: bold;
-  color: var(--accent-blue);
+  margin: 0 5px;
+  display: inline-flex;
 }
 
-.toggle-button .bank {
-  color: var(--accent-toggle-song);
+.voice {
+  margin-bottom: 5px;
 }
 
-.toggle-button .voice {
-  /* color: #333; */
+.bank {
+  background-color: var(--bank-bg);
+  color: var(--bank-text);
+  border-color: var(--bank-border);
 }
 
+.voice {
+  background-color: var(--voice-bg);
+  color: var(--voice-text);
+  border-color: var(--voice-border);
+}
+
+.split {
+  background-color: var(--split-bg);
+  color: var(--split-text);
+  border-color: var(--split-border);
+}
 
 span.midi {
   font-weight: bold;
@@ -462,22 +303,16 @@ span.midi {
   align-items: center;
 }
 
-/* по умолчанию — зелёная стрелка */
 span.midi::after {
-  /* content: "➜"; */
-  /* color: limegreen; */
   margin-left: 2px;
   font-weight: bold;
 }
 
-/* если MIDI — зелёная стрелка */
 span.midi.initiated::after {
   content: "➜";
   color: limegreen;
 }
 
-
-/* если нет MIDI — красный крест */
 span.midi.error::after {
   content: "✖";
   color: red;
@@ -486,11 +321,155 @@ span.midi.error::after {
 .hammondVolume {
   transform: scaleX(2);
   transform-origin: left;
-  /* чтобы увеличивался вправо, а не в обе стороны */
 }
 
+/* --------------------------------------------------------------------------
+   7. TOOL BUTTONS & SONG TOOLS
+   -------------------------------------------------------------------------- */
+.transpose-cell {
+  position: relative;
+}
 
+.tool-buttons {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: inline-flex;
+  gap: 6px;
+  z-index: 10;
+}
 
+.tool-btn {
+  background: var(--tool-btn-bg);
+  border: none;
+  border-radius: 3px;
+  color: var(--tool-btn-color);
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.transpose-btn {
+  font-size: 14px;
+  padding: 4px 8px;
+  background: var(--transpose-btn-bg);
+  border: none;
+  border-radius: 3px;
+  color: var(--transpose-btn-color);
+  cursor: pointer;
+}
+
+.sl-btn {
+  font-size: 10px;
+  padding: 2px 5px;
+  border: 1px solid var(--sl-btn-border);
+  border-radius: 3px 0 0 3px;
+  background-color: var(--sl-btn-bg);
+  cursor: pointer;
+  margin: 5px;
+  float: right;
+}
+
+.setlist-btn {
+  float: right;
+  margin-right: 10px !important;
+}
+
+.square-green-button {
+  user-select: none;
+  width: 60px;
+  height: 60px;
+  background-color: #4CAF50;
+  color: #000000;
+  border: 2px solid #000000;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.square-green-button:active {
+  animation: flash-border 0.25s;
+}
+
+@keyframes flash-border {
+  0% {
+    border-color: #000000;
+    box-shadow: none;
+  }
+  25% {
+    border-color: #ffff99;
+    box-shadow: 0 0 6px #ffff99;
+  }
+  50% {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+  75% {
+    border-color: #ffff99;
+    box-shadow: 0 0 6px #ffff99;
+  }
+  100% {
+    border-color: #000000;
+    box-shadow: none;
+  }
+}
+
+.square-green-button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   8. CHECKLIST
+   -------------------------------------------------------------------------- */
+.checklist-item {
+  margin-bottom: 0.5em;
+  display: flex;
+  align-items: center;
+}
+
+.checkmark {
+  margin-right: 0.5em;
+  cursor: pointer;
+}
+
+.checkdiv {
+  padding-bottom: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   9. BLOCKS / SETLIST
+   -------------------------------------------------------------------------- */
+.block-header {
+  position: relative;
+  padding-right: 15px;
+}
+
+.block-remove-btn {
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.block-remove-btn::after {
+  content: "🗑️";
+  color: var(--accent-blue);
+  font-weight: bold;
+}
+
+.dimmed {
+  opacity: 0.3;
+}
+
+/* --------------------------------------------------------------------------
+   10. MODALS
+   -------------------------------------------------------------------------- */
 .modal {
   display: none;
   position: fixed;
@@ -508,14 +487,10 @@ span.midi.error::after {
   padding: 0;
   border-radius: 8px;
   width: 90vw;
-  /* почти вся ширина окна браузера */
   height: 85vh;
-  /* почти вся высота окна */
   overflow: hidden;
-  /* важно, чтобы видео не вылазило за рамки */
 }
 
-/* --- iframe занимает всю область --- */
 .modal-content iframe {
   width: 100%;
   height: 100%;
@@ -523,14 +498,12 @@ span.midi.error::after {
   border: none;
 }
 
-/* кнопки над iframe */
 .minimize-btn,
 .close-btn {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 9999;
-  /* важно — выше iframe */
   background: rgba(255, 255, 255, 0.25);
   border: none;
   color: #fff;
@@ -544,13 +517,11 @@ span.midi.error::after {
   right: 48px;
 }
 
-/* чтобы не наезжала на кнопку закрытия */
 .minimize-btn:hover,
 .close-btn:hover {
   background: rgba(255, 255, 255, 0.4);
 }
 
-/* минимизированное состояние */
 .modal.minimized {
   inset: auto 16px 16px auto;
   width: auto;
@@ -572,18 +543,11 @@ span.midi.error::after {
   height: 100%;
 }
 
-
-
-.setlist-btn {
-  float: right;
-  margin-right: 10px !important;
-}
-
+/* Setlist modal */
 .setlist-modal {
   display: none;
   position: fixed;
   z-index: 3000;
-  /* выше большинства окон */
   inset: 0;
   background: var(--overlay-bg);
   justify-content: center;
@@ -644,40 +608,180 @@ span.midi.error::after {
   background: var(--setlist-btn-hover);
 }
 
+/* MIDI modal */
+.midi-modal-trigger {
+  margin-left: 6px;
+  font-size: 1.1em;
+  vertical-align: middle;
+}
 
+.midi-modal {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  background: var(--overlay-bg);
+  justify-content: center;
+  align-items: center;
+}
+
+.midi-modal.is-open {
+  display: flex;
+}
+
+.midi-modal-content {
+  background: var(--setlist-modal-bg);
+  color: var(--surface-text);
+  padding: 20px 24px;
+  border-radius: 8px;
+  width: 320px;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.midi-modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.midi-modal-device {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin-bottom: 1em;
+}
+
+.midi-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: var(--surface-text);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.midi-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 1em;
+}
+
+.midi-modal-form label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.midi-modal-form input[type="number"] {
+  width: 80px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+}
+
+.midi-modal-send {
+  padding: 8px 16px;
+  background: var(--setlist-btn-bg);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.midi-modal-send:hover {
+  background: var(--setlist-btn-hover);
+}
+
+.midi-modal-divider {
+  margin: 1em 0;
+  border: none;
+  border-top: 1px solid var(--button-border);
+}
+
+.midi-modal-subtitle {
+  margin: 0 0 0.25em 0;
+  font-size: 1em;
+}
+
+.midi-modal-hint {
+  font-size: 0.85em;
+  opacity: 0.9;
+  margin-bottom: 0.5em;
+}
+
+.midi-modal-sysex {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 0.9em;
+  resize: vertical;
+  margin-bottom: 0.5em;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: var(--button-bg);
+  color: var(--fontcolor);
+}
+
+/* --------------------------------------------------------------------------
+   11. OVERLAYS / IFRAME
+   -------------------------------------------------------------------------- */
+.iframe-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay-bg);
+  z-index: 10000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.iframe-container {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  height: 80%;
+  max-height: 900px;
+  background: var(--iframe-container-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px var(--iframe-container-shadow);
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.iframe-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  background: var(--iframe-close-bg);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   12. MISC UI
+   -------------------------------------------------------------------------- */
 .youtube-link {
   margin-left: 10px !important;
   text-decoration: none;
   color: red;
-}
-
-.scene {
-  font-weight: bolder;
-  color: var(--accent-song);
-}
-
-.dimmed {
-  opacity: 0.3;
-}
-
-.block-header {
-  position: relative;
-  padding-right: 15px;
-  /* место под кнопку */
-}
-
-/* сама "кнопка" удаления */
-.block-remove-btn {
-  cursor: pointer;
-  margin-left: 8px;
-}
-
-/* выносим сам символ */
-.block-remove-btn::after {
-  content: "🗑️";
-  /* ← хочешь — заменим на любой символ */
-  color: var(--accent-blue);
-  font-weight: bold;
 }
 
 #scrollToTopBtn {
@@ -692,40 +796,12 @@ span.midi.error::after {
   color: var(--scroll-btn-color);
   font-size: 18px;
   cursor: pointer;
-  opacity: 0.6;
+  opacity: var(--scroll-btn-opacity, 0.6);
   z-index: 9999;
 }
 
 #scrollToTopBtn:hover {
   opacity: 1;
-}
-
-
-.tilde-text {
-  font-weight: bold;
-  color: var(--accent-blue);
-}
-
-bblue {
-  display: inline;
-  font-weight: bold;
-  color: var(--accent-blue);
-}
-
-bigb {
-  display: inline;
-  font-weight: bold;
-  font-size: 1.4em;
-}
-
-pre {
-  margin-bottom: 0px;
-  margin-top: 0px;
-}
-
-chord,
-yt {
-  display: none;
 }
 
 #pageLoader {
@@ -734,11 +810,9 @@ yt {
   background: var(--surface-bg);
   color: var(--surface-text);
   z-index: 9999;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 20px;
   font-family: Arial, sans-serif;
 }
@@ -755,37 +829,33 @@ yt {
 }
 
 @keyframes dots {
-  0% {
-    content: "";
-  }
-
-  33% {
-    content: ".";
-  }
-
-  66% {
-    content: "..";
-  }
-
-  100% {
-    content: "...";
-  }
-}
-
-.checkdiv {
-  padding-bottom: 10px;
-}
-
-.tool-btn {
-  background: var(--tool-btn-bg);
-  border: none;
-  border-radius: 3px;
-  color: var(--tool-btn-color);
-  padding: 4px 8px;
-  font-size: 14px;
-  cursor: pointer;
+  0% { content: ""; }
+  33% { content: "."; }
+  66% { content: ".."; }
+  100% { content: "..."; }
 }
 
 .originalImage {
   float: none;
+}
+
+/* --------------------------------------------------------------------------
+   13. MEDIA QUERIES
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) and (hover: none) and (pointer: coarse) {
+  pre:not([class]) {
+    font-size: 16px;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .iframe-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    max-width: none;
+    max-height: none;
+  }
 }

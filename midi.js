@@ -656,3 +656,72 @@ function updateMidiIndicators() {
     }, 3000);
   });
 }
+
+function initMidiModal() {
+  const modal = document.getElementById('midi-modal');
+  const trigger = document.getElementById('midiModalBtn');
+  const closeBtn = document.getElementById('midiModalClose');
+  const sendBtn = document.getElementById('midiModalSend');
+  const deviceNameEl = document.getElementById('midiModalDeviceName');
+
+  if (!modal || !trigger) return;
+
+  function openMidiModal() {
+    if (deviceNameEl && midiOutput) {
+      deviceNameEl.textContent = 'Устройство: ' + midiOutput.name;
+    } else if (deviceNameEl) {
+      deviceNameEl.textContent = 'Устройство не выбрано';
+    }
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeMidiModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  trigger.addEventListener('click', openMidiModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeMidiModal);
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeMidiModal();
+  });
+
+  if (sendBtn) {
+    sendBtn.addEventListener('click', function () {
+      if (!selectedMidiOutput()) return;
+      const ch = parseInt(document.getElementById('midiModalChannel').value, 10);
+      const msb = parseInt(document.getElementById('midiModalMsb').value, 10);
+      const lsb = parseInt(document.getElementById('midiModalLsb').value, 10);
+      const prog = parseInt(document.getElementById('midiModalProgram').value, 10);
+      if (isNaN(ch) || ch < 1 || ch > 16) return;
+      if ([msb, lsb, prog].some(v => isNaN(v) || v < 0 || v > 127)) return;
+      sendMidiPatch(ch - 1, msb, lsb, prog, '');
+    });
+  }
+
+  const sysexInput = document.getElementById('midiModalSysex');
+  const sendSysexBtn = document.getElementById('midiModalSendSysex');
+  if (sendSysexBtn && sysexInput) {
+    sendSysexBtn.addEventListener('click', function () {
+      if (!selectedMidiOutput()) return;
+      const raw = sysexInput.value.trim().replace(/,/g, ' ').split(/\s+/).filter(Boolean);
+      const dataArray = [];
+      for (let i = 0; i < raw.length; i++) {
+        const s = raw[i].replace(/^0x/i, '');
+        const n = parseInt(s, 16);
+        if (isNaN(n) || n < 0 || n > 255) continue;
+        dataArray.push(n);
+      }
+      if (dataArray.length < 3) {
+        console.warn('SysEx: нужно минимум 3 байта');
+        return;
+      }
+      sendSysEx(dataArray.slice(), 'Modal');
+    });
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', initMidiModal);
+}

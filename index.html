@@ -43,6 +43,7 @@
     <span id="hashNo" style="color: red;"><strong>No hash</strong><br><span id="hashNoList"></span><br></span>
     <span id="midiContent">
         MIDI device <select id="midiSelectDevice"></select> <span id="midiError" style="color: red;">Wait...</span>
+        <button type="button" id="midiModalBtn" class="tool-btn midi-modal-trigger" title="Настроить и отправить MIDI команду" aria-label="MIDI команда">&#127929;</button>
         <hr>
     </span>
     <div class="accordion" id="checkList">
@@ -24855,6 +24856,31 @@ D#m A#m F A#m <bblue>x2</bblue></instr>
     <iframe id="youtubeFrame" src="" frameborder="0"
       allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
+</div>
+
+<!-- Модальное окно: настройка и отправка MIDI команды -->
+<div id="midi-modal" class="midi-modal" aria-hidden="true">
+    <div class="midi-modal-content">
+        <button type="button" class="midi-modal-close" id="midiModalClose" aria-label="Закрыть">×</button>
+        <h3>Отправить MIDI на устройство</h3>
+        <p class="midi-modal-device" id="midiModalDeviceName"></p>
+        <div class="midi-modal-form">
+            <label>Канал (1–16): <input type="number" id="midiModalChannel" min="1" max="16" value="1"></label>
+            <label>MSB (0–127): <input type="number" id="midiModalMsb" min="0" max="127" value="0"></label>
+            <label>LSB (0–127): <input type="number" id="midiModalLsb" min="0" max="127" value="0"></label>
+            <label>Program (0–127): <input type="number" id="midiModalProgram" min="0" max="127" value="0"></label>
+        </div>
+        <div class="midi-modal-actions">
+            <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
+        </div>
+        <hr class="midi-modal-divider">
+        <h4 class="midi-modal-subtitle">SysEx</h4>
+        <p class="midi-modal-hint">Байты в HEX через пробел или запятую (F0 и F7 подставятся автоматически при необходимости).</p>
+        <textarea id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="41 10 00 00 00 5B 12 ..."></textarea>
+        <div class="midi-modal-actions">
+            <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+        </div>
+    </div>
 </div>
 
 <!-- Модальное окно только для setlist -->

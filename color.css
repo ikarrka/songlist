@@ -50,6 +50,7 @@
     --tool-btn-color: #212529;
     --scroll-btn-bg: #444444;
     --scroll-btn-color: #ffffff;
+    --scroll-btn-opacity: 0.6;
     --setlist-modal-bg: #ffffff;
     --setlist-btn-bg: #1976d2;
     --setlist-btn-hover: #125ca1;
@@ -107,8 +108,9 @@
     --transpose-btn-color: #e4e4e7;
     --tool-btn-bg: transparent;
     --tool-btn-color: #e4e4e7;
-    --scroll-btn-bg: #404040;
-    --scroll-btn-color: #e4e4e7;
+    --scroll-btn-bg: #6e6e6e;
+    --scroll-btn-color: #f0f0f0;
+    --scroll-btn-opacity: 0.9;
     --setlist-modal-bg: #2d2d2d;
     --setlist-btn-bg: #2563eb;
     --setlist-btn-hover: #3b82f6;
