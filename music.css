@@ -590,6 +590,7 @@ span.midi.error::after {
 }
 
 .setlist-save,
+.setlist-autofill,
 .setlist-clear {
   margin-top: 12px;
   padding: 6px 10px;
@@ -600,11 +601,19 @@ span.midi.error::after {
   cursor: pointer;
 }
 
+.setlist-autofill {
+  margin-left: 8px;
+  font-size: 1.15em;
+  line-height: 1;
+  padding: 6px 12px;
+}
+
 .setlist-clear {
   float: right;
 }
 
-.setlist-save:hover {
+.setlist-save:hover,
+.setlist-autofill:hover {
   background: var(--setlist-btn-hover);
 }
 

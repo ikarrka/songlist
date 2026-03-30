@@ -45,6 +45,40 @@ function setlistClose() {
     currentHash = null;
 }
 
+function setlistFillLastBlockNextSong() {
+    const band = document.getElementsByClassName('band-select')[0]?.value;
+    if (!band) return;
+    const list = document.querySelector(`.songlist[band="${band}"]`);
+    if (!list) return;
+
+    const hashes = Array.from(list.querySelectorAll('.accordion')).map(el => el.getAttribute('hash'));
+    let maxBlock = 0;
+    const entries = [];
+
+    for (const hash of hashes) {
+        const data = setlistData[hash];
+        if (!data) continue;
+        const block = parseInt(data.block, 10);
+        const song = parseInt(data.song, 10);
+        if (block > 0 && song > 0) {
+            entries.push({ block, song });
+            if (block > maxBlock) maxBlock = block;
+        }
+    }
+
+    let nextBlock = 1;
+    let nextSong = 1;
+
+    if (entries.length > 0) {
+        nextBlock = maxBlock;
+        const songsInLast = entries.filter(e => e.block === maxBlock).map(e => e.song);
+        nextSong = Math.max(...songsInLast) + 1;
+    }
+
+    document.getElementById('setlist-block').value = nextBlock;
+    document.getElementById('setlist-song').value = nextSong;
+}
+
 // --- обработчики ---
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('setlist-close').onclick = setlistClose;
@@ -69,6 +103,10 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('setlist-clear').onclick = async () => {
         document.getElementById('setlist-block').value = "";
         document.getElementById('setlist-song').value = "";
+    };
+
+    document.getElementById('setlist-autofill-next').onclick = () => {
+        setlistFillLastBlockNextSong();
     };
 
 });
