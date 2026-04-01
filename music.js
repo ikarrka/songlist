@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     handleAccordionAccess();
     fillCheckList();
-    initTranspose();
     updateMidiIndicators();
     bindNavigationEvents()
 
@@ -687,8 +686,8 @@ function addButtons(song) {
         { txt: "⛭", class: "setlist-btn" },
         { txt: "►", class: "youtube-link", tag: "yt", action: openYoutubeFrame },
         { txt: "☰", tag: "chord", action: link => window.open(link, "_blank") },
-        { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn,down"  },
-        { txt: TransposeButtonUpSymbol, transpose: 1, class: "transpose-btn,up"  },
+        { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn down"  },
+        { txt: TransposeButtonUpSymbol, transpose: 1, class: "transpose-btn up"  },
     ];
 
     buttons.forEach(cfg => {
@@ -698,7 +697,7 @@ function addButtons(song) {
         btn.classList.add("tool-btn");
 
         if (cfg.class) {
-            btn.classList.add(cfg.class);
+            btn.classList.add(...cfg.class.split(" "));
         }
 
         if (cfg.tag) {
@@ -797,6 +796,8 @@ function bindAccordionClickEvent() {
                 img.src = prefixImage + img.dataset.src + '?v=' + Date.now();
                 img.removeAttribute("data-src");
             });
+
+            initTransposeForAccordion(accordion);
         }
 
         const yOffset = 0;
@@ -936,47 +937,47 @@ async function buildAllBandsList() {
     }
 }
 
-function initTranspose() {
-    document.querySelectorAll(".accordion[transpose]").forEach(acc => {
-        //удаляем картинки с атрибутом imagetype ---
-        const transposeValue = parseInt(acc.getAttribute("transpose"), 10);
+function initTransposeForAccordion(acc) {
+    if (!acc || acc.dataset.transposeApplied === "1") return;
 
-        if (!isNaN(transposeValue) && transposeValue !== 0) {
-            acc.querySelectorAll('img[imagetype="scores"]').forEach(img => {
-                const src = img.getAttribute("data-src");
-                const notice = document.createElement("div");
+    const transposeValue = parseInt(acc.getAttribute("transpose"), 10);
+    if (isNaN(transposeValue) || transposeValue === 0) return;
 
-                const a = document.createElement('a');
-                a.href = src;
-                a.target = '_blank';
-                a.className = 'originalImage';
-                a.textContent = 'original';
+    acc.querySelectorAll('img[imagetype="scores"]').forEach(img => {
+        const src = img.getAttribute("data-src");
+        const notice = document.createElement("div");
 
-                notice.innerHTML = '&#119070; ';
-                notice.append('Notes removed due to key mismatch ', a);                
+        const a = document.createElement('a');
+        a.href = src;
+        a.target = '_blank';
+        a.className = 'originalImage';
+        a.textContent = 'original';
 
-                notice.classList.add("tilde-text");
-                img.replaceWith(notice);
-            });
+        notice.innerHTML = '&#119070; ';
+        notice.append('Notes removed due to key mismatch ', a);
 
-            const btnContainer = acc.querySelector(".tool-buttons");
-            if (!btnContainer) return;
-
-            // Ищем кнопки по содержимому текста
-            const minusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
-                .find(btn => btn.textContent.trim() === TransposeButtonDownSymbol || btn.textContent.trim() === "-");
-            const plusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
-                .find(btn => btn.textContent.trim() === TransposeButtonUpSymbol);
-            if (!minusBtn || !plusBtn) return;
-
-            const btn = transposeValue > 0 ? plusBtn : minusBtn;
-            const count = Math.abs(transposeValue);
-
-            for (let i = 0; i < count; i++) {
-                btn.click();
-            }
-        }
+        notice.classList.add("tilde-text");
+        img.replaceWith(notice);
     });
+
+    const btnContainer = acc.querySelector(".tool-buttons");
+    if (!btnContainer) return;
+
+    // Ищем кнопки по содержимому текста
+    const minusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
+        .find(btn => btn.textContent.trim() === TransposeButtonDownSymbol || btn.textContent.trim() === "-");
+    const plusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
+        .find(btn => btn.textContent.trim() === TransposeButtonUpSymbol);
+    if (!minusBtn || !plusBtn) return;
+
+    const btn = transposeValue > 0 ? plusBtn : minusBtn;
+    const count = Math.abs(transposeValue);
+
+    for (let i = 0; i < count; i++) {
+        btn.click();
+    }
+
+    acc.dataset.transposeApplied = "1";
 }
 
 function initClickOnPads(song) {
