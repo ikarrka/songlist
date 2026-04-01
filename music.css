@@ -211,6 +211,12 @@ table.structure col.content-col {
   word-break: break-word;
 }
 
+table.structure tr.songpart td:last-child pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 table.structure tr.songpart:not(.controls-row) td:first-child {
   width: 5%;
   white-space: nowrap;
