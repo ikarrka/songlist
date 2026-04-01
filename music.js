@@ -399,6 +399,21 @@ function convertSongToTable(song) {
     song.dataset.converted = "1";
     const table = document.createElement('table');
     table.className = 'structure';
+    const colgroup = document.createElement('colgroup');
+    const sectionCol = document.createElement('col');
+    sectionCol.className = 'section-col';
+    const contentCol = document.createElement('col');
+    contentCol.className = 'content-col';
+    colgroup.appendChild(sectionCol);
+    colgroup.appendChild(contentCol);
+    table.appendChild(colgroup);
+    const controlsRow = document.createElement('tr');
+    controlsRow.className = 'songpart controls-row';
+    const controlsCell = document.createElement('td');
+    controlsCell.className = 'controls-cell';
+    controlsCell.colSpan = 2;
+    controlsRow.appendChild(controlsCell);
+    table.appendChild(controlsRow);
 
     // Перебираем все дочерние узлы song
     songContainer = song.querySelector("song");
@@ -666,15 +681,15 @@ function transposeSong(direction = 1, table) {
 function addButtons(song) {
     if (!song) return;
     const table = song.querySelector("table.structure");
-    let lastCell;
+    let targetCell;
     if (table) {
-        lastCell = table.querySelector("tr:first-child td:last-child");
+        targetCell = table.querySelector("tr.controls-row td.controls-cell");
     }
     else {
-        lastCell = song.querySelector("pre");
+        targetCell = song.querySelector("pre");
     }
 
-    if (!lastCell) return;
+    if (!targetCell) return;
 
     const wrapper = document.createElement("div");
     wrapper.className = "tool-buttons";
@@ -723,8 +738,8 @@ function addButtons(song) {
         wrapper.appendChild(btn);
     });
 
-    lastCell.classList.add("transpose-cell");
-    lastCell.appendChild(wrapper);
+    targetCell.classList.add("transpose-cell");
+    targetCell.appendChild(wrapper);
 }
 
 function copyAccordionContentByHash() {

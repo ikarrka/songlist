@@ -190,9 +190,17 @@ bigb {
 table.structure {
   border-collapse: collapse;
   border: 1px solid var(--table-border);
-  table-layout: fixed;
+  table-layout: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+table.structure col.section-col {
+  width: 1%;
+}
+
+table.structure col.content-col {
+  width: 99%;
 }
 
 .structure td,
@@ -203,8 +211,10 @@ table.structure {
   word-break: break-word;
 }
 
-table.structure tr.songpart td:first-child {
+table.structure tr.songpart:not(.controls-row) td:first-child {
   width: 5%;
+  white-space: nowrap;
+  width: 1%;
 }
 
 table.structure tr.intro td:first-child,
@@ -337,6 +347,20 @@ span.midi.error::after {
   display: inline-flex;
   gap: 6px;
   z-index: 10;
+}
+
+table.structure tr.controls-row td.controls-cell {
+  position: relative;
+  padding: 4px 6px;
+}
+
+table.structure tr.controls-row td.controls-cell .tool-buttons {
+  position: static;
+  top: auto;
+  right: auto;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .tool-btn {
