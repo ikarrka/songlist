@@ -212,9 +212,17 @@ table.structure col.content-col {
 }
 
 table.structure tr.songpart td:last-child pre {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+table.structure tr.songpart td.has-horizontal-scroll {
+  border-color: var(--accent-blue);
+  box-shadow: inset 0 0 0 1px var(--accent-blue);
 }
 
 table.structure tr.songpart:not(.controls-row) td:first-child {

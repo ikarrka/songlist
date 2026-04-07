@@ -451,6 +451,20 @@ function convertSongToTable(song) {
     replaceBackticksWithSpace(table);
     replaceCustomTags(song);
     handleMidi(table);
+    markScrollableCells(table);
+}
+
+function markScrollableCells(scope) {
+    if (!scope) return;
+
+    const cells = scope.querySelectorAll('tr.songpart td:last-child');
+    cells.forEach(cell => {
+        const pre = cell.querySelector('pre');
+        if (!pre) return;
+
+        const hasHorizontalScroll = pre.scrollWidth > pre.clientWidth + 1;
+        cell.classList.toggle('has-horizontal-scroll', hasHorizontalScroll);
+    });
 }
 
 /**
@@ -998,7 +1012,7 @@ function initTransposeForAccordion(acc) {
 function initClickOnPads(song) {
     song.querySelectorAll(".square-green-button").forEach(btn => {
         btn.addEventListener("click", () => {
-            getPadSysex(btn.textContent.trim());
+            handleGreenPadButton(btn.textContent.trim());
         });
     });
 }

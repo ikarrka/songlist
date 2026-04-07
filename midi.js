@@ -457,7 +457,7 @@ function sendFantomSceneChange(accordion) {
   if (sendMidiPatch(midiChanell, msb, lsb, program)) {
     if (pad) {
       setTimeout(() => {
-        getPadSysex(pad)
+        handleGreenPadButton(pad);
       }, 500); // миллисекунды
     }
   }
@@ -590,6 +590,15 @@ function sendSysEx(dataArray, description = "") {
   } catch (e) {
     console.error("Failed to send SysEx:", e);
   }
+}
+
+/** Same logic as a click on .square-green-button (pad 1–16). */
+function handleGreenPadButton(raw) {
+  const n = parseInt(String(raw ?? "").trim(), 10);
+  if (!Number.isFinite(n) || n < 1 || n > 16) {
+    return;
+  }
+  getPadSysex(n);
 }
 
 function getPadSysex(padNumber) {
