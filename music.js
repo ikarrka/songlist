@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
     handleAccordionAccess();
     fillCheckList();
     updateMidiIndicators();
-    bindNavigationEvents()
+    initMidiModal();
+    bindNavigationEvents();
 
     document.body.style.visibility = "visible";
     const loader = document.getElementById("pageLoader");
@@ -416,7 +417,7 @@ function convertSongToTable(song) {
     table.appendChild(controlsRow);
 
     // Перебираем все дочерние узлы song
-    songContainer = song.querySelector("song");
+    const songContainer = song.querySelector("song");
     if (!songContainer) return;
 
     Array.from(songContainer.children).forEach(node => {
@@ -1010,6 +1011,7 @@ function initTransposeForAccordion(acc) {
 }
 
 function initClickOnPads(song) {
+    if (!song || typeof song.querySelectorAll !== "function") return;
     song.querySelectorAll(".square-green-button").forEach(btn => {
         btn.addEventListener("click", () => {
             handleGreenPadButton(btn.textContent.trim());
@@ -1017,7 +1019,20 @@ function initClickOnPads(song) {
     });
 }
 
+/** Scene+MIDI+pad same as opening an accordion with the same attributes (gray pad buttons in song body). */
+function initSquareGrayMidiButtons(scope) {
+    if (!scope || typeof scope.querySelectorAll !== "function") return;
+    scope.querySelectorAll(".square-gray-button[midi]").forEach(btn => {
+        btn.addEventListener("click", e => {
+            e.preventDefault();
+            e.stopPropagation();
+            sendFantomSceneChange(btn);
+        });
+    });
+}
+
 function initHammondVolumeChange(song) {
+    if (!song || typeof song.querySelectorAll !== "function") return;
     const sliders = song.querySelectorAll('.hammondVolume');
     sliders.forEach(slider => {
 
@@ -1065,17 +1080,72 @@ function replaceBackticksWithSpace(table) {
     });
 }
 
+function extractYoutubeVideoId(link) {
+    try {
+        const url = new URL(link, window.location.href);
+        const v = url.searchParams.get('v');
+        if (v) {
+            return v;
+        }
+        if (url.hostname === 'youtu.be') {
+            const id = url.pathname.replace(/^\//, '').split('/')[0];
+            return id || null;
+        }
+        const shorts = url.pathname.match(/\/shorts\/([^/?]+)/);
+        if (shorts) return shorts[1];
+        const embed = url.pathname.match(/\/embed\/([^/?]+)/);
+        if (embed) return embed[1];
+    } catch (e) {
+        return null;
+    }
+    return null;
+}
+
+function buildYoutubeNocookieEmbedUrl(videoId) {
+    const q = new URLSearchParams({
+        autoplay: '1',
+        rel: '0',
+        playsinline: '1',
+        modestbranding: '1',
+    });
+    return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?${q}`;
+}
+
+function clearYoutubeIframe(frame) {
+    if (!frame) return;
+    if (frame.dataset.youtubeBlobUrl) {
+        URL.revokeObjectURL(frame.dataset.youtubeBlobUrl);
+        delete frame.dataset.youtubeBlobUrl;
+    }
+    frame.removeAttribute('srcdoc');
+    frame.src = 'about:blank';
+}
+
 function openYoutubeFrame(link) {
-    const url = new URL(link);
-    const videoId = url.searchParams.get('v');
+    const videoId = extractYoutubeVideoId(link);
     if (!videoId) return;
 
-    const modal = document.getElementById('videoModal');
+    const panel = document.getElementById('youtubePanel');
     const frame = document.getElementById('youtubeFrame');
+    if (!panel || !frame) return;
 
-    frame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-    modal.style.display = 'flex';
-    modal.classList.remove('minimized');
+    clearYoutubeIframe(frame);
+
+    const embedUrl = buildYoutubeNocookieEmbedUrl(videoId);
+    if (window.location.protocol === 'file:') {
+        const bridgeHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="referrer" content="unsafe-url"></head><body style="margin:0;overflow:hidden">' +
+            '<iframe style="border:0;position:fixed;inset:0;width:100%;height:100%" src="' +
+            embedUrl.replace(/"/g, '&quot;') +
+            '" referrerpolicy="unsafe-url" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></body></html>';
+        const blobUrl = URL.createObjectURL(new Blob([bridgeHtml], { type: 'text/html' }));
+        frame.dataset.youtubeBlobUrl = blobUrl;
+        frame.src = blobUrl;
+    } else {
+        frame.src = embedUrl;
+    }
+
+    panel.classList.add('is-open');
+    panel.classList.remove('minimized');
 
     bindYoutubeHandlersOnce();
 }
@@ -1084,43 +1154,46 @@ function bindYoutubeHandlersOnce() {
     if (window._youtubeHandlerBound) return;
     window._youtubeHandlerBound = true;
 
-    const modal = document.getElementById('videoModal');
+    const panel = document.getElementById('youtubePanel');
     const frame = document.getElementById('youtubeFrame');
+    if (!panel || !frame) return;
 
     document.getElementById('closeModal')
         ?.addEventListener('click', () => {
-            frame.src = '';
-            modal.style.display = 'none';
+            clearYoutubeIframe(frame);
+            panel.classList.remove('is-open', 'minimized');
         });
 
     document.getElementById('minimizeModal')
         ?.addEventListener('click', () => {
-            modal.classList.toggle('minimized');
-            //console.log('Minimize toggled:', modal.classList.contains('minimized'));
-        });
-
-    document.getElementById('restoreModal')
-        ?.addEventListener('click', () => {
-            modal.classList.remove('minimized');
+            panel.classList.toggle('minimized');
         });
 }
 
-function ArtistSongToClipboard() {
-    const bandId = document.querySelector('.band-select').value;
-    const bandDiv = document.querySelector(`div[band="${bandId}"]`);
-    if (!bandDiv) return;
+function readArtistSongFromToggleButton(btn) {
+    return {
+        artist: btn.querySelector('.artist')?.textContent.trim() || "",
+        song: btn.querySelector('.song')?.textContent.trim() || "",
+        songKey: btn.querySelector('.song-key')?.textContent.trim() || "",
+        youtube: btn.querySelector('.youtube-link')?.href || "",
+    };
+}
 
-    const buttons = bandDiv.querySelectorAll('.toggle-button');
+function getArtistSongEntriesForCurrentBand() {
+    const bandId = document.querySelector('.band-select')?.value;
+    if (!bandId) return null;
+    const bandDiv = document.querySelector(`div[band="${bandId}"]`);
+    if (!bandDiv) return null;
+    return Array.from(bandDiv.querySelectorAll('.toggle-button')).map(readArtistSongFromToggleButton);
+}
+
+function ArtistSongToClipboard() {
+    const entries = getArtistSongEntriesForCurrentBand();
+    if (!entries) return;
 
     let csv = "";
-    buttons.forEach(btn => {
-        const artist = btn.querySelector('.artist')?.textContent.trim() || "";
-        const song = btn.querySelector('.song')?.textContent.trim() || "";
-        const songKey = btn.querySelector('.song-key')?.textContent.trim() || "";
-
-        const youtubeRaw = btn.querySelector('.youtube-link')?.href || "";
+    entries.forEach(({ artist, song, songKey, youtube: youtubeRaw }) => {
         const youtube = youtubeRaw ? `=HYPERLINK("${youtubeRaw}";"Открыть")` : "";
-
         csv += `${artist}\t${song}\t${songKey}\t${youtube}\r\n`;
     });
 
@@ -1135,54 +1208,14 @@ function ArtistSongToClipboard() {
 }
 
 function ArtistSongToConsoleArray() {
-    const bandId = document.querySelector('.band-select').value;
-    const bandDiv = document.querySelector(`div[band="${bandId}"]`);
-    if (!bandDiv) return;
-
-    const buttons = bandDiv.querySelectorAll('.toggle-button');
-
-    const result = [];
-
-    buttons.forEach(btn => {
-        const artist = btn.querySelector('.artist')?.textContent.trim() || "";
-        const song = btn.querySelector('.song')?.textContent.trim() || "";
-        const songKey = btn.querySelector('.song-key')?.textContent.trim() || "";
-        const youtube = btn.querySelector('.youtube-link')?.href || "";
-
-        result.push({
-            artist,
-            song,
-            songKey,
-            youtube
-        });
-    });
-
-    //console.log(result);
-    return result;
+    const entries = getArtistSongEntriesForCurrentBand();
+    return entries || [];
 }
 
 function ArtistSongToConsoleRows() {
-    const bandId = document.querySelector('.band-select').value;
-    const bandDiv = document.querySelector(`div[band="${bandId}"]`);
-    if (!bandDiv) return;
-
-    const buttons = bandDiv.querySelectorAll('.toggle-button');
-
-    const rows = [];
-
-    buttons.forEach(btn => {
-        const artist = btn.querySelector('.artist')?.textContent.trim() || "";
-        const song = btn.querySelector('.song')?.textContent.trim() || "";
-        const songKey = btn.querySelector('.song-key')?.textContent.trim() || "";
-        const youtube = btn.querySelector('.youtube-link')?.href || "";
-
-        rows.push([artist, song, songKey, youtube]);
-    });
-
-    //    console.table(rows);
-    //console.log(rows.map(r => r.join("\t")).join("\n"));
-
-    return rows;
+    const entries = getArtistSongEntriesForCurrentBand();
+    if (!entries) return;
+    return entries.map(({ artist, song, songKey, youtube }) => [artist, song, songKey, youtube]);
 }
 
 function bindLetterSelectEvent() {
@@ -1254,7 +1287,9 @@ function bindArtistSelectEvent() {
 }
 
 function bindScrollToTopEvent() {
-    document.getElementById('scrollToTopBtn').addEventListener('click', () => {
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    if (!scrollToTopBtn) return;
+    scrollToTopBtn.addEventListener('click', () => {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -1269,7 +1304,9 @@ function bindNavigationEvents() {
 }
 
 function handleMidi(song) {
+    if (!song) return;
     initClickOnPads(song);
+    initSquareGrayMidiButtons(song);
     initHammondVolumeChange(song);
 }
 

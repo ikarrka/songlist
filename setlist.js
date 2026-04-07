@@ -3,6 +3,14 @@ const API_KEY = 'd9568e85-92da-4e7c-ab00-ec475625f04e';
 let setlistData = {};
 let currentHash = null;
 
+function getSetlistSelectedBand() {
+    return document.querySelector('.band-select')?.value || '';
+}
+
+function getSonglistElForBand(band) {
+    return band ? document.querySelector(`.songlist[band="${band}"]`) : null;
+}
+
 // --- загрузка данных ---
 async function setlistLoadData() {
     try {
@@ -33,22 +41,26 @@ async function setlistSaveData() {
 function setlistOpen(hash) {
     currentHash = hash;
     const modal = document.getElementById('setlist-modal');
+    if (!modal) return;
     modal.style.display = 'flex';
     const data = setlistData[hash] || {};
-    document.getElementById('setlist-block').value = data.block || '';
-    document.getElementById('setlist-song').value = data.song || '';
+    const blockInput = document.getElementById('setlist-block');
+    const songInput = document.getElementById('setlist-song');
+    if (blockInput) blockInput.value = data.block || '';
+    if (songInput) songInput.value = data.song || '';
     logBanksByBand();
 }
 
 function setlistClose() {
-    document.getElementById('setlist-modal').style.display = 'none';
+    const modal = document.getElementById('setlist-modal');
+    if (modal) modal.style.display = 'none';
     currentHash = null;
 }
 
 function setlistFillLastBlockNextSong() {
-    const band = document.getElementsByClassName('band-select')[0]?.value;
+    const band = getSetlistSelectedBand();
     if (!band) return;
-    const list = document.querySelector(`.songlist[band="${band}"]`);
+    const list = getSonglistElForBand(band);
     if (!list) return;
 
     const hashes = Array.from(list.querySelectorAll('.accordion')).map(el => el.getAttribute('hash'));
@@ -75,41 +87,12 @@ function setlistFillLastBlockNextSong() {
         nextSong = Math.max(...songsInLast) + 1;
     }
 
-    document.getElementById('setlist-block').value = nextBlock;
-    document.getElementById('setlist-song').value = nextSong;
+    const blockInput = document.getElementById('setlist-block');
+    const songInput = document.getElementById('setlist-song');
+    if (blockInput) blockInput.value = nextBlock;
+    if (songInput) songInput.value = nextSong;
 }
 
-// --- обработчики ---
-window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('setlist-close').onclick = setlistClose;
-    window.addEventListener('click', e => {
-        if (e.target.id === 'setlist-modal') setlistClose();
-    });
-
-    document.getElementById('setlist-save').onclick = async () => {
-        const block = document.getElementById('setlist-block').value;
-        const song = document.getElementById('setlist-song').value;
-        if ((block > 0 && song > 0) || (block == 0 && song == 0)) {
-            setlistData[currentHash] = { block, song };
-            await setlistSaveData();
-            setlistApplyData();
-        }
-        else {
-            alert("Некорректный ввод данных");
-        }
-        setlistClose();
-    };
-
-    document.getElementById('setlist-clear').onclick = async () => {
-        document.getElementById('setlist-block').value = "";
-        document.getElementById('setlist-song').value = "";
-    };
-
-    document.getElementById('setlist-autofill-next').onclick = () => {
-        setlistFillLastBlockNextSong();
-    };
-
-});
 // --- применить данные к DOM ---
 function setlistApplyData() {
     document.querySelectorAll('.accordion').forEach(acc => {
@@ -127,23 +110,63 @@ function setlistApplyData() {
     });
 
     setTimeout(function () {
-        reorderSongList(document.getElementsByClassName('band-select')[0].value);
+        const band = getSetlistSelectedBand();
+        if (band) reorderSongList(band);
     }, 100);
 }
 
 
 // --- инициализация ---
 window.addEventListener('DOMContentLoaded', async () => {
-    // Один делегированный обработчик на всё тело страницы
+    const closeEl = document.getElementById('setlist-close');
+    if (closeEl) closeEl.onclick = setlistClose;
+    window.addEventListener('click', e => {
+        if (e.target.id === 'setlist-modal') setlistClose();
+    });
+
+    const saveEl = document.getElementById('setlist-save');
+    if (saveEl) saveEl.onclick = async () => {
+        if (currentHash == null || currentHash === '') {
+            alert('Внутренняя ошибка: не выбрана песня.');
+            setlistClose();
+            return;
+        }
+        const blockEl = document.getElementById('setlist-block');
+        const songEl = document.getElementById('setlist-song');
+        if (!blockEl || !songEl) return;
+        const block = blockEl.value;
+        const song = songEl.value;
+        if ((block > 0 && song > 0) || (block == 0 && song == 0)) {
+            setlistData[currentHash] = { block, song };
+            await setlistSaveData();
+            setlistApplyData();
+        }
+        else {
+            alert("Некорректный ввод данных");
+        }
+        setlistClose();
+    };
+
+    const clearEl = document.getElementById('setlist-clear');
+    if (clearEl) clearEl.onclick = async () => {
+        const blockEl = document.getElementById('setlist-block');
+        const songEl = document.getElementById('setlist-song');
+        if (blockEl) blockEl.value = "";
+        if (songEl) songEl.value = "";
+    };
+
+    const autofillEl = document.getElementById('setlist-autofill-next');
+    if (autofillEl) autofillEl.onclick = () => {
+        setlistFillLastBlockNextSong();
+    };
+
     if (!window._setlistHandlerBound) {
         window._setlistHandlerBound = true;
         document.body.addEventListener('click', e => {
             const btn = e.target.closest('.accordion .setlist-btn');
-            if (!btn) return; // клик не по кнопке
+            if (!btn) return;
             e.stopPropagation();
             const accordion = btn.closest('.accordion');
-            console.log(556677);
-            
             if (accordion) {
                 setlistOpen(accordion.getAttribute('hash'));
             }
@@ -157,9 +180,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 async function deleteBlockSongs(band, block) {
     if (confirm(`Удалить блок ${block} из ${band}  ? Восстановить будет невозможно!`)) {
-        const selector = `.accordion[setlistblock="${block}"]`;
-        const elements = document.querySelectorAll(`[band="${band}"] ${selector}`);
-
         const hashes = Array.from(
             document.querySelectorAll(`[band="${band}"] .accordion[setlistblock="${block}"]`)
         ).map(el => el.getAttribute('hash'));
@@ -173,10 +193,10 @@ async function deleteBlockSongs(band, block) {
 }
 
 function logBanksByBand() {
-    const band = document.getElementsByClassName('band-select')[0]?.value;
+    const band = getSetlistSelectedBand();
     if (!band) return;
 
-    const el = document.querySelector(`.songlist[band="${band}"]`);
+    const el = getSonglistElForBand(band);
     if (!el) return;
 
     const banks = [...new Set(

@@ -7843,6 +7843,7 @@ Em | C | G | B7 <bblue>x2</bblue></coda>
 <intro>Em D C B
 <img imagetype="scores" data-src="agata.volno.1.png">
 <bblue>x2</bblue>
+<span class="square-gray-button" midi>Piano+Strings</span>
 </intro>
 <verse>
 Em           Em/Eb    Em7    Em6   
@@ -25019,12 +25020,13 @@ D#m A#m F A#m <bblue>x2</bblue></instr>
         })();
     </script>
 
-<div class="modal" id="videoModal">
-  <div class="modal-content">
-    <button class="minimize-btn" id="minimizeModal">_</button>
-    <button class="close-btn" id="closeModal">×</button>
-    <iframe id="youtubeFrame" src="" frameborder="0"
-      allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<div id="youtubePanel" class="youtube-panel" aria-label="YouTube">
+  <div class="youtube-panel-inner">
+    <button type="button" class="minimize-btn" id="minimizeModal" aria-label="Свернуть">_</button>
+    <button type="button" class="close-btn" id="closeModal" aria-label="Закрыть">×</button>
+    <iframe id="youtubeFrame" src="about:blank" frameborder="0"
+      referrerpolicy="unsafe-url"
+      allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
   </div>
 </div>
 

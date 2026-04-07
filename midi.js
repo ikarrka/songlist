@@ -1,7 +1,3 @@
-if (window.location.search) {
-  document.documentElement.innerHTML = '';
-}
-
 let midiAccess = null;
 let outputs = [];
 
@@ -31,7 +27,7 @@ if (navigator.requestMIDIAccess) {
         return;
       }
       else {
-        document.getElementById("midiError").remove();
+        document.getElementById("midiError")?.remove();
       }
 
       // По умолчанию выбираем первые устройства
@@ -53,13 +49,15 @@ if (navigator.requestMIDIAccess) {
     })
     .catch((err) => {
       console.error("Failed to get MIDI access:", err);
-      document.getElementById("midiError").textContent = "Failed to get MIDI access";
-      midiSelectDevice.remove();
+      const errEl = document.getElementById("midiError");
+      if (errEl) errEl.textContent = "Failed to get MIDI access";
+      document.getElementById("midiSelectDevice")?.remove();
     });
 } else {
   console.error("Web MIDI API is not supported in this browser.");
-  document.getElementById("midiError").textContent = "Web MIDI API is not supported in this browser.";
-  midiSelectDevice.remove();
+  const errEl = document.getElementById("midiError");
+  if (errEl) errEl.textContent = "Web MIDI API is not supported in this browser.";
+  document.getElementById("midiSelectDevice")?.remove();
 }
 
 
@@ -425,18 +423,23 @@ function sendTonesByChannel(toneAssignments) {
 }
 
 
-function sendFantomSceneChange(accordion) {
+/** Any element with `midi` (and optional `pad`) — e.g. .accordion or .square-gray-button */
+function sendFantomSceneChange(element) {
+  if (!element || typeof element.getAttribute !== "function") {
+    console.warn("sendFantomSceneChange: invalid element");
+    return;
+  }
   if (!selectedMidiOutput()) {
     return;
   }
 
-  const midiAttr = accordion.getAttribute("midi");
+  const midiAttr = element.getAttribute("midi");
   if (!midiAttr) {
     console.error("No midi change array");
     return;
   }
 
-  const pad = accordion.getAttribute("pad");
+  const pad = element.getAttribute("pad");
 
   // Проверяем формат: две цифры, разделённые запятой
   const match = midiAttr.match(/^\s*(\d{1,3})\s*,\s*(\d{1,3})\s*$/);
@@ -448,13 +451,13 @@ function sendFantomSceneChange(accordion) {
   const lsb = parseInt(match[1], 10);
   const program = parseInt(match[2], 10);
 
-  // Проверка диапазона 0–127
-  if (lsb < 0 || lsb > 128 || program < 0 || program > 128) return;
+  // Проверка диапазона 0–127 (7-bit MIDI)
+  if (lsb < 0 || lsb > 127 || program < 0 || program > 127) return;
 
   // Вызываем MIDI-функцию
-  const midiChanell = 15;
+  const midiChannel = 15;
   const msb = 85;
-  if (sendMidiPatch(midiChanell, msb, lsb, program)) {
+  if (sendMidiPatch(midiChannel, msb, lsb, program)) {
     if (pad) {
       setTimeout(() => {
         handleGreenPadButton(pad);
@@ -639,31 +642,29 @@ function selectedMidiOutput() {
 }
 
 function updateMidiIndicators() {
-  window.addEventListener('DOMContentLoaded', () => {
+  function checkMidi() {
+    console.log('Check midi access');
 
-    function checkMidi() {
-      console.log('Check midi access');
+    const midiSpans = document.querySelectorAll('span.midi');
+    midiSpans.forEach(span => {
+      span.classList.toggle('error', !midiOutput);
+    });
 
-      const midiSpans = document.querySelectorAll('span.midi');
-      midiSpans.forEach(span => {
-        span.classList.toggle('error', !midiOutput);
-      });
+    const greenPads = document.querySelectorAll('span.square-green-button');
+    greenPads.forEach(span => {
+      span.classList.toggle('dimmed', !midiOutput);
+    });
 
-      const greenPads = document.querySelectorAll('span.square-green-button');
-      greenPads.forEach(span => {
-        span.classList.toggle('dimmed', !midiOutput);
-      });
-    }
+    document.querySelectorAll('.square-gray-button').forEach(el => {
+      el.classList.toggle('dimmed', !midiOutput);
+    });
+  }
 
-    // Первый вызов через 3 секунды
-    setTimeout(() => {
-      checkMidi();
-
-      // Далее — каждые 30 секунд
-      setInterval(checkMidi, 30000);
-
-    }, 3000);
-  });
+  // Первый вызов через 3 секунды (вызывается из music.js на DOMContentLoaded)
+  setTimeout(() => {
+    checkMidi();
+    setInterval(checkMidi, 30000);
+  }, 3000);
 }
 
 function initMidiModal() {
@@ -729,8 +730,4 @@ function initMidiModal() {
       sendSysEx(dataArray.slice(), 'Modal');
     });
   }
-}
-
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', initMidiModal);
 }
