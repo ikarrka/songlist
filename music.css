@@ -902,6 +902,38 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   animation: dots 1s steps(3, end) infinite;
 }
 
+.setlist-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.setlist-loader-overlay[hidden] {
+  display: none !important;
+}
+
+.setlist-loader-text {
+  min-width: 220px;
+  text-align: center;
+  background: var(--surface-bg);
+  color: var(--surface-text);
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.setlist-loader-text::after {
+  content: "...";
+  animation: dots 1s steps(3, end) infinite;
+}
+
 @keyframes dots {
   0% { content: ""; }
   33% { content: "."; }

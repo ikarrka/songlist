@@ -4,6 +4,14 @@ let outputs = [];
 let midiOutput = null;
 
 const selectDevice = document.getElementById('midiSelectDevice');
+const midiModalBtn = document.getElementById('midiModalBtn');
+
+function syncMidiModalButtonVisibility() {
+  if (!midiModalBtn) return;
+  midiModalBtn.style.display = midiOutput ? '' : 'none';
+}
+
+syncMidiModalButtonVisibility();
 
 const upper = 3;
 const lower = 4;
@@ -24,6 +32,7 @@ if (navigator.requestMIDIAccess) {
         if (midiSelectDevice) {
           midiSelectDevice.remove();
         }
+        syncMidiModalButtonVisibility();
         return;
       }
       else {
@@ -32,6 +41,7 @@ if (navigator.requestMIDIAccess) {
 
       // По умолчанию выбираем первые устройства
       midiOutput = outputs[0];
+      syncMidiModalButtonVisibility();
 
       // Заполняем селект
       if (selectDevice && document.getElementById('midiSelectDevice')) {
@@ -43,6 +53,7 @@ if (navigator.requestMIDIAccess) {
           const id = selectDevice.value;
           midiOutput = outputs.find(o => o.id === id);
           console.log('Selected output:', midiOutput?.name);
+          syncMidiModalButtonVisibility();
         });
       }
 
@@ -52,12 +63,14 @@ if (navigator.requestMIDIAccess) {
       const errEl = document.getElementById("midiError");
       if (errEl) errEl.textContent = "Failed to get MIDI access";
       document.getElementById("midiSelectDevice")?.remove();
+      syncMidiModalButtonVisibility();
     });
 } else {
   console.error("Web MIDI API is not supported in this browser.");
   const errEl = document.getElementById("midiError");
   if (errEl) errEl.textContent = "Web MIDI API is not supported in this browser.";
   document.getElementById("midiSelectDevice")?.remove();
+  syncMidiModalButtonVisibility();
 }
 
 
@@ -644,6 +657,7 @@ function selectedMidiOutput() {
 function updateMidiIndicators() {
   function checkMidi() {
     console.log('Check midi access');
+    syncMidiModalButtonVisibility();
 
     const midiSpans = document.querySelectorAll('span.midi');
     midiSpans.forEach(span => {
