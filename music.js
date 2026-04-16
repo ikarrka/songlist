@@ -394,10 +394,48 @@ function fillCheckList() {
     }
 }
 
+function processHashReferences(songContainer) {
+    if (!songContainer) return;
+
+    // Собираем все элементы с атрибутом hash и их содержимое с типом тега
+    const hashMap = {};
+    Array.from(songContainer.children).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const hashAttr = node.getAttribute('hash');
+            if (hashAttr) {
+                hashMap[hashAttr] = {
+                    tagName: node.tagName.toLowerCase(),
+                    content: node.innerHTML
+                };
+            }
+        }
+    });
+
+    // Обрабатываем элементы с hashreference
+    Array.from(songContainer.children).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const hashrefAttr = node.getAttribute('hashreference');
+            const currentTagName = node.tagName.toLowerCase();
+            
+            // Копируем только если hash существует и тип тега совпадает
+            if (hashrefAttr && hashMap[hashrefAttr] && hashMap[hashrefAttr].tagName === currentTagName) {
+                node.innerHTML = hashMap[hashrefAttr].content;
+            }
+        }
+    });
+}
+
 function convertSongToTable(song) {
     if (!song) return;
     if (song.dataset.converted) return;
     song.dataset.converted = "1";
+
+    const songContainer = song.querySelector("song");
+    if (!songContainer) return;
+
+    // Обработать hash и hashreference перед конвертированием
+    processHashReferences(songContainer);
+
     const table = document.createElement('table');
     table.className = 'structure';
     const colgroup = document.createElement('colgroup');
@@ -415,10 +453,6 @@ function convertSongToTable(song) {
     controlsCell.colSpan = 2;
     controlsRow.appendChild(controlsCell);
     table.appendChild(controlsRow);
-
-    // Перебираем все дочерние узлы song
-    const songContainer = song.querySelector("song");
-    if (!songContainer) return;
 
     Array.from(songContainer.children).forEach(node => {
         if (node.nodeType === Node.ELEMENT_NODE) {
