@@ -476,6 +476,7 @@ function replaceCustomTags(song) {
 
     const configs1 = [
         { selector: 'yt, YT', text: '►' },
+        { selector: 'mp3', text: '♪' },
         { selector: 'chord', text: chordSign }
     ];
     configs1.forEach(({ selector, text }) => {
@@ -697,23 +698,22 @@ function addButtons(song) {
     if (!song) return;
     const table = song.querySelector("table.structure");
     let targetCell;
-    if (table) {
-        targetCell = table.querySelector("tr.controls-row td.controls-cell");
-    }
-    else {
-        targetCell = song.querySelector("pre");
-    }
-
-    if (!targetCell) return;
-
     const wrapper = document.createElement("div");
     wrapper.className = "tool-buttons";
     if (!table) {
-        wrapper.style.position = "static";
-        wrapper.style.float = "right";
+        targetCell = song;
+        wrapper.style.position = "absolute";
+        wrapper.style.top = "2px";
+        wrapper.style.right = "2px";
     }
+    else {
+        targetCell = table.querySelector("tr.controls-row td.controls-cell");
+    }
+    if (!targetCell) return;
+
     const buttons = [
         { txt: "⛭", class: "setlist-btn" },
+        { txt: "♫", class: "mp3-link", tag: "mp3", action: openMp3Player },
         { txt: "►", class: "youtube-link", tag: "yt", action: openYoutubeFrame },
         { txt: "☰", tag: "chord", action: link => window.open(link, "_blank") },
         { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn down"  },
@@ -722,6 +722,34 @@ function addButtons(song) {
 
     buttons.forEach(cfg => {
         if (cfg.transpose && !table) return;
+        if (cfg.tag === 'mp3') {
+            const rawValue = song
+                ?.querySelector(`button.toggle-button ${cfg.tag}`)
+                ?.textContent
+                ?.trim();
+            if (!rawValue) return;
+
+            const fileName = normalizeMp3FileName(rawValue);
+            const filePath = `mp3/${fileName}.mp3`;
+            const btn = document.createElement("button");
+            btn.textContent = cfg.txt;
+            btn.classList.add("tool-btn");
+            if (cfg.class) {
+                btn.classList.add(...cfg.class.split(" "));
+            }
+            btn.style.display = 'none';
+            wrapper.appendChild(btn);
+            checkMp3FileExists(filePath).then(exists => {
+                if (!exists) {
+                    btn.remove();
+                    return;
+                }
+                btn.style.display = '';
+                btn.addEventListener("click", () => cfg.action(fileName));
+            });
+            return;
+        }
+
         const btn = document.createElement("button");
         btn.textContent = cfg.txt;
         btn.classList.add("tool-btn");
@@ -753,7 +781,7 @@ function addButtons(song) {
         wrapper.appendChild(btn);
     });
 
-    targetCell.classList.add("transpose-cell");
+    if (table) targetCell.classList.add("transpose-cell");
     targetCell.appendChild(wrapper);
 }
 
@@ -1165,6 +1193,102 @@ function bindYoutubeHandlersOnce() {
         });
 
     document.getElementById('minimizeModal')
+        ?.addEventListener('click', () => {
+            panel.classList.toggle('minimized');
+        });
+}
+
+function normalizeMp3FileName(rawValue) {
+    if (!rawValue) return "";
+    return rawValue.trim().replace(/\.mp3$/i, "");
+}
+
+async function checkMp3FileExists(filePath) {
+    return new Promise(resolve => {
+        const audio = document.createElement('audio');
+        let settled = false;
+
+        const cleanup = () => {
+            if (settled) return;
+            settled = true;
+            audio.src = '';
+            audio.removeAttribute('src');
+        };
+
+        const ok = () => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            resolve(true);
+        };
+
+        const fail = () => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            resolve(false);
+        };
+
+        audio.preload = 'metadata';
+        audio.addEventListener('loadedmetadata', ok);
+        audio.addEventListener('canplaythrough', ok);
+        audio.addEventListener('error', fail);
+        audio.addEventListener('abort', fail);
+
+        audio.src = filePath;
+
+        setTimeout(() => {
+            if (!settled) {
+                cleanup();
+                resolve(false);
+            }
+        }, 3000);
+    });
+}
+
+function openMp3Player(filename) {
+    const resolvedFileName = normalizeMp3FileName(filename);
+    if (!resolvedFileName) return;
+
+    const panel = document.getElementById('mp3Panel');
+    const player = document.getElementById('mp3Player');
+    if (!panel || !player) {
+        console.error('MP3 panel or player not found');
+        return;
+    }
+
+    player.autoplay = true;
+    player.src = `mp3/${resolvedFileName}.mp3`;
+    player.currentTime = 0;
+    player.load();
+    player.play().catch(error => {
+        console.warn('MP3 autoplay blocked or failed:', error);
+    });
+
+    panel.classList.add('is-open');
+    panel.classList.remove('minimized');
+
+    bindMp3HandlersOnce();
+}
+
+function bindMp3HandlersOnce() {
+    if (window._mp3HandlerBound) return;
+    window._mp3HandlerBound = true;
+
+    const panel = document.getElementById('mp3Panel');
+    if (!panel) return;
+
+    const mp3Player = document.getElementById('mp3Player');
+    document.getElementById('closeMp3Modal')
+        ?.addEventListener('click', () => {
+            if (mp3Player) {
+                mp3Player.pause();
+                mp3Player.currentTime = 0;
+            }
+            panel.classList.remove('is-open', 'minimized');
+        });
+
+    document.getElementById('minimizeMp3Modal')
         ?.addEventListener('click', () => {
             panel.classList.toggle('minimized');
         });

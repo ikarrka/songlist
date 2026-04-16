@@ -73,15 +73,21 @@ yt {
 }
 
 .accordion .toggle-button {
-  display: block;
+  display: flex;
+  width: 100%;
   cursor: pointer;
   border: 1px solid;
   text-align: left;
   padding: 8px;
-  width: 100%;
   background: var(--button-bg);
   border-color: var(--button-border);
   color: var(--fontcolor);
+}
+
+.accordion .toggle-button > mp3,
+.accordion .toggle-button > yt,
+.accordion .toggle-button > chord {
+  display: none;
 }
 
 .accordion .content {
@@ -359,6 +365,7 @@ span.midi.error::after {
   top: 2px;
   right: 2px;
   display: inline-flex;
+  align-items: center;
   gap: 6px;
   z-index: 10;
 }
@@ -380,20 +387,32 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 .tool-btn {
   background: var(--tool-btn-bg);
   border: none;
-  border-radius: 3px;
+  border-radius: 6px;
   color: var(--tool-btn-color);
-  padding: 4px 8px;
-  font-size: 14px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
 .transpose-btn {
-  font-size: 14px;
-  padding: 4px 8px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 18px;
   background: var(--transpose-btn-bg);
   border: none;
-  border-radius: 3px;
+  border-radius: 6px;
   color: var(--transpose-btn-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
@@ -604,6 +623,88 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   height: min(203px, 24vw);
   min-height: 120px;
   max-height: 28vh;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* MP3 PANEL */
+.mp3-panel {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
+  pointer-events: none;
+}
+
+.mp3-panel.is-open {
+  display: block;
+}
+
+.mp3-panel-inner {
+  position: relative;
+  pointer-events: auto;
+  margin: 0 auto;
+  max-width: min(1200px, 100%);
+  width: 100%;
+  height: 80px;
+  background: #000;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.mp3-panel-inner audio {
+  flex: 1;
+  width: auto !important;
+  max-width: calc(100% - 112px);
+  margin-right: 96px;
+  position: relative;
+  z-index: 1;
+}
+
+.mp3-panel-inner .minimize-btn,
+.mp3-panel-inner .close-btn {
+  z-index: 10001;
+}
+
+.mp3-minimize-btn,
+.mp3-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10000;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.mp3-minimize-btn {
+  right: 48px;
+}
+
+.mp3-minimize-btn:hover,
+.mp3-close-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* PiP-style corner when minimized */
+.mp3-panel.minimized .mp3-panel-inner {
+  position: fixed;
+  left: auto;
+  right: 16px;
+  bottom: 16px;
+  width: min(360px, 42vw);
+  height: 80px;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
@@ -853,9 +954,36 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
    12. MISC UI
    -------------------------------------------------------------------------- */
 .youtube-link {
-  margin-left: 10px !important;
+  margin-left: 0 !important;
+  margin-right: 8px;
   text-decoration: none;
-  color: red;
+  background: #ff0000;
+  color: #ffffff;
+  border-radius: 6px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  align-self: center;
+}
+
+.mp3-link {
+  margin-right: 8px;
+  color: var(--tool-btn-color);
+  background: transparent;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 29px;
+  background-image: none;
 }
 
 #scrollToTopBtn {
