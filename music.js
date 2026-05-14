@@ -58,17 +58,16 @@ document.addEventListener("DOMContentLoaded", function () {
 function reorderSongList(band) {
     document.querySelectorAll('.reordered').forEach(el => el.remove());
 
-    // Ищем div.songlist с нужным атрибутом
     const container = document.querySelector(`.songlist[band="${band}"]`);
     if (!container) {
         return;
     }
 
     const items = Array.from(container.querySelectorAll('.accordion'));
-    // СБРОС margin у всех песен
     items.forEach(item => {
         item.style.marginTop = '';
     });
+
     const numbered = [];
     const unnumbered = [];
 
@@ -77,55 +76,35 @@ function reorderSongList(band) {
         const blockVal = item.getAttribute('setlistblock')?.trim() ?? '';
         const button = item.querySelector('.toggle-button');
 
-        if (numVal === '') {
+        if (!numVal) {
             unnumbered.push(item);
-        } else {
-            const number = parseInt(numVal, 10);
-            let block = parseInt(blockVal, 10);
-            if (isNaN(block) || block === 0) {
-                block = 1;
-            }
-
-            if (!isNaN(number)) {
-                if (button !== null) {
-                    const text = button.innerHTML;
-
-                    const spanSongNumber = document.createElement('span');
-                    spanSongNumber.className = 'reordered';
-                    spanSongNumber.textContent = `${block}-${number}.`;
-
-                    button.innerHTML = "";
-                    button.appendChild(spanSongNumber);
-                    button.insertAdjacentHTML('beforeend', text);
-                }
-
-                if (number === 1) {
-                    const header = document.createElement('h2');
-                    header.className = 'reordered';
-                    header.textContent = `Block ${block}`;
-                    header.setAttribute('data-band', band);
-                    item.style.marginTop = '20px';
-                    item.insertBefore(header, item.firstChild);
-
-                    const removeBtn = document.createElement('span');
-                    removeBtn.classList.add('block-remove-btn');
-                    removeBtn.dataset.block = block;
-
-                    removeBtn.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        deleteBlockSongs(band, block);
-                    });
-
-                    header.appendChild(removeBtn);
-                } else {
-                    item.style.marginTop = '';
-                }
-
-                numbered.push({ node: item, block, number });
-            } else {
-                unnumbered.push(item);
-            }
+            return;
         }
+
+        const number = parseInt(numVal, 10);
+        let block = parseInt(blockVal, 10);
+        if (isNaN(block) || block === 0) {
+            block = 1;
+        }
+
+        if (isNaN(number)) {
+            unnumbered.push(item);
+            return;
+        }
+
+        if (button !== null) {
+            const text = button.innerHTML;
+
+            const spanSongNumber = document.createElement('span');
+            spanSongNumber.className = 'reordered';
+            spanSongNumber.textContent = `${block}-${number}.`;
+
+            button.innerHTML = "";
+            button.appendChild(spanSongNumber);
+            button.insertAdjacentHTML('beforeend', text);
+        }
+
+        numbered.push({ node: item, block, number });
     });
 
     numbered.sort((a, b) => {
@@ -135,23 +114,46 @@ function reorderSongList(band) {
         return a.number - b.number;
     });
 
-    // восстановление исходного порядка для unnumbered
-    if (originalOrder[band]) {
-        unnumbered.sort((a, b) => {
-            return originalOrder[band].indexOf(a.getAttribute('hash')) -
-                originalOrder[band].indexOf(b.getAttribute('hash'));
-        });
-    }
-
     container.innerHTML = '';
-    numbered.forEach(item => container.appendChild(item.node));
-    if (Array.isArray(numbered) && numbered.length > 0 && unnumbered.length > 0) {
+    let lastBlock = null;
+    numbered.forEach(entry => {
+        const item = entry.node;
+        const block = entry.block;
+
+        if (lastBlock !== block) {
+            const header = document.createElement('h2');
+            header.className = 'reordered';
+            header.textContent = `Block ${block}`;
+            header.setAttribute('data-band', band);
+            item.style.marginTop = '20px';
+            item.insertBefore(header, item.firstChild);
+
+            const removeBtn = document.createElement('span');
+            removeBtn.classList.add('block-remove-btn');
+            removeBtn.dataset.block = block;
+
+            removeBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                deleteBlockSongs(band, block);
+            });
+
+            header.appendChild(removeBtn);
+            lastBlock = block;
+        } else {
+            item.style.marginTop = '';
+        }
+
+        container.appendChild(item);
+    });
+
+    if (numbered.length > 0 && unnumbered.length > 0) {
         const hr = document.createElement('hr');
         hr.className = 'reordered';
         hr.style.marginTop = '20px';
         hr.style.marginBottom = '20px';
         container.appendChild(hr);
     }
+
     unnumbered.forEach(item => container.appendChild(item));
     //ArtistSongToClipboard();
     //ArtistSongToConsoleArray();

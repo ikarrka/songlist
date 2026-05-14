@@ -92,6 +92,14 @@ function setlistClose() {
     currentHash = null;
 }
 
+function closeAccordionByHash(hash) {
+    if (!hash) return;
+    const accordion = document.querySelector(`.accordion[hash="${hash}"]`);
+    if (accordion) {
+        accordion.classList.remove('active');
+    }
+}
+
 function setlistFillLastBlockNextSong() {
     const band = getSetlistSelectedBand();
     if (!band) return;
@@ -169,13 +177,26 @@ window.addEventListener('DOMContentLoaded', async () => {
         const blockEl = document.getElementById('setlist-block');
         const songEl = document.getElementById('setlist-song');
         if (!blockEl || !songEl) return;
-        const block = normalizeSetlistValue(blockEl.value);
-        const song = normalizeSetlistValue(songEl.value);
-        if ((block > 0 && song > 0) || (block === 0 && song === 0)) {
+        const blockValue = blockEl.value.trim();
+        const songValue = songEl.value.trim();
+        const block = normalizeSetlistValue(blockValue);
+        const song = normalizeSetlistValue(songValue);
+        const isClearRequest = (blockValue === '' && songValue === '') || block === 0 || song === 0;
+
+        if (isClearRequest) {
+            delete setlistData[currentHash];
+            const saved = await setlistSaveData();
+            if (saved) {
+                setlistApplyData();
+                closeAccordionByHash(currentHash);
+            }
+        }
+        else if (block > 0 && song > 0) {
             setlistData[currentHash] = { block, song };
             const saved = await setlistSaveData();
             if (saved) {
                 setlistApplyData();
+                closeAccordionByHash(currentHash);
             }
         }
         else {
@@ -185,7 +206,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     };
 
     const clearEl = document.getElementById('setlist-clear');
-    if (clearEl) clearEl.onclick = async () => {
+    if (clearEl) clearEl.onclick = () => {
         const blockEl = document.getElementById('setlist-block');
         const songEl = document.getElementById('setlist-song');
         if (blockEl) blockEl.value = "";
