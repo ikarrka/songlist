@@ -53,6 +53,18 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.visibility = "visible";
     const loader = document.getElementById("pageLoader");
     if (loader) loader.remove();
+
+        // Обработчик для кнопки очистки данных
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        if (clearDataBtn) {
+            clearDataBtn.addEventListener('click', () => {
+                if (confirm('⚠️ Очистить все локальные данные сайта?\n\nЭто удалит:\n• Сохранённые настройки темы\n• MIDI разрешение (потребуется новое)\n• Все локальные данные\n\nСтраница будет перезагружена.')) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    location.reload();
+                }
+            });
+        }
 });
 
 function reorderSongList(band) {

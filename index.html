@@ -33,6 +33,7 @@
                 <button type="button" id="themeToggle" title="Переключить светлую/тёмную тему" aria-label="Переключить тему">&#9789;</button>
             </td>
         </tr>
+                <button type="button" id="clearDataBtn" title="Очистить все локальные данные и перезагрузить (потребуется новое разрешение MIDI)" style="margin-right: 10px;">🔄 Clear</button>
     </table>
     <script>if (window.location.search) {
             document.documentElement.innerHTML = '';
@@ -44,6 +45,7 @@
     <span id="midiContent">
         MIDI device <select id="midiSelectDevice"></select> <span id="midiError" style="color: red;">Wait...</span>
         <button type="button" id="midiModalBtn" class="tool-btn midi-modal-trigger" title="Настроить и отправить MIDI команду" aria-label="MIDI команда">&#127929;</button>
+        <button type="button" id="midiResetBtn" title="Сбросить разрешение MIDI (откроет диалог запроса доступа)">Reset MIDI</button>
         <hr>
     </span>
     <div class="accordion" id="checkList">
