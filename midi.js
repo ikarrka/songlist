@@ -5,24 +5,10 @@ let midiOutput = null;
 
 const selectDevice = document.getElementById('midiSelectDevice');
 const midiModalBtn = document.getElementById('midiModalBtn');
-const midiResetBtn = document.getElementById('midiResetBtn');
 
 function syncMidiModalButtonVisibility() {
   if (!midiModalBtn) return;
   midiModalBtn.style.display = midiOutput ? '' : 'none';
-}
-
-// Обработчик для кнопки сброса MIDI разрешения
-if (midiResetBtn) {
-  midiResetBtn.addEventListener('click', () => {
-    alert('⚠️ Сброс разрешения MIDI:\n\n' +
-          '1. Браузер запомнил ваше решение о доступе к MIDI\n' +
-          '2. Чтобы увидеть диалог разрешения заново:\n\n' +
-          '📍 Chrome: chrome://settings/content/midiDevices → очистить сайт\n' +
-          '📍 Firefox: меню → Настройки → Приватность → разрешения → MIDI\n' +
-          '📍 Edge: edge://settings/content/midiDevices\n\n' +
-          'После очистки перезагрузите страницу (Ctrl+Shift+R)');
-  });
 }
 
 syncMidiModalButtonVisibility();

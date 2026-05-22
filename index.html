@@ -30,10 +30,10 @@
             <td id="cell_letter_select"></td>
             <td id="cell_artist_select"></td>
             <td id="cell_theme_toggle" style="text-align: right; vertical-align: middle;">
+                <button type="button" id="clearDataBtn" title="Очистить все локальные данные и перезагрузить (потребуется новое разрешение MIDI)" style="margin-right: 10px;">&#x21bb;</button>
                 <button type="button" id="themeToggle" title="Переключить светлую/тёмную тему" aria-label="Переключить тему">&#9789;</button>
             </td>
         </tr>
-                <button type="button" id="clearDataBtn" title="Очистить все локальные данные и перезагрузить (потребуется новое разрешение MIDI)" style="margin-right: 10px;">🔄 Clear</button>
     </table>
     <script>if (window.location.search) {
             document.documentElement.innerHTML = '';
@@ -45,7 +45,6 @@
     <span id="midiContent">
         MIDI device <select id="midiSelectDevice"></select> <span id="midiError" style="color: red;">Wait...</span>
         <button type="button" id="midiModalBtn" class="tool-btn midi-modal-trigger" title="Настроить и отправить MIDI команду" aria-label="MIDI команда">&#127929;</button>
-        <button type="button" id="midiResetBtn" title="Сбросить разрешение MIDI (откроет диалог запроса доступа)">Reset MIDI</button>
         <hr>
     </span>
     <div class="accordion" id="checkList">
@@ -26435,8 +26434,9 @@ Wiec po drodze, wiec po drodze, zaspiewajmy jeszcze raz
 
     <div class="accordion" artist="Петр Лещенко" song="Все что было" key="" voice="" hash="1537zjy7dlv9vyi">
             <button class="toggle-button">
-                <chord></chord>
-                <yt></yt>
+                <chord>https://www.ackordofmine.ru/index/pjotr_leshhenko_vsjo_chto_bylo_akkordy_i_tekst_pesni_v_tonalnosti_am/0-6695</chord>
+                <yt>https://www.youtube.com/watch?v=xMPNN1sDw34</yt>
+                <mp3>vse.chto.bylo</mp3>
             </button>
             <div class="content">
 <song>
@@ -26788,6 +26788,7 @@ Gm           A7          Dm
             <button class="toggle-button">
                 <chord>https://amdm.ru/akkordi/sinyaya_ptitsa/170090/tak_vot_kakaya_ti/</chord>
                 <yt>https://www.youtube.com/watch?v=Dk82g4wzZwk</yt>
+                <mp3>tak.vot.kakaya.ti</mp3>
             </button>
             <div class="content">
 <song>
@@ -26851,26 +26852,7 @@ Dm           F7
 Идешь с другим...
 </verse>
 <chorus></chorus>
-<verse>
-Am
-Счастлив тот не будет,
-Dm              E7
-Кто любовь обидел,
-Dm           G7
-Кто смеяться может
-C          Bm7 E7
-Так над самым дорогим.
-
-Dm           G7
-И, что не говори ты,
-C           F
-Я сам сегодня видел –
-Dm           F7
-Ты шла с другим,
-             E7
-Ты шла с другим...
-</verse>
-<instr>Am F Dm E7 
+<instr>Am F
 <bblue>Transpose +1</bblue>  </instr>
 <verse>
 A#m
@@ -26899,15 +26881,20 @@ D#m           F#7
 А я с ума сходил
     F7
 От этой красоты, -
+
     A#m
 Так вот какая ты,
     C#
 Надежды и мечты
-F7
-Ты подарила
-          A#m
+F7 |--пауза--|
+Ты подарила  <bblue>x3</bblue>
+            A#m
 И разбила ты!   
 </chorus>
+<coda>
+C#
+F7 <bblue>арпеджио+пауза</bblue>
+A#m</coda>
 </song>
             </div>
     </div>

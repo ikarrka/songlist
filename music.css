@@ -40,7 +40,8 @@ yt {
 /* --------------------------------------------------------------------------
    2. HEADER / PAGE CHROME
    -------------------------------------------------------------------------- */
-#themeToggle {
+#themeToggle,
+#clearDataBtn {
   font-size: 1.25em;
   padding: 4px 10px;
   border: 1px solid var(--button-border);
@@ -51,7 +52,8 @@ yt {
   line-height: 1.2;
 }
 
-#themeToggle:hover {
+#themeToggle:hover,
+#clearDataBtn:hover {
   opacity: 0.9;
 }
 
