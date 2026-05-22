@@ -400,6 +400,13 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   cursor: pointer;
 }
 
+.google-search-btn svg {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .transpose-btn {
   width: 34px;
   min-width: 34px;
