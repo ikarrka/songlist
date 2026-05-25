@@ -65,6 +65,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
         }
+
+        const clearNextBtn = document.getElementById('clearNextBtn');
+        if (clearNextBtn) {
+            clearNextBtn.addEventListener('click', () => {
+                localStorage.removeItem('next');
+                const announcer = document.getElementById('next-announcer');
+                if (announcer) {
+                    announcer.remove();
+                }
+            });
+        }
 });
 
 function reorderSongList(band) {
@@ -170,6 +181,7 @@ function reorderSongList(band) {
     //ArtistSongToClipboard();
     //ArtistSongToConsoleArray();
     ArtistSongToConsoleRows();
+    transformAccordionHeaders();
 }
 
 function fillSongHeader(band) {
@@ -1035,6 +1047,7 @@ async function buildAllBandsList() {
 
     // Добавляем в контейнер
     allAccordions.forEach(acc => allContainer.appendChild(acc));
+    transformAccordionHeaders();
     // ✅ Формируем CSV уже ПОСЛЕ сортировки
     const csvRows = [["Artist", "Song"]];
     allAccordions.forEach(acc => {
@@ -1515,4 +1528,103 @@ function addEmptySetlistAttribute() {
         acc.setAttribute("setlistposition", "");
         acc.setAttribute("setlistblock", "");
     });
+}
+
+// --- NEXT button / announcer functionality -------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    transformAccordionHeaders();
+    bindNextButtonEvents();
+    restoreNextFromStorage();
+});
+
+function transformAccordionHeaders() {
+    document.querySelectorAll('.accordion').forEach(accordion => {
+        // already transformed?
+        if (accordion.querySelector(':scope > .header-row')) return;
+
+        const oldBtn = accordion.querySelector(':scope > button.toggle-button');
+        if (!oldBtn) return;
+
+        const headerRow = document.createElement('div');
+        headerRow.className = 'header-row';
+
+        const toggleClone = oldBtn.cloneNode(true);
+        toggleClone.type = oldBtn.type || 'button';
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'next-button';
+        nextBtn.type = 'button';
+        nextBtn.innerHTML = '<span class="next-icon">➜</span> <span class="sr">Next</span>';
+
+        accordion.replaceChild(headerRow, oldBtn);
+        headerRow.appendChild(toggleClone);
+        headerRow.appendChild(nextBtn);
+    });
+}
+
+function bindNextButtonEvents() {
+    document.body.addEventListener('click', function (e) {
+        const nb = e.target.closest('.next-button');
+        if (!nb) return;
+        e.stopPropagation();
+        const accordion = nb.closest('.accordion');
+        if (!accordion) return;
+        const hash = accordion.getAttribute('hash');
+        if (!hash) return;
+
+        localStorage.setItem('next', hash);
+        showNextAnnouncer(hash);
+    });
+}
+
+function showNextAnnouncer(hash) {
+    const acc = document.querySelector(`.accordion[hash="${hash}"]`);
+    if (!acc) return;
+    const artist = acc.getAttribute('artist') || '';
+    const song = acc.getAttribute('song') || '';
+
+    let announcer = document.getElementById('next-announcer');
+    if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = 'next-announcer';
+        announcer.className = 'next-announcer';
+        document.body.appendChild(announcer);
+
+        announcer.addEventListener('click', function () {
+            const cur = localStorage.getItem('next');
+            if (!cur) return;
+            const target = document.querySelector(`.accordion[hash="${cur}"]`);
+            if (target) {
+                const btn = target.querySelector('.toggle-button');
+                if (btn) btn.click();
+            }
+            localStorage.removeItem('next');
+            announcer.remove();
+        });
+    }
+
+    announcer.textContent = `Next ${artist} ${song}`;
+    announcer.style.display = 'block';
+
+    const activeAccordion = document.querySelector('.accordion.active');
+    if (activeAccordion) {
+        scrollToAccordionButton(activeAccordion);
+    }
+}
+
+function scrollToAccordionButton(accordion) {
+    if (!accordion) return;
+    const button = accordion.querySelector('.toggle-button');
+    if (!button) return;
+
+    const yOffset = 0;
+    setTimeout(() => {
+        const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    }, 200);
+}
+
+function restoreNextFromStorage() {
+    const hash = localStorage.getItem('next');
+    if (hash) showNextAnnouncer(hash);
 }

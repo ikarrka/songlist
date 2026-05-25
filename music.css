@@ -41,7 +41,8 @@ yt {
    2. HEADER / PAGE CHROME
    -------------------------------------------------------------------------- */
 #themeToggle,
-#clearDataBtn {
+#clearDataBtn,
+#clearNextBtn {
   font-size: 1.25em;
   padding: 4px 10px;
   border: 1px solid var(--button-border);
@@ -53,7 +54,8 @@ yt {
 }
 
 #themeToggle:hover,
-#clearDataBtn:hover {
+#clearDataBtn:hover,
+#clearNextBtn:hover {
   opacity: 0.9;
 }
 
@@ -76,7 +78,7 @@ yt {
 
 .accordion .toggle-button {
   display: flex;
-  width: 100%;
+  width: auto;
   cursor: pointer;
   border: 1px solid;
   text-align: left;
@@ -84,6 +86,55 @@ yt {
   background: var(--button-bg);
   border-color: var(--button-border);
   color: var(--fontcolor);
+}
+
+/* Header row: primary toggle + small next button */
+.accordion .header-row {
+  display: flex;
+  gap: 2px;
+  align-items: stretch;
+}
+
+.accordion .header-row .toggle-button,
+.accordion .header-row .next-button {
+  align-items: center;
+}
+
+.accordion .header-row .toggle-button {
+  flex: 0 0 85%;
+  width: auto;
+}
+
+.accordion .header-row .next-button {
+  flex: 1 0 15%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid var(--button-border);
+  background: color-mix(in srgb, var(--button-bg) 85%, white 15%);
+  color: var(--fontcolor);
+  padding: 8px;
+}
+
+.accordion .header-row .next-button .next-icon {
+  font-size: 1.0em;
+}
+
+/* Top announcer for Next */
+.next-announcer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 12px;
+  background: rgba(135,206,250,0.95); /* light blue */
+  color: #03314b;
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 9999;
+  cursor: pointer;
+  opacity: 0.98;
 }
 
 .accordion .toggle-button > mp3,
