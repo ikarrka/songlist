@@ -101,12 +101,12 @@ yt {
 }
 
 .accordion .header-row .toggle-button {
-  flex: 0 0 85%;
+  flex: 0 0 95%;
   width: auto;
 }
 
 .accordion .header-row .next-button {
-  flex: 1 0 15%;
+  flex: 1 0 5%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,7 @@ yt {
 }
 
 .accordion .header-row .next-button .next-icon {
-  font-size: 1.0em;
+  font-size: 1.4em;
 }
 
 /* Top announcer for Next */

@@ -1554,7 +1554,7 @@ function transformAccordionHeaders() {
         const nextBtn = document.createElement('button');
         nextBtn.className = 'next-button';
         nextBtn.type = 'button';
-        nextBtn.innerHTML = '<span class="next-icon">➜</span> <span class="sr">Next</span>';
+        nextBtn.innerHTML = '<span class="next-icon">⏭</span>';
 
         accordion.replaceChild(headerRow, oldBtn);
         headerRow.appendChild(toggleClone);
