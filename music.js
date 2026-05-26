@@ -1590,7 +1590,8 @@ function showNextAnnouncer(hash) {
         announcer.className = 'next-announcer';
         document.body.appendChild(announcer);
 
-        announcer.addEventListener('click', function () {
+        // Click announcer to open the stored next accordion
+        announcer.addEventListener('click', function (ev) {
             const cur = localStorage.getItem('next');
             if (!cur) return;
             const target = document.querySelector(`.accordion[hash="${cur}"]`);
@@ -1601,9 +1602,36 @@ function showNextAnnouncer(hash) {
             localStorage.removeItem('next');
             announcer.remove();
         });
+
+        // close button will be created/attached when rendering announcer text
     }
 
-    announcer.textContent = `Next ${artist} ${song}`;
+    // Set main text (insert before the close button)
+    announcer.innerHTML = '';
+    const text = document.createElement('span');
+    text.className = 'next-announcer-text';
+    text.textContent = `Next ${artist} ${song}`;
+    announcer.appendChild(text);
+
+    // Create and append close button so it's always present
+    let existingClose = announcer.querySelector('.next-close');
+    if (!existingClose) {
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'next-close';
+        closeBtn.type = 'button';
+        closeBtn.title = 'Закрыть';
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.innerHTML = '✖';
+        closeBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            localStorage.removeItem('next');
+            const a = document.getElementById('next-announcer');
+            if (a) a.remove();
+        });
+        announcer.appendChild(closeBtn);
+    } else {
+        announcer.appendChild(existingClose);
+    }
     announcer.style.display = 'block';
 
     const activeAccordion = document.querySelector('.accordion.active');
