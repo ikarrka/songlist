@@ -81,6 +81,14 @@ yt {
   overflow: visible;
 }
 
+#cell_letter_select {
+  text-align: right;
+}
+
+#cell_artist_select {
+  text-align: left;
+}
+
 #cell_theme_toggle .header-right {
   justify-content: flex-end;
 }
