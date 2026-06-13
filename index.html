@@ -34,16 +34,17 @@
             <td id="cell_band_select"></td>
             <td id="cell_letter_select"></td>
             <td id="cell_artist_select"></td>
-        </tr>
-        <tr>
-            <td></td><td></td>
             <td id="cell_theme_toggle" style="text-align: right; vertical-align: middle;">
                 <div class="header-right">
                   <button type="button" id="clearDataBtn" title="Очистить все локальные данные и перезагрузить (потребуется новое разрешение MIDI)" style="margin-right: 10px;">&#x21bb;</button>
                   <button type="button" id="themeToggle" title="Переключить светлую/тёмную тему" aria-label="Переключить тему">&#9789;</button>
                 </div>
             </td>
+
         </tr>
+        <!-- <tr>
+            <td></td><td></td>
+        </tr> -->
     </table>
     <span id="hashRepeat" style="color: red;"><strong>Duplicate hash</strong><br><span id="hashRepeatList"></span><br></span>
     <span id="hashNo" style="color: red;"><strong>No hash</strong><br><span id="hashNoList"></span><br></span>
@@ -8947,7 +8948,7 @@ C Am F G <bblue>x4</bblue></coda>
             <div class="content">
                 
 <song>
-    <intro>C G</intro>
+    <intro>C C | F G</intro>
     <verse>
 `   C 
 Солдат шёл по улице домой
@@ -8958,13 +8959,13 @@ C Am F G <bblue>x4</bblue></coda>
      F       G      C 
 Спросил у ребят солдат.
     </verse>
-    <chorus>Am       Em 
+    <chorus hash="be86jsyoo8j9qfx">Am       Em 
 Мама – анархия,  
  F         G 
 Папа – стакан портвейна.
 <bblue>x2</bblue>
 </chorus>
-<intro></intro>
+<instr>C C | F G</instr>
 <verse>` C 
 Все они в кожаных куртках,
   F        G    C 
@@ -8975,9 +8976,9 @@ C Am F G <bblue>x4</bblue></coda>
 Но это было не просто.
 </verse>
 <chorus></chorus>
-<instr><bblue>куплет</bblue> <bblue>x2</bblue></instr>
-<chorus></chorus>
-<intro></intro>
+<instr><bblue>verse x2</bblue></instr>
+<chorus hashreference="be86jsyoo8j9qfx"></chorus>
+<instr>C C | F G</instr>
 <verse>`  C 
 Довольно весёлую шутку
     F         G       C 
@@ -9070,21 +9071,21 @@ A Asus4 A Asus2
 <verse>
 Bm A   D   A
  Гуляю, я один гуляю,
-Bm     A   C#m      F#m
- Что дальше делать, я не знаю.
-Bm    A   D    A
+Bm    A    C#m        F#m
+ Что дальше    делать, я не знаю.
+Bm    A   D     A
  Нет дома, никого нет дома,
-Bm   A    C#m     F#m
- Я лишний, словно куча лома.
+Bm   A    C#m        F#m
+ Я лишний,    словно куча лома.
 </verse>
-<chorus>
+<chorus hash="nu07t69bi72g3pl">
 C#m   F#m
 У-у-у у-у-у, 
-              Bm        A
+              Bm         A
 Я бездельник, о-о, мама мама, я бездельник.
 C#m   F#m
 У-у-у у-у-у, 
-              Bm        A
+              Bm         A
 Я бездельник, о-о, мама мама.
 </chorus>
 <instr>
@@ -9093,14 +9094,14 @@ A Asus4 A Asus2
 <bblue>x4</bblue>
 </instr>
 <verse>
-Bm    A   D     A
+Bm    A   D      A
  В толпе я как иголка в сене,
-Bm   A  C#m  F#m
- Я снова человек без цели.
-Bm   A    D      A
+Bm   A  C#m     F#m
+ Я снова    человек без цели.
+Bm   A    D       A
  Болтаюсь, целый день гуляю,
-Bm    A  C#m    F#m
- Не знаю, я ничего не знаю.
+Bm    A  C#m       F#m
+ Не знаю,    я ничего не знаю.
 </verse>
 <chorus></chorus>
 <instr>
@@ -9109,16 +9110,7 @@ A Asus4 A Asus2
 <bblue>x4</bblue>
 </instr>
 <instr>Bm A D A Bm A C#m F#m <bblue>x2</bblue></instr>
-<chorus>
-C#m   F#m
-У-у-у у-у-у, 
-              Bm        A
-Я бездельник, о-о, мама мама, я бездельник.
-C#m   F#m
-У-у-у у-у-у, 
-              Bm        A
-Я бездельник, о-о, мама мама.
-</chorus>
+<chorus hashreference="nu07t69bi72g3pl"></chorus>
 </song>
             </div>
         </div>
@@ -9418,6 +9410,54 @@ F              G          Am
 <intro></intro>
 <verse></verse>
 <chorus></chorus>
+</song>
+            </div>
+        </div>
+
+        <div class="accordion" artist="Кино" song="Время есть, а денег нет" key="Em" voice="" hash="5vzv1j7rlduxtto">
+            <button class="toggle-button">
+                <chord>https://mychords.net/ru/kino/1072-kino-vremya-est-a-deneg-net.html</chord>
+                <yt>https://www.youtube.com/watch?v=T_s-H7yC-LY</yt>
+            </button>
+            <div class="content">
+<song>
+<intro>Em | Am Em | Em | Am Em</intro>
+<verse>
+`            Em
+Дождь идёт с утра, будет, был и есть.
+     Am                  Em
+И карман мой пуст, на часах - шесть.
+    Em
+Папирос нет, и огня нет,
+       Am               Em
+И в окне знакомом не горит свет.
+</verse>
+<chorus>
+` C
+Время есть, а денег нет,
+                    Em
+И в гости некуда пойти.
+<bblue>x4</bblue></chorus>
+<instr>Em | Am Em | Em | Am Em</instr>
+<verse>
+Em
+И куда-то все подевались вдруг.
+     Am                 Em
+Я попал в какой-то не такой круг.
+Em
+Я хочу пить, я хочу есть,
+     Am              Em
+Я хочу просто где-нибудь сесть.
+</verse>
+<chorus></chorus>
+<coda>
+C       Em
+А-аа, - о...
+C       Em
+А-аа, - о...
+C       Em
+А-аа, - о...
+</coda>
 </song>
             </div>
         </div>
@@ -9913,10 +9953,64 @@ D  C  Em
 
         <div class="accordion" artist="Кино" song="Кукушка" key="Am" voice="Strings" hashreference="t2r5e8w1q9y4u7o" hash="ei2qtx2hy1rpuze"></div>
 
+        <div class="accordion" artist="Кино" song="Легенда" key="Bm" voice="Pads" hash="k2r2upjjwbzfh5d">
+            <button class="toggle-button">
+                <chord>https://akkords.pro/songs/kino/legenda/</chord>
+                <yt>https://www.youtube.com/watch?v=yi2d67AXEVs</yt>
+            </button>
+            <div class="content">
+<song>
+<instr>D A Bm7 F#m G A Bm Bm</instr>
+<verse><bblue> Fade-in / Fade-out +добавлять 2/4/6/7 ступени</bblue>
+       Bm                            F#m
+Среди связок в горле комом теснится крик,
+      Bm                                  A  Asus4  A
+Но настала пора, и тут уж кричи – не кричи.
+         D                          A
+Лишь потом кто-то долго не сможет забыть,
+       Bm                               F#m
+Как, шатаясь, бойцы об траву вытирали мечи.
+</verse>
+<verse> <span class="voice">Organ</span> <bblue>добавить MFX???</bblue>
+       Bm                             F#m
+И как хлопало крыльями чёрное племя ворон,
+       Bm                             A  Asus4  A
+Как смеялось небо, а потом прикусило язык.
+     D                             A
+И дрожала рука у того, кто остался жив,
+     Bm                                 F#m
+И внезапно в вечность вдруг превратился миг.
+</verse>
+<verse>
+`      Bm                      F#m
+И горел погребальным костром закат,
+     Bm                            A  Asus4  A
+И волками смотрели звёзды из облаков.
+        D                            A
+Как, раскинув руки, лежали ушедшие в ночь,
+      Bm                            F#m
+И как спали вповалку живые, не видя снов.
+</verse>
+<verse>
+` Bm
+А жизнь – только слово.
+                        F#m
+Есть лишь любовь и есть смерть.
+Bm                                    A    Asus4  A
+Эй, а кто будет петь, если все будут спать?
+ D                       A
+Смерть стоит того, чтобы жить,
+        Bm  F#m               Bm
+А любовь – стоит того, чтобы ждать…
+</verse>
+</song>
+            </div>
+        </div>
+
         <div class="accordion" artist="Кино" song="Мама, мы все тяжело больны" key="Bm" voice="Pads" hash="0x71aouh31wg7gw">
             <button class="toggle-button">
-                <chord>https://akkords.pro/songs/kino/muzyka-voln/</chord>
-                <yt>https://akkords.pro/songs/kino/mama-my-vse-tyazhelo-bolny/</yt>
+                <chord>https://akkords.pro/songs/kino/mama-my-vse-tyazhelo-bolny/</chord>
+                <yt>https://www.youtube.com/watch?v=5ilpyUFll6A</yt>
             </button>
             <div class="content">
 <song>
@@ -10414,6 +10508,78 @@ A
             </div>
         </div>
 
+        <div class="accordion" artist="Кино" song="Печаль" key="Bm" voice="Flute" hash="rurnbxgf82lrrjp">
+            <button class="toggle-button">
+                <chord>https://akkords.pro/songs/kino/pechal/</chord>
+                <yt>https://www.youtube.com/watch?v=Pw2vmMNkf40</yt>
+            </button>
+            <div class="content">
+<song>
+    <intro>D A D A Bm A D A</intro>
+<verse> <img imagetype="scores" data-src=kino.pechal.1.png>  
+     Bm
+На холодной земле
+      A
+Стоит город большой,
+      G
+Там горят фонари,
+    F#m
+И машины гудят.
+      Bm
+А над городом ночь,
+      A
+А над ночью луна,
+    G
+И сегодня луна
+       F#m
+Каплей крови красна.
+</verse>
+<chorus hash="z1h9w52z2i6qv7l">
+`      A          D
+Дом стоит, свет горит,
+     A        D
+Из окна видна даль,
+      A       Bm   A
+Так откуда взялась
+  D
+Печаль?
+          A        D
+И, вроде, жив и здоров,
+          A         D
+И, вроде, жить не тужить,
+      A       Bm   A
+Так откуда взялась
+  D
+Печаль?
+</chorus>
+<verse>
+`    Bm
+А вокруг благодать –
+      A
+Ни черта не видать,
+     G
+А вокруг красота –
+     F#m
+Не видать ни черта.
+         Bm
+И все кричат: «Ура!»
+        A
+И все бегут вперёд,
+      G
+И над этим всем
+      F#m
+Новый день встаёт.
+</verse>
+<chorus hashreference="z1h9w52z2i6qv7l"></chorus>
+<instr>Bm A G F#m  <bblue>x2</bblue>
+<bblue>после одну строка не играть</bblue></instr>
+<chorus hashreference="z1h9w52z2i6qv7l"></chorus>
+<coda>D A D A Bm A D A <bblue>много раз</bblue></coda>
+</song>                
+
+            </div>
+        </div>
+
         <div class="accordion" artist="Кино" song="Попробуй спеть вместе со мной" keycustom="F#m" voice="Organ" hash="d8bxrbez8z16pup">
             <button class="toggle-button">
                 <chord>https://akkords.pro/songs/kino/poprobuy-spet-vmeste-so-mnoy/</chord>
@@ -10568,6 +10734,66 @@ Em            G
         <div class="accordion" artist="Кино" song="Стук" key="Em" bank="24-3" hash="590wcdqjxg8z4du" hashreference="f1g4h7j2k9l5z8x">
         </div>
 
+        <div class="accordion" artist="Кино" song="Транквилизатор" key="E" voice="Organ" hash="015yr7ev7ym052r">
+            <button class="toggle-button">
+                <chord>https://akkords.pro/songs/kino/trankvilizator/</chord>
+                <yt>https://www.youtube.com/watch?v=LIOxZ9_WoMs</yt>
+            </button>
+            <div class="content">        
+<song>
+<verse>
+E              C                      E
+Я выхожу из парадной, раскрываю свой зонт.
+E              C                E
+Я выхожу под поток атмосферных осадков.
+F#                             E
+Я понимаю, что это капризы природы.
+   F#                           E
+Мне даже нравится чем-то эта погода.</verse>
+<chorus hash="i4gfk1yncuf6uie">
+D B            E
+У-у, транквилизатор…
+D B            E
+У-у, транквилизатор…
+</chorus>
+<verse>
+E             C                  E
+Метеоролог сказал, дождь будет недолго.
+E                  C                    E
+Я разобрал весь приемник, как опытный практик.
+F#                                    E
+Ты понимаешь, что мне было трудно сдержаться.
+   F#                              E
+Мне даже нравится это такой мой характер.
+</verse>
+<chorus></chorus>
+<instr>A ???</instr>
+<verse>
+E              C                    E
+Я начинаю свой путь к остановке трамвая.
+E                C                   E
+Я закрываю свой зонт, я — экспериментатор.
+F#                                    E
+Вот проезжает трамвай, вот гудит, удаляясь.
+F#                         E
+Я направляюсь домой, я улыбаюсь.
+</verse>
+<chorus hashreference="i4gfk1yncuf6uie"></chorus>
+<verse>
+E                 C                E
+Капли врезаются в окна, как молнии Индры.
+E             C               E
+Я нахожу это дело довольно забавным.
+F#                                   E
+Ты понимаешь, что мне было нужно развлечься.
+F#                                E
+Мне надо чем-то лечить душевные травмы.
+</verse>
+<chorus><bblue>x4</bblue> </chorus>
+</song>
+            </div>
+        </div>
+
         <div class="accordion" artist="Кино" song="Троллейбус" key="Em" voice="Pads" hash="qbpit2neveseddx">
             <button class="toggle-button">
                 <chord>https://akkords.pro/songs/kino/trolleybus/</chord>
@@ -10652,15 +10878,16 @@ Em D C Em</coda>
             </button>
             <div class="content">
 <song>
-    <intro><img imagetype="scores" data-src="kino.filmy.1.png"> </intro>
+    <intro><img imagetype="scores" data-src="kino.filmy.1.png"> 
+G G G G | G G G Bm | Em Em Em Em | C Em Am Am  <bblue>x4</bblue> </intro>
 <verse>
-`   G
+`    G
 Ты смотришь мне в глаза, ты смотришь мне в глаза,
-    Bm              Em
+    Em              
 Но тёмные стекла хранят мою душу.
     G
 Мы вышли из кино, мы вышли из кино,
-   Bm                      Em
+    Em
 Ты хочешь там остаться, но сон твой нарушен.</verse>
 <chorus>
 Am        Bm
@@ -10679,6 +10906,32 @@ Am Bm
 Мы
                       G
 Вряд ли сможем быть вместе.</chorus>
+<instr>G G G G | G G G Bm | Em Em Em Em | C Em Am Am  <bblue>x2</bblue></instr>
+<verse>
+G
+Ты смотришь мне в глаза, а я смотрю вперёд,
+    Em
+Ты говоришь, что я похож на киноактёра.
+   G
+И ты меня зовёшь, а я иду домой,
+   Em
+Я знал, что будет плохо, но не знал, что так скоро.</verse>
+<chorus></chorus>
+<instr><span class="voice">Vibraphone</span>
+G G G G | G G G Bm | Em Em Em Em | C Em Am Am  <bblue>x4</bblue></instr>
+<verse>
+G    
+Ты хочешь, чтобы я остался навсегда с тобой,
+   Em
+Ты хочешь, чтоб ты пела, а я тебя слушал.
+   G
+Оставь меня в покое, оставь меня в покое,
+   Em
+Оставь меня в покое, не тронь мою душу.</verse>
+<chorus></chorus>
+<instr>G G G G | G G G Bm | Em Em Em Em | C Em Am Am  <bblue>x2</bblue></instr>
+<chorus></chorus>
+<coda>G G G G | G G G Bm | Em Em Em Em | C Em Am Am  <bblue>x2</bblue></coda>
 </song>
             </div>
         </div>
