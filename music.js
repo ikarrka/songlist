@@ -203,6 +203,18 @@ function fillSongHeader(band) {
         note: { className: 'note' }, // 🆕 добавлен новый тип
     };
 
+    function getSceneFromMidi(item) {
+        const midiVal = item.getAttribute('midi');
+        const match = midiVal?.match(/^\s*(\d{1,3})\s*,\s*(\d{1,3})\s*$/);
+        if (!match) return null;
+
+        const bank = Number(match[1]);
+        const program = Number(match[2]);
+        if (bank < 0 || bank > 3 || program < 0 || program > 127) return null;
+
+        return String.fromCharCode('A'.charCodeAt(0) + bank) + String(program + 1).padStart(3, '0');
+    }
+
     // 🧹 1️⃣ Удаляем старые <span>
     function removeOldSpans(button) {
         const selector = Object.values(config)
@@ -214,12 +226,15 @@ function fillSongHeader(band) {
     // 🧩 2️⃣ Создаём пустые <span> по конфигурации
     function createSpans(button) {
         const spans = {};
+        const midiControls = document.createElement('span');
+        midiControls.className = 'midi-controls';
         Object.entries(config).forEach(([attr, conf]) => {
             const span = document.createElement('span');
             span.className = conf.className;
-            button.appendChild(span);
+            (['midi', 'pad', 'scene'].includes(attr) ? midiControls : button).appendChild(span);
             spans[attr] = span;
         });
+        button.appendChild(midiControls);
         return spans;
     }
 
@@ -273,6 +288,11 @@ function fillSongHeader(band) {
                     value = noteVal;
                     style = { fontStyle: 'italic', color: '#666' }; // лёгкий серый курсив
                 }
+                break;
+            }
+
+            case 'scene': {
+                value = getSceneFromMidi(item) || item.getAttribute('scene');
                 break;
             }
 

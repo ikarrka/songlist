@@ -120,6 +120,19 @@ yt {
   color: var(--fontcolor);
 }
 
+/* MIDI-related indicators stay grouped at the right edge of a song header. */
+.accordion .toggle-button .midi-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.accordion .toggle-button .midi-controls .midi,
+.accordion .toggle-button .midi-controls .pad {
+  margin: 0;
+}
+
 /* Header row: primary toggle + small next button */
 .accordion .header-row {
   display: flex;
