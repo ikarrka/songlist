@@ -372,7 +372,7 @@ function paintChords(song) {
     paintedSongs.add(song);
 
     const chordRegex =
-        /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add)?|dim|aug|sus|add)?\d*(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
+        /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add)?|dim|aug|sus|add)?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
 
     const pres = song.querySelectorAll("pre");
     pres.forEach(pre => {
