@@ -1222,13 +1222,45 @@ function extractYoutubeVideoId(link) {
     return null;
 }
 
-function buildYoutubeNocookieEmbedUrl(videoId) {
+function parseYoutubeTime(timeValue) {
+    if (!timeValue) return null;
+    timeValue = timeValue.trim();
+    if (/^[0-9]+$/.test(timeValue)) {
+        return parseInt(timeValue, 10);
+    }
+    const match = timeValue.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/i);
+    if (!match) return null;
+    const hours = parseInt(match[1] || '0', 10);
+    const minutes = parseInt(match[2] || '0', 10);
+    const seconds = parseInt(match[3] || '0', 10);
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+function extractYoutubeStartTime(link) {
+    try {
+        const url = new URL(link, window.location.href);
+        const params = url.searchParams;
+        let t = params.get('t') || params.get('start');
+        if (!t && url.hash) {
+            const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
+            t = hashParams.get('t') || hashParams.get('start');
+        }
+        return parseYoutubeTime(t);
+    } catch (e) {
+        return null;
+    }
+}
+
+function buildYoutubeNocookieEmbedUrl(videoId, startTime) {
     const q = new URLSearchParams({
         autoplay: '1',
         rel: '0',
         playsinline: '1',
         modestbranding: '1',
     });
+    if (startTime != null && Number.isFinite(startTime) && startTime > 0) {
+        q.set('start', startTime.toString());
+    }
     return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?${q}`;
 }
 
@@ -1245,6 +1277,7 @@ function clearYoutubeIframe(frame) {
 function openYoutubeFrame(link) {
     const videoId = extractYoutubeVideoId(link);
     if (!videoId) return;
+    const startTime = extractYoutubeStartTime(link);
 
     const panel = document.getElementById('youtubePanel');
     const frame = document.getElementById('youtubeFrame');
@@ -1252,7 +1285,7 @@ function openYoutubeFrame(link) {
 
     clearYoutubeIframe(frame);
 
-    const embedUrl = buildYoutubeNocookieEmbedUrl(videoId);
+    const embedUrl = buildYoutubeNocookieEmbedUrl(videoId, startTime);
     if (window.location.protocol === 'file:') {
         const bridgeHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="referrer" content="unsafe-url"></head><body style="margin:0;overflow:hidden">' +
             '<iframe style="border:0;position:fixed;inset:0;width:100%;height:100%" src="' +
