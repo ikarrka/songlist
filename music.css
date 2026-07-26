@@ -664,12 +664,19 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 .block-remove-btn {
   cursor: pointer;
   margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.2em;
+  color: #d32;
 }
 
 .block-remove-btn::after {
-  content: "🗑️";
-  color: var(--accent-blue);
-  font-weight: bold;
+  content: "✖";
+  display: inline-block;
+  font-size: 1.2em;
+  line-height: 1;
 }
 
 .dimmed {
