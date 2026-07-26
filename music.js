@@ -1251,17 +1251,20 @@ function extractYoutubeStartTime(link) {
     }
 }
 
-function buildYoutubeNocookieEmbedUrl(videoId, startTime) {
+function buildYoutubeEmbedUrl(videoId, startTime) {
     const q = new URLSearchParams({
         autoplay: '1',
         rel: '0',
         playsinline: '1',
         modestbranding: '1',
     });
+    if (window.location.protocol !== 'file:') {
+        q.set('origin', window.location.origin);
+    }
     if (startTime != null && Number.isFinite(startTime) && startTime > 0) {
         q.set('start', startTime.toString());
     }
-    return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?${q}`;
+    return `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${q}`;
 }
 
 function clearYoutubeIframe(frame) {
@@ -1285,18 +1288,14 @@ function openYoutubeFrame(link) {
 
     clearYoutubeIframe(frame);
 
-    const embedUrl = buildYoutubeNocookieEmbedUrl(videoId, startTime);
     if (window.location.protocol === 'file:') {
-        const bridgeHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="referrer" content="unsafe-url"></head><body style="margin:0;overflow:hidden">' +
-            '<iframe style="border:0;position:fixed;inset:0;width:100%;height:100%" src="' +
-            embedUrl.replace(/"/g, '&quot;') +
-            '" referrerpolicy="unsafe-url" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></body></html>';
-        const blobUrl = URL.createObjectURL(new Blob([bridgeHtml], { type: 'text/html' }));
-        frame.dataset.youtubeBlobUrl = blobUrl;
-        frame.src = blobUrl;
-    } else {
-        frame.src = embedUrl;
+        const directUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}${startTime ? `&t=${startTime}s` : ''}`;
+        window.open(directUrl, '_blank');
+        return;
     }
+
+    const embedUrl = buildYoutubeEmbedUrl(videoId, startTime);
+    frame.src = embedUrl;
 
     panel.classList.add('is-open');
     panel.classList.remove('minimized');
