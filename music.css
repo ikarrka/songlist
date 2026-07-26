@@ -560,6 +560,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .square-green-button {
   user-select: none;
+  position: relative;
   width: 60px;
   height: 60px;
   background-color: #4CAF50;
@@ -579,6 +580,44 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .square-green-button:active {
   animation: flash-border 0.25s;
+}
+
+.square-green-button::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #00b83f;
+  font-size: 46px;
+  font-weight: bold;
+  line-height: 1;
+  box-shadow: 0 0 14px rgba(0, 200, 70, 0.85);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%) scale(0.35);
+}
+
+.square-green-button.pad-confirmed::after {
+  animation: pad-confirmation 0.75s ease-out forwards;
+}
+
+@keyframes pad-confirmation {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.35); }
+  20% { opacity: 1; transform: translateY(-50%) scale(1.15); }
+  45% { opacity: 1; transform: translateY(-50%) scale(1); }
+  100% { opacity: 0; transform: translateY(-85%) scale(0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .square-green-button.pad-confirmed::after {
+    animation-duration: 0.2s;
+  }
 }
 
 @keyframes flash-border {

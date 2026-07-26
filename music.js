@@ -1136,8 +1136,17 @@ function initClickOnPads(song) {
     song.querySelectorAll(".square-green-button").forEach(btn => {
         btn.addEventListener("click", () => {
             handleGreenPadButton(btn.textContent.trim());
+            showGreenPadConfirmation(btn);
         });
     });
+}
+
+/** Briefly shows a confirmation check next to a green pad after it is pressed. */
+function showGreenPadConfirmation(btn) {
+    btn.classList.remove("pad-confirmed");
+    // Restart the animation when the same pad is pressed repeatedly.
+    void btn.offsetWidth;
+    btn.classList.add("pad-confirmed");
 }
 
 /** Scene+MIDI+pad same as opening an accordion with the same attributes (gray pad buttons in song body). */
