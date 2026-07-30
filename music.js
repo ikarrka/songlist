@@ -6,12 +6,12 @@ const checklist = [
     'Check MIDI output device',
     'Piano - RockPiano',
     'Piano - Others -  Accordion',
-    'Synth - Brass -   Muted / ClassicTp',
+    'Synth - Brass -   Blow Sax',
     'Synth - Strings - Full Strings',
     'Synth - Bass - Fat Analog',
     'Synth - Choir -   ClassicChoir',
     'Synth - SFX -     OrchHit',
-    'Synth - Others -  Marimba',
+    'Synth - Others -  Vibrofone',
 ];
 
 const sectionMap = {
