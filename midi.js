@@ -657,10 +657,12 @@ function sendMidiPatch(midiChannel, msb, lsb, program, toneName = "") {
 
     const log = `[${new Date().toLocaleTimeString()}] Тон ${toneName} отправлен на канал ${midiChannel + 1}. MSB=${msb}, LSB=${lsb}, Prog=${program}`;
     console.log(log);
+    // alert(log);
 
     return true; // ✔ успешно
   } catch (err) {
     console.error("Ошибка отправки MIDI:", err);
+    // alert(`Ошибка отправки MIDI: ${err?.message || err}`);
     return false; // ❌ ошибка
   }
 }
@@ -724,22 +726,42 @@ function initializeVoiceMidiKeys() {
 }
 
 function isVoiceMidiDeviceAllowed() {
-  const output = selectedMidiOutput();
+  if (!selectedMidiOutput()) {
+    // alert("[MIDI] sendVComboVoice skipped: no MIDI output selected");
+    return false;
+  }
+
+  const output = midiOutput;
   if (!output || typeof output.name !== "string") {
+    // alert("[MIDI] sendVComboVoice skipped: no MIDI output selected after resolution");
     return false;
   }
 
   const normalizedName = output.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return normalizedName.includes("roland") || normalizedName.includes("vcombo") || normalizedName.includes("vr");
+  // alert(`[MIDI] Comparing MIDI name: "${output.name}" -> "${normalizedName}" against [roland, vcombo, vr]`);
+
+  const hasRoland = normalizedName.includes("roland");
+  const hasVCombo = normalizedName.includes("vcombo");
+  const hasVR = normalizedName.includes("vr");
+  const allowed = hasRoland || hasVCombo || hasVR;
+
+  if (!allowed) {
+    // alert(`[MIDI] Device name mismatch: ${output.name}`);
+    console.warn(`[MIDI] Device name mismatch: ${output.name}`);
+  }
+
+  return allowed;
 }
 
 function sendVComboVoice(mappingKey) {
   if (!selectedMidiOutput()) {
+    // alert("[MIDI] sendVComboVoice skipped: no MIDI output selected");
     return false;
   }
 
   if (!mappingKey) {
     console.warn("[MIDI] Voice mapping key is empty");
+    // alert("[MIDI] sendVComboVoice skipped: voice mapping key is empty");
     return false;
   }
 
@@ -750,7 +772,7 @@ function sendVComboVoice(mappingKey) {
   const configEntry = voiceMidiConfig[mappingKey];
   if (!configEntry || !hasVoiceMidiConfigEntry(configEntry)) {
     console.warn(`[MIDI] Нет доступной конфигурации для голоса: ${mappingKey}`);
-    alert(`[MIDI] sendVComboVoice skipped: no usable config for ${mappingKey}`);
+    // alert(`[MIDI] sendVComboVoice skipped: no usable config for ${mappingKey}`);
     return false;
   }
 
@@ -760,7 +782,7 @@ function sendVComboVoice(mappingKey) {
   const lowerDefined = isVoiceMidiConfigDefined(lower);
 
   if (upperDefined) {
-    alert(`[MIDI] sendVComboVoice upper: ${mappingKey}`);
+    // alert(`[MIDI] sendVComboVoice upper: ${mappingKey}`);
     sendMidiPatch(
       Math.max(0, Number(upper.channel) - 1),
       Number(upper.msb),
@@ -771,7 +793,7 @@ function sendVComboVoice(mappingKey) {
   }
 
   if (lowerDefined) {
-    alert(`[MIDI] sendVComboVoice lower: ${mappingKey}`);
+    // alert(`[MIDI] sendVComboVoice lower: ${mappingKey}`);
     const delay = upperDefined ? 100 : 0;
     setTimeout(() => {
       sendMidiPatch(
@@ -811,6 +833,7 @@ function handleVoiceMidiClick(event) {
 
   target.classList.add("is-pressed");
   window.setTimeout(() => target.classList.remove("is-pressed"), 250);
+  // alert(`[MIDI] Click handler for ${mappingKey}`);
   sendVComboVoice(mappingKey);
 }
 
@@ -961,16 +984,18 @@ function getPadSysex(padNumber) {
 }
 
 function selectedMidiOutput() {
-  let status = true;
-  if (!midiOutput) {
-    status = false;
-    console.error(
-      "%c[SetList]%c MIDI output not selected",
-      "color: white; background: #d32f2f; font-weight: bold; padding: 2px 6px; border-radius: 3px;",
-      "color: #d32f2f; font-weight: bold;"
-    );
+  if (midiOutput) {
+    return true;
   }
-  return status;
+
+  const runtimeSelect = document.getElementById('midiSelectDevice');
+  const selectValue = runtimeSelect?.value;
+  if (!selectValue) {
+    return false;
+  }
+
+  midiOutput = outputs.find(o => o.id === selectValue) || null;
+  return !!midiOutput;
 }
 
 function updateMidiIndicators() {
