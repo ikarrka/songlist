@@ -391,7 +391,7 @@ const voiceMidiConfig = {
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "EPiano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 58, "msb": 6, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "EPiano | FullStrings": {
@@ -670,12 +670,26 @@ function sendMidiPatch(midiChannel, msb, lsb, program, toneName = "") {
 }
 
 function isVoiceMidiConfigDefined(definition) {
-  return !!definition && typeof definition === "object" && (
-    definition.channel !== undefined && definition.channel !== null && definition.channel !== "" ||
-    definition.pc !== undefined && definition.pc !== null && definition.pc !== "" ||
-    definition.msb !== undefined && definition.msb !== null && definition.msb !== "" ||
-    definition.lsb !== undefined && definition.lsb !== null && definition.lsb !== ""
-  );
+  if (!definition || typeof definition !== "object") {
+    return false;
+  }
+
+  const channel = Number(definition.channel);
+  const pc = Number(definition.pc);
+  const msb = Number(definition.msb);
+  const lsb = Number(definition.lsb);
+
+  const hasValidChannel = Number.isInteger(channel) && channel >= 1 && channel <= 16;
+  const hasMeaningfulPatchValue =
+    (!Number.isNaN(pc) && pc !== 0) ||
+    (!Number.isNaN(msb) && msb !== 0) ||
+    (!Number.isNaN(lsb) && lsb !== 0);
+
+  const isDefaultZeroPatch =
+    (!Number.isNaN(pc) && pc === 0) &&
+    (!Number.isNaN(msb) && msb === 0);
+
+  return hasValidChannel && (!isDefaultZeroPatch ? hasMeaningfulPatchValue : false);
 }
 
 function hasVoiceMidiConfigEntry(entry) {
