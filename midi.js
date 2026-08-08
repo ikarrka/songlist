@@ -371,23 +371,23 @@ const voiceMidiConfig = {
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Blow.Sax": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 96, "msb": 2, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Choir": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 48, "msb": 0, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "ClassicTp": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 94, "msb": 10, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Clavinet": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 80, "msb": 3, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Clavinet+Organ": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 80, "msb": 3, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "EPiano": {
@@ -395,39 +395,39 @@ const voiceMidiConfig = {
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "EPiano | FullStrings": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 58, "msb": 6, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 41, "msb": 5, "lsb": 0 }
   },
   "Epiano | Pads": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 58, "msb": 6, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 46, "msb": 8, "lsb": 0 }
   },
   "EPiano+FullStrings": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 58, "msb": 6, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 41, "msb": 5, "lsb": 0 }
   },
   "Flute": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 99, "msb": 5, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "FS Brass": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 65, "msb": 5, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "FullStrings": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 41, "msb": 5, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Harp": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 73, "msb": 5, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "JD Piano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 79, "msb": 2, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Marimba": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 69, "msb": 0, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Organ": {
@@ -443,79 +443,75 @@ const voiceMidiConfig = {
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Orch Hit": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 127, "msb": 6, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Pads": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Pads | Bell synth": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 47, "msb": 1, "lsb": 0 }
   },
   "Pads | EPiano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 58, "msb": 6, "lsb": 0 }
   },
   "Pads | Organ аккорды": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Pads | Piano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 79, "msb": 1, "lsb": 0 }
   },
   "Pads | Synth": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 46, "msb": 8, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 111, "msb": 1, "lsb": 0 }
   },
   "Piano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 79, "msb": 1, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Piano | FullStrings": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 79, "msb": 1, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 41, "msb": 5, "lsb": 0 }
   },
   "Piano | Organ": {
     "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Piano+Dreampads": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 79, "msb": 1, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 47, "msb": 10, "lsb": 0 }
   },
   "Piano+FullStrings": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 79, "msb": 1, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 41, "msb": 5, "lsb": 0 }
   },
   "Piano+Pads": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+    "upper": { "channel": 4, "pc": 79, "msb": 1, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 46, "msb": 8, "lsb": 0 }
   },
   "Pizzicato": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 55, "msb": 0, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Pulse Lead": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
-    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
-  },
-  "RockPiano": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 110, "msb": 11, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "StackTp": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 64, "msb": 15, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Synth": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 111, "msb": 11, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Vibrophone": {
-    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "upper": { "channel": 4, "pc": 68, "msb": 0, "lsb": 0 },
     "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Violine": {
@@ -727,6 +723,16 @@ function initializeVoiceMidiKeys() {
   });
 }
 
+function isVoiceMidiDeviceAllowed() {
+  const output = selectedMidiOutput();
+  if (!output || typeof output.name !== "string") {
+    return false;
+  }
+
+  const name = output.name.toLowerCase();
+  return name.includes("roland") || name.includes("v_combo") || name.includes("vr");
+}
+
 function sendVoiceMidiPatch(mappingKey) {
   if (!selectedMidiOutput()) {
     return false;
@@ -734,6 +740,10 @@ function sendVoiceMidiPatch(mappingKey) {
 
   if (!mappingKey) {
     console.warn("[MIDI] Voice mapping key is empty");
+    return false;
+  }
+
+  if (!isVoiceMidiDeviceAllowed()) {
     return false;
   }
 
