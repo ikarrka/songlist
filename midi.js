@@ -729,8 +729,8 @@ function isVoiceMidiDeviceAllowed() {
     return false;
   }
 
-  const name = output.name.toLowerCase();
-  return name.includes("roland") || name.includes("v_combo") || name.includes("vr");
+  const normalizedName = output.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return normalizedName.includes("roland") || normalizedName.includes("vcombo") || normalizedName.includes("vr");
 }
 
 function sendVComboVoice(mappingKey) {
