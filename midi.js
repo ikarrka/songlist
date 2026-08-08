@@ -700,7 +700,7 @@ function getVoiceMidiKey(element) {
     return null;
   }
 
-  const candidates = ["sym:v", "#sym:v", "data-sym-v", "data-voice-key", "data-voice"];
+  const candidates = ["sym:v", "#sym:v", "data-sym-v", "data-voice-key", "data-voice", "voice"];
   for (const name of candidates) {
     const value = element.getAttribute(name);
     if (typeof value === "string" && value.trim()) {
@@ -733,7 +733,7 @@ function isVoiceMidiDeviceAllowed() {
   return name.includes("roland") || name.includes("v_combo") || name.includes("vr");
 }
 
-function sendVoiceMidiPatch(mappingKey) {
+function sendVComboVoice(mappingKey) {
   if (!selectedMidiOutput()) {
     return false;
   }
@@ -808,7 +808,7 @@ function handleVoiceMidiClick(event) {
 
   target.classList.add("is-pressed");
   window.setTimeout(() => target.classList.remove("is-pressed"), 250);
-  sendVoiceMidiPatch(mappingKey);
+  sendVComboVoice(mappingKey);
 }
 
 function initVoiceMidiHandlers() {

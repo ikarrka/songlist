@@ -939,6 +939,11 @@ function bindAccordionClickEvent() {
                 sendFantomSceneChange(accordion);
             }
 
+            const voiceKey = accordion.getAttribute("voice") || getVoiceMidiKey(accordion);
+            if (voiceKey) {
+                sendVComboVoice(voiceKey);
+            }
+
             convertSongToTable(accordion);
 
             // ленивая загрузка картинок
