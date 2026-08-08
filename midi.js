@@ -750,6 +750,7 @@ function sendVComboVoice(mappingKey) {
   const configEntry = voiceMidiConfig[mappingKey];
   if (!configEntry || !hasVoiceMidiConfigEntry(configEntry)) {
     console.warn(`[MIDI] Нет доступной конфигурации для голоса: ${mappingKey}`);
+    alert(`[MIDI] sendVComboVoice skipped: no usable config for ${mappingKey}`);
     return false;
   }
 
@@ -759,6 +760,7 @@ function sendVComboVoice(mappingKey) {
   const lowerDefined = isVoiceMidiConfigDefined(lower);
 
   if (upperDefined) {
+    alert(`[MIDI] sendVComboVoice upper: ${mappingKey}`);
     sendMidiPatch(
       Math.max(0, Number(upper.channel) - 1),
       Number(upper.msb),
@@ -769,6 +771,7 @@ function sendVComboVoice(mappingKey) {
   }
 
   if (lowerDefined) {
+    alert(`[MIDI] sendVComboVoice lower: ${mappingKey}`);
     const delay = upperDefined ? 100 : 0;
     setTimeout(() => {
       sendMidiPatch(
