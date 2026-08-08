@@ -1,4 +1,4 @@
-let midiAccess = null;
+﻿let midiAccess = null;
 let outputs = [];
 
 let midiOutput = null;
@@ -361,6 +361,169 @@ function toneData() {
   ];
 }
 
+const voiceMidiConfig = {
+  "Accordion": {
+    "upper": { "channel": 4, "pc": 72, "msb": 5, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "AtkPad": {
+    "upper": { "channel": 4, "pc": 45, "msb": 11, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Blow.Sax": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Choir": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "ClassicTp": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Clavinet": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Clavinet+Organ": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "EPiano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "EPiano | FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Epiano | Pads": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "EPiano+FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Flute": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "FS Brass": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Harp": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "JD Piano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Marimba": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Organ": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Organ | FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Organ | Strings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Orch Hit": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads | Bell synth": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads | EPiano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads | Organ аккорды": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads | Piano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pads | Synth": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano | FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano | Organ": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano+Dreampads": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano+FullStrings": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Piano+Pads": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pizzicato": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Pulse Lead": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "RockPiano": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "StackTp": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Synth": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Vibrophone": {
+    "upper": { "channel": 4, "pc": 0, "msb": 0, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  },
+  "Violine": {
+    "upper": { "channel": 4, "pc": 92, "msb": 6, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
+  }
+};
+
 /**
  * Отправляет несколько MIDI Program Change сообщений, используя данные из toneData().
  *
@@ -506,6 +669,135 @@ function sendMidiPatch(midiChannel, msb, lsb, program, toneName = "") {
   }
 }
 
+function isVoiceMidiConfigDefined(definition) {
+  return !!definition && typeof definition === "object" && (
+    definition.channel !== undefined && definition.channel !== null && definition.channel !== "" ||
+    definition.pc !== undefined && definition.pc !== null && definition.pc !== "" ||
+    definition.msb !== undefined && definition.msb !== null && definition.msb !== "" ||
+    definition.lsb !== undefined && definition.lsb !== null && definition.lsb !== ""
+  );
+}
+
+function hasVoiceMidiConfigEntry(entry) {
+  return !!entry && (
+    isVoiceMidiConfigDefined(entry.lower) ||
+    isVoiceMidiConfigDefined(entry.upper)
+  );
+}
+
+function getVoiceMidiKey(element) {
+  if (!element || typeof element.getAttribute !== "function") {
+    return null;
+  }
+
+  const candidates = ["sym:v", "#sym:v", "data-sym-v", "data-voice-key", "data-voice"];
+  for (const name of candidates) {
+    const value = element.getAttribute(name);
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return null;
+}
+
+function initializeVoiceMidiKeys() {
+  document.querySelectorAll("span.voice").forEach((element) => {
+    const existingKey = getVoiceMidiKey(element);
+    if (!existingKey) {
+      const textValue = (element.textContent || "").trim();
+      if (textValue) {
+        element.setAttribute("sym:v", textValue);
+      }
+    }
+  });
+}
+
+function sendVoiceMidiPatch(mappingKey) {
+  if (!selectedMidiOutput()) {
+    return false;
+  }
+
+  if (!mappingKey) {
+    console.warn("[MIDI] Voice mapping key is empty");
+    return false;
+  }
+
+  const configEntry = voiceMidiConfig[mappingKey];
+  if (!configEntry || !hasVoiceMidiConfigEntry(configEntry)) {
+    console.warn(`[MIDI] Нет доступной конфигурации для голоса: ${mappingKey}`);
+    return false;
+  }
+
+  const upper = configEntry.upper || {};
+  const lower = configEntry.lower || null;
+  const upperDefined = isVoiceMidiConfigDefined(upper);
+  const lowerDefined = isVoiceMidiConfigDefined(lower);
+
+  if (upperDefined) {
+    sendMidiPatch(
+      Math.max(0, Number(upper.channel) - 1),
+      Number(upper.msb),
+      Number(upper.lsb),
+      Number(upper.pc),
+      `${mappingKey} upper`
+    );
+  }
+
+  if (lowerDefined) {
+    const delay = upperDefined ? 100 : 0;
+    setTimeout(() => {
+      sendMidiPatch(
+        Math.max(0, Number(lower.channel) - 1),
+        Number(lower.msb),
+        Number(lower.lsb),
+        Number(lower.pc),
+        `${mappingKey} lower`
+      );
+    }, delay);
+  }
+
+  return true;
+}
+
+function handleVoiceMidiClick(event) {
+  const target = event.target instanceof Element ? event.target.closest("span.voice") : null;
+  if (!target) {
+    return;
+  }
+
+  const mappingKey = getVoiceMidiKey(target);
+  if (!mappingKey) {
+    console.warn("[MIDI] span.voice missing a mapping key attribute");
+    return;
+  }
+
+  if (!selectedMidiOutput()) {
+    return;
+  }
+
+  const configEntry = voiceMidiConfig[mappingKey];
+  if (!configEntry || !hasVoiceMidiConfigEntry(configEntry)) {
+    console.warn(`[MIDI] Нет доступной конфигурации для голоса: ${mappingKey}`);
+    return;
+  }
+
+  target.classList.add("is-pressed");
+  window.setTimeout(() => target.classList.remove("is-pressed"), 250);
+  sendVoiceMidiPatch(mappingKey);
+}
+
+function initVoiceMidiHandlers() {
+  initializeVoiceMidiKeys();
+  document.removeEventListener("click", handleVoiceMidiClick);
+  document.addEventListener("click", handleVoiceMidiClick);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initVoiceMidiHandlers);
+} else {
+  initVoiceMidiHandlers();
+}
 
 function sendMidiByForm() {
   // Получаем значения из полей

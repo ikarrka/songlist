@@ -419,6 +419,43 @@ table.structure tr.interlude td:first-child {
 
 .voice {
   margin-bottom: 5px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.voice:active,
+.voice.is-pressed {
+  animation: flash-border 0.25s;
+  position: relative;
+}
+
+.voice.is-pressed::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px);
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #00b83f;
+  font-size: 46px;
+  font-weight: bold;
+  line-height: 1;
+  box-shadow: 0 0 14px rgba(0, 200, 70, 0.85);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%) scale(0.35);
+  animation: voice-confirmation 0.75s ease-out forwards;
+}
+
+@keyframes voice-confirmation {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.35); }
+  20% { opacity: 1; transform: translateY(-50%) scale(1.15); }
+  45% { opacity: 1; transform: translateY(-50%) scale(1); }
+  100% { opacity: 0; transform: translateY(-85%) scale(0.85); }
 }
 
 .bank {
