@@ -1025,6 +1025,54 @@ function updateMidiIndicators() {
   }, 3000);
 }
 
+function clampMidiValue(input, min, max) {
+  let value = parseInt(input.value, 10);
+  if (isNaN(value)) {
+    value = min;
+  }
+  if (value < min) {
+    value = min;
+  }
+  if (value > max) {
+    value = max;
+  }
+  input.value = value;
+}
+
+function setupMidiModalNumberControls() {
+  document.querySelectorAll('.midi-number-control button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetId = button.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      const step = button.classList.contains('midi-number-increment') ? 1 : -1;
+      const min = Number(input.getAttribute('min'));
+      const max = Number(input.getAttribute('max'));
+      let value = parseInt(input.value, 10);
+      if (isNaN(value)) {
+        value = min;
+      }
+      value += step;
+      if (value < min) value = min;
+      if (value > max) value = max;
+      input.value = value;
+    });
+  });
+
+  document.querySelectorAll('#midiModalMsb, #midiModalLsb, #midiModalProgram').forEach((input) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    });
+
+    input.addEventListener('blur', () => {
+      const min = Number(input.getAttribute('min'));
+      const max = Number(input.getAttribute('max'));
+      clampMidiValue(input, min, max);
+    });
+  });
+}
+
 function initMidiModal() {
   const modal = document.getElementById('midi-modal');
   const trigger = document.getElementById('midiModalBtn');
@@ -1055,13 +1103,24 @@ function initMidiModal() {
     if (e.target === modal) closeMidiModal();
   });
 
+  setupMidiModalNumberControls();
+
   if (sendBtn) {
     sendBtn.addEventListener('click', function () {
       if (!selectedMidiOutput()) return;
       const ch = parseInt(document.getElementById('midiModalChannel').value, 10);
-      const msb = parseInt(document.getElementById('midiModalMsb').value, 10);
-      const lsb = parseInt(document.getElementById('midiModalLsb').value, 10);
-      const prog = parseInt(document.getElementById('midiModalProgram').value, 10);
+      const msbInput = document.getElementById('midiModalMsb');
+      const lsbInput = document.getElementById('midiModalLsb');
+      const programInput = document.getElementById('midiModalProgram');
+
+      clampMidiValue(msbInput, 0, 127);
+      clampMidiValue(lsbInput, 0, 127);
+      clampMidiValue(programInput, 0, 127);
+
+      const msb = parseInt(msbInput.value, 10);
+      const lsb = parseInt(lsbInput.value, 10);
+      const prog = parseInt(programInput.value, 10);
+
       if (isNaN(ch) || ch < 1 || ch > 16) return;
       if ([msb, lsb, prog].some(v => isNaN(v) || v < 0 || v > 127)) return;
       sendMidiPatch(ch - 1, msb, lsb, prog, '');

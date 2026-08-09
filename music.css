@@ -1060,10 +1060,38 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   justify-content: space-between;
 }
 
-.midi-modal-form input[type="number"] {
-  width: 80px;
+.midi-modal-form select {
+  width: 144px;
   box-sizing: border-box;
   padding: 4px 8px;
+}
+
+.midi-modal-form input[type="number"] {
+  width: 96px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+}
+
+.midi-number-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.midi-number-control button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color, #555);
+  background: var(--surface-bg, #222);
+  color: var(--surface-text, #fff);
+  border-radius: 4px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.midi-number-control input[type="number"] {
+  width: 72px;
+  text-align: center;
 }
 
 .midi-modal-send {

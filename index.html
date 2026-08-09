@@ -29112,10 +29112,51 @@ A#m</coda>
         <h3>Отправить MIDI на устройство</h3>
         <p class="midi-modal-device" id="midiModalDeviceName"></p>
         <div class="midi-modal-form">
-            <label>Канал (1–16): <input type="number" id="midiModalChannel" min="1" max="16" value="1"></label>
-            <label>MSB (0–127): <input type="number" id="midiModalMsb" min="0" max="127" value="0"></label>
-            <label>LSB (0–127): <input type="number" id="midiModalLsb" min="0" max="127" value="0"></label>
-            <label>Program (0–127): <input type="number" id="midiModalProgram" min="0" max="127" value="0"></label>
+            <label>
+                Канал (1–16):
+                <select id="midiModalChannel">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                </select>
+            </label>
+            <label>
+                MSB (0–127):
+                <div class="midi-number-control">
+                    <button type="button" class="midi-number-decrement" data-target="midiModalMsb">−</button>
+                    <input type="number" id="midiModalMsb" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
+                    <button type="button" class="midi-number-increment" data-target="midiModalMsb">+</button>
+                </div>
+            </label>
+            <label>
+                LSB (0–127):
+                <div class="midi-number-control">
+                    <button type="button" class="midi-number-decrement" data-target="midiModalLsb">−</button>
+                    <input type="number" id="midiModalLsb" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
+                    <button type="button" class="midi-number-increment" data-target="midiModalLsb">+</button>
+                </div>
+            </label>
+            <label>
+                Program (0–127):
+                <div class="midi-number-control">
+                    <button type="button" class="midi-number-decrement" data-target="midiModalProgram">−</button>
+                    <input type="number" id="midiModalProgram" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
+                    <button type="button" class="midi-number-increment" data-target="midiModalProgram">+</button>
+                </div>
+            </label>
         </div>
         <div class="midi-modal-actions">
             <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
