@@ -114,7 +114,7 @@ yt {
   cursor: pointer;
   border: 1px solid;
   text-align: left;
-  padding: 8px;
+  /* padding: 8px; */
   background: var(--button-bg);
   border-color: var(--button-border);
   color: var(--fontcolor);
@@ -141,17 +141,25 @@ yt {
 }
 
 .accordion .header-row .toggle-button,
-.accordion .header-row .next-button {
+.accordion .header-row .next-button,
+.accordion .header-row .remove-button,
+.accordion .header-row .plus-button {
   align-items: center;
 }
 
 .accordion .header-row .toggle-button {
-  flex: 0 0 95%;
+  flex: 1 1 auto;
   width: auto;
 }
 
-.accordion .header-row .next-button {
-  flex: 1 0 5%;
+.accordion .header-row .remove-button,
+.accordion .header-row .next-button,
+.accordion .header-row .plus-button,
+.accordion .header-row .setlist-helper-wrapper {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -159,7 +167,28 @@ yt {
   border: 1px solid var(--button-border);
   background: color-mix(in srgb, var(--button-bg) 85%, white 15%);
   color: var(--fontcolor);
-  padding: 8px;
+  padding: 0;
+}
+
+.accordion .header-row .setlist-helper-wrapper {
+  margin: 0;
+}
+
+.accordion .header-row .setlist-helper {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  transform: scale(1.25);
+}
+
+.accordion .header-row .plus-button {
+  font-weight: bold;
+  width: 2.2em;
+}
+
+.accordion .header-row .remove-button {
+  font-weight: bold;
+  font-size: 1.1em;
 }
 
 .accordion .header-row .next-button .next-icon {

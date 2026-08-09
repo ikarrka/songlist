@@ -1599,9 +1599,43 @@ function addEmptySetlistAttribute() {
 // --- NEXT button / announcer functionality -------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     transformAccordionHeaders();
+    restoreSetListHelper();
     bindNextButtonEvents();
     restoreNextFromStorage();
 });
+
+function setListHelperIsActive() {
+    return localStorage.getItem('setListHelper') === 'true';
+}
+
+function restoreSetListHelper() {
+    const helperCheckbox = document.getElementById('setListHelper');
+    if (!helperCheckbox) return;
+
+    const active = setListHelperIsActive();
+    helperCheckbox.checked = active;
+    if (typeof setlistUpdateHeaderActions === 'function') {
+        setlistUpdateHeaderActions();
+    }
+
+    helperCheckbox.addEventListener('change', function () {
+        if (helperCheckbox.checked) {
+            if (confirm('Перезагрузить в режим составления блоков?')) {
+                localStorage.setItem('setListHelper', 'true');
+                if (typeof setlistUpdateHeaderActions === 'function') {
+                    setlistUpdateHeaderActions();
+                }
+            } else {
+                helperCheckbox.checked = false;
+            }
+        } else {
+            localStorage.removeItem('setListHelper');
+            if (typeof setlistUpdateHeaderActions === 'function') {
+                setlistUpdateHeaderActions();
+            }
+        }
+    });
+}
 
 function transformAccordionHeaders() {
     document.querySelectorAll('.accordion').forEach(accordion => {
@@ -1615,16 +1649,44 @@ function transformAccordionHeaders() {
         headerRow.className = 'header-row';
 
         const toggleClone = oldBtn.cloneNode(true);
-        toggleClone.type = oldBtn.type || 'button';
-
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'next-button';
-        nextBtn.type = 'button';
-        nextBtn.innerHTML = '<span class="next-icon">⏭</span>';
+        toggleClone.type = 'button';
 
         accordion.replaceChild(headerRow, oldBtn);
         headerRow.appendChild(toggleClone);
-        headerRow.appendChild(nextBtn);
+
+        if (accordion.id === 'checkListAccordion') {
+            const helperWrapper = document.createElement('label');
+            helperWrapper.className = 'setlist-helper-wrapper';
+            helperWrapper.title = 'Режим составления блоков';
+
+            const helperCheckbox = document.createElement('input');
+            helperCheckbox.type = 'checkbox';
+            helperCheckbox.id = 'setListHelper';
+            helperCheckbox.className = 'setlist-helper';
+            helperWrapper.appendChild(helperCheckbox);
+
+            headerRow.appendChild(helperWrapper);
+        } else {
+            const plusBtn = document.createElement('button');
+            plusBtn.className = 'plus-button';
+            plusBtn.type = 'button';
+            plusBtn.textContent = '+';
+            plusBtn.style.display = 'none';
+            headerRow.appendChild(plusBtn);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-button';
+            removeBtn.type = 'button';
+            removeBtn.textContent = '✖';
+            removeBtn.style.display = 'none';
+            headerRow.appendChild(removeBtn);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'next-button';
+            nextBtn.type = 'button';
+            nextBtn.innerHTML = '<span class="next-icon">⏭</span>';
+            headerRow.appendChild(nextBtn);
+        }
     });
 }
 

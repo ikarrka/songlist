@@ -152,10 +152,62 @@ function setlistApplyData() {
         }
     });
 
+    setlistUpdateHeaderActions();
+
     setTimeout(function () {
         const band = getSetlistSelectedBand();
         if (band) reorderSongList(band);
     }, 100);
+}
+
+function setlistUpdateHeaderActions() {
+    const helperActive = localStorage.getItem('setListHelper') === 'true';
+
+    document.querySelectorAll('.accordion').forEach(acc => {
+        if (acc.id === 'checkListAccordion') return;
+        const headerRow = acc.querySelector(':scope > .header-row');
+        if (!headerRow) return;
+
+        const blockValue = acc.getAttribute('setlistblock')?.trim() || '';
+        const hasBlock = blockValue !== '' && parseInt(blockValue, 10) > 0;
+        const plusBtn = headerRow.querySelector('.plus-button');
+        const nextBtn = headerRow.querySelector('.next-button');
+        const removeBtn = headerRow.querySelector('.remove-button');
+
+        if (hasBlock) {
+            if (plusBtn) plusBtn.style.display = 'none';
+            if (!removeBtn) {
+                const btn = document.createElement('button');
+                btn.className = 'remove-button';
+                btn.type = 'button';
+                btn.textContent = '✖';
+                headerRow.insertBefore(btn, nextBtn || null);
+            } else {
+                removeBtn.style.display = '';
+            }
+        } else {
+            if (removeBtn) {
+                removeBtn.style.display = 'none';
+            }
+            if (!plusBtn && helperActive && !hasBlock) {
+                const btn = document.createElement('button');
+                btn.className = 'plus-button';
+                btn.type = 'button';
+                btn.textContent = '+';
+                headerRow.insertBefore(btn, nextBtn || null);
+            }
+            if (plusBtn) {
+                plusBtn.style.display = helperActive ? '' : 'none';
+            }
+            if (!nextBtn) {
+                const btn = document.createElement('button');
+                btn.className = 'next-button';
+                btn.type = 'button';
+                btn.innerHTML = '<span class="next-icon">⏭</span>';
+                headerRow.appendChild(btn);
+            }
+        }
+    });
 }
 
 
@@ -168,15 +220,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     const saveEl = document.getElementById('setlist-save');
-    if (saveEl) saveEl.onclick = async () => {
+    if (saveEl) saveEl.onclick = setlistSaveCurrent;
+
+    async function setlistSaveCurrent() {
         if (currentHash == null || currentHash === '') {
             alert('Внутренняя ошибка: не выбрана песня.');
             setlistClose();
-            return;
+            return false;
         }
         const blockEl = document.getElementById('setlist-block');
         const songEl = document.getElementById('setlist-song');
-        if (!blockEl || !songEl) return;
+        if (!blockEl || !songEl) return false;
+        if (blockEl.value.trim() === '') blockEl.value = '0';
+        if (songEl.value.trim() === '') songEl.value = '0';
         const blockValue = blockEl.value.trim();
         const songValue = songEl.value.trim();
         const block = normalizeSetlistValue(blockValue);
@@ -201,9 +257,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
         else {
             alert("Некорректный ввод данных");
+            return false;
         }
         setlistClose();
-    };
+        return true;
+    }
 
     const clearEl = document.getElementById('setlist-clear');
     if (clearEl) clearEl.onclick = () => {
@@ -220,7 +278,39 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     if (!window._setlistHandlerBound) {
         window._setlistHandlerBound = true;
-        document.body.addEventListener('click', e => {
+        document.body.addEventListener('click', async e => {
+            const removeBtn = e.target.closest('.remove-button');
+            if (removeBtn) {
+                e.stopPropagation();
+                const accordion = removeBtn.closest('.accordion');
+                if (!accordion) return;
+                const hash = accordion.getAttribute('hash');
+                if (!hash) return;
+                if (!confirm('Удалить песню из блока?')) return;
+                delete setlistData[hash];
+                const saved = await setlistSaveData();
+                if (saved) {
+                    setlistApplyData();
+                    closeAccordionByHash(hash);
+                }
+                return;
+            }
+
+            const plusBtn = e.target.closest('.plus-button');
+            if (plusBtn) {
+                e.stopPropagation();
+                const accordion = plusBtn.closest('.accordion');
+                if (!accordion) return;
+                const hash = accordion.getAttribute('hash');
+                if (!hash) return;
+                setlistOpen(hash);
+                setlistFillLastBlockNextSong();
+                requestAnimationFrame(async () => {
+                    await setlistSaveCurrent();
+                });
+                return;
+            }
+
             const btn = e.target.closest('.accordion .setlist-btn');
             if (!btn) return;
             e.stopPropagation();
