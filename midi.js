@@ -11,7 +11,19 @@ function syncMidiModalButtonVisibility() {
   midiModalBtn.style.display = midiOutput ? '' : 'none';
 }
 
+function syncVoiceMidiState() {
+  const enableVoiceClicks = !!selectedMidiOutput();
+  document.querySelectorAll('span.voice').forEach((element) => {
+    if (enableVoiceClicks) {
+      element.classList.remove('no-midi');
+    } else {
+      element.classList.add('no-midi');
+    }
+  });
+}
+
 syncMidiModalButtonVisibility();
+syncVoiceMidiState();
 
 const upper = 3;
 const lower = 4;
@@ -33,6 +45,7 @@ if (navigator.requestMIDIAccess) {
           midiSelectDevice.remove();
         }
         syncMidiModalButtonVisibility();
+        syncVoiceMidiState();
         return;
       }
       else {
@@ -42,6 +55,7 @@ if (navigator.requestMIDIAccess) {
       // По умолчанию выбираем первые устройства
       midiOutput = outputs[0];
       syncMidiModalButtonVisibility();
+      syncVoiceMidiState();
 
       // Заполняем селект
       if (selectDevice && document.getElementById('midiSelectDevice')) {
@@ -54,6 +68,7 @@ if (navigator.requestMIDIAccess) {
           midiOutput = outputs.find(o => o.id === id);
           console.log('Selected output:', midiOutput?.name);
           syncMidiModalButtonVisibility();
+          syncVoiceMidiState();
         });
       }
 
@@ -64,6 +79,7 @@ if (navigator.requestMIDIAccess) {
       if (errEl) errEl.textContent = "Failed to get MIDI access";
       document.getElementById("midiSelectDevice")?.remove();
       syncMidiModalButtonVisibility();
+      syncVoiceMidiState();
     });
 } else {
   console.error("Web MIDI API is not supported in this browser.");
@@ -71,8 +87,10 @@ if (navigator.requestMIDIAccess) {
   if (errEl) errEl.textContent = "Web MIDI API is not supported in this browser.";
   document.getElementById("midiSelectDevice")?.remove();
   syncMidiModalButtonVisibility();
+  syncVoiceMidiState();
 }
 
+document.addEventListener('DOMContentLoaded', syncVoiceMidiState);
 
 function fillSelect(selectElem, outputs) {
   if (selectElem === null) {
@@ -825,16 +843,13 @@ function handleVoiceMidiClick(event) {
     return;
   }
 
-  const configEntry = voiceMidiConfig[mappingKey];
-  if (!configEntry || !hasVoiceMidiConfigEntry(configEntry)) {
-    console.warn(`[MIDI] Нет доступной конфигурации для голоса: ${mappingKey}`);
+  const result = sendVComboVoice(mappingKey);
+  if (!result) {
     return;
   }
 
   target.classList.add("is-pressed");
   window.setTimeout(() => target.classList.remove("is-pressed"), 250);
-  // alert(`[MIDI] Click handler for ${mappingKey}`);
-  sendVComboVoice(mappingKey);
 }
 
 function initVoiceMidiHandlers() {
@@ -1002,6 +1017,7 @@ function updateMidiIndicators() {
   function checkMidi() {
     console.log('Check midi access');
     syncMidiModalButtonVisibility();
+    syncVoiceMidiState();
 
     const midiSpans = document.querySelectorAll('span.midi');
     midiSpans.forEach(span => {
