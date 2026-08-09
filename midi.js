@@ -1055,7 +1055,7 @@ function clampMidiValue(input, min, max) {
   input.value = value;
 }
 
-function setupMidiModalNumberControls() {
+function setupMidiModalNumberControls(onChange) {
   document.querySelectorAll('.midi-number-control button').forEach((button) => {
     button.addEventListener('click', () => {
       const targetId = button.getAttribute('data-target');
@@ -1073,6 +1073,10 @@ function setupMidiModalNumberControls() {
       if (value < min) value = min;
       if (value > max) value = max;
       input.value = value;
+
+      if (typeof onChange === 'function') {
+        onChange();
+      }
     });
   });
 
@@ -1119,27 +1123,40 @@ function initMidiModal() {
     if (e.target === modal) closeMidiModal();
   });
 
-  setupMidiModalNumberControls();
+  const autoSendCheckbox = document.getElementById('midiModalAutoSend');
+
+  function sendModalPatch() {
+    if (!selectedMidiOutput()) return false;
+    const ch = parseInt(document.getElementById('midiModalChannel').value, 10);
+    const msbInput = document.getElementById('midiModalMsb');
+    const lsbInput = document.getElementById('midiModalLsb');
+    const programInput = document.getElementById('midiModalProgram');
+
+    clampMidiValue(msbInput, 0, 127);
+    clampMidiValue(lsbInput, 0, 127);
+    clampMidiValue(programInput, 0, 127);
+
+    const msb = parseInt(msbInput.value, 10);
+    const lsb = parseInt(lsbInput.value, 10);
+    const prog = parseInt(programInput.value, 10);
+
+    if (isNaN(ch) || ch < 1 || ch > 16) return false;
+    if ([msb, lsb, prog].some(v => isNaN(v) || v < 0 || v > 127)) return false;
+    sendMidiPatch(ch - 1, msb, lsb, prog, '');
+    return true;
+  }
+
+  function triggerAutoSendIfEnabled() {
+    if (autoSendCheckbox?.checked) {
+      sendModalPatch();
+    }
+  }
+
+  setupMidiModalNumberControls(triggerAutoSendIfEnabled);
 
   if (sendBtn) {
     sendBtn.addEventListener('click', function () {
-      if (!selectedMidiOutput()) return;
-      const ch = parseInt(document.getElementById('midiModalChannel').value, 10);
-      const msbInput = document.getElementById('midiModalMsb');
-      const lsbInput = document.getElementById('midiModalLsb');
-      const programInput = document.getElementById('midiModalProgram');
-
-      clampMidiValue(msbInput, 0, 127);
-      clampMidiValue(lsbInput, 0, 127);
-      clampMidiValue(programInput, 0, 127);
-
-      const msb = parseInt(msbInput.value, 10);
-      const lsb = parseInt(lsbInput.value, 10);
-      const prog = parseInt(programInput.value, 10);
-
-      if (isNaN(ch) || ch < 1 || ch > 16) return;
-      if ([msb, lsb, prog].some(v => isNaN(v) || v < 0 || v > 127)) return;
-      sendMidiPatch(ch - 1, msb, lsb, prog, '');
+      sendModalPatch();
     });
   }
 
