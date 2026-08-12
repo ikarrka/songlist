@@ -9744,7 +9744,7 @@ Gm      C      Dm  C
    G                D            Em
 За окнами дождь, но я в него не верю.
 </verse>
-<chorus>
+<chorus hash="b3kpqbc8awbofpg">
 ` G                   A              Bm
 И я попал в сеть, и мне из неё не уйти.
 G               A                Bm
@@ -9764,19 +9764,12 @@ G        A             Bm
      G                 D                Em
 Почему мы стоим, а места вокруг нас пустуют.
 </verse>
-<chorus></chorus>
+<chorus hashreference="b3kpqbc8awbofpg"></chorus>
+<instr>A | Bm  <bblue>x4</bblue></instr>
 <instr><span class="voice">Blow.Sax</span>
 <img imagetype="scores" data-src=kino.zvezdi.ost.1.png>
-A | Bm  <bblue>x8</bblue></instr>
-<chorus>
-` G                   A              Bm
-И я попал в сеть, и мне из неё не уйти.
-G               A                Bm
-  Твой взгляд бьёт меня, словно ток.
-  G             A             Bm
-Звёзды, упав, все останутся здесь.
-G        A             Bm
-  Навсегда останутся здесь.</chorus>
+A | Bm  <bblue>x4</bblue></instr>
+<chorus hashreference="b3kpqbc8awbofpg"></chorus>
 <coda>
 ` G                   A              Bm
 И я попал в сеть, и мне из неё не уйти.
@@ -12090,7 +12083,7 @@ C              Fmaj7         Am           D
         <div class="accordion" artist="Крем" song="Гоблины и хоббиты" key="Cm" voice="EPiano" hash="7zxbja3wl5orgth">
             <button class="toggle-button">
                 <chord>https://amdm.ru/akkordi/krematoriy/92965/goblini_i_hobbiti/</chord>
-                <yt>https://www.youtube.com/watch?v=zhB-lOyHDNY</yt>
+                <yt>https://www.youtube.com/watch?v=j5_4yIfbFmw</yt>
             </button>
             <div class="content">
                 
@@ -29183,7 +29176,7 @@ A#m</coda>
             <input type="number" id="setlist-block">
         </label>
         <label>Номер песни:
-            <input type="number" id="setlist-song">
+                    <input type="number" id="setlist-song" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
         </label>
         <button class="setlist-save" id="setlist-save">Сохранить</button>
         <button type="button" class="setlist-autofill" id="setlist-autofill-next" title="Последний блок и следующий номер песни" aria-label="Подставить последний блок и следующий номер песни">🪄</button>
