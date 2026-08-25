@@ -1,5 +1,7 @@
 ﻿let midiAccess = null;
 let outputs = [];
+let midiInputs = [];
+let receivedMidiMessages = [];
 
 let midiOutput = null;
 
@@ -8,7 +10,7 @@ const midiModalBtn = document.getElementById('midiModalBtn');
 
 function syncMidiModalButtonVisibility() {
   if (!midiModalBtn) return;
-  midiModalBtn.style.display = midiOutput ? '' : 'none';
+  midiModalBtn.style.display = '';
 }
 
 function syncVoiceMidiState() {
@@ -22,6 +24,45 @@ function syncVoiceMidiState() {
   });
 }
 
+function renderReceivedMidiMessages() {
+  const output = document.getElementById('midiModalReceived');
+  if (!output) return;
+  output.textContent = receivedMidiMessages.length
+    ? receivedMidiMessages.join('\n')
+    : 'Сообщений пока нет.';
+  output.scrollTop = output.scrollHeight;
+}
+
+function syncMidiInputListeners() {
+  if (!midiAccess) return;
+
+  midiInputs = Array.from(midiAccess.inputs.values());
+  midiInputs.forEach(input => {
+    input.onmidimessage = event => {
+      const data = Array.from(event.data);
+      const statusByte = data[0];
+      // Не показываем пустые и непрерывные служебные сообщения: Clock, Active Sensing и Reset.
+      if (data.length === 0 || data.every(byte => byte === 0) || [0xF8, 0xF9, 0xFD, 0xFE, 0xFF].includes(statusByte)) {
+        return;
+      }
+      const source = event.currentTarget?.name || input.name || 'MIDI input';
+      const bytes = data
+        .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
+        .join(' ');
+      receivedMidiMessages.push(`${source}: ${bytes}`);
+      if (receivedMidiMessages.length > 100) receivedMidiMessages.shift();
+      renderReceivedMidiMessages();
+    };
+  });
+
+  const status = document.getElementById('midiModalInputStatus');
+  if (status) {
+    status.textContent = midiInputs.length
+      ? `Слушаем входы: ${midiInputs.map(input => input.name || 'MIDI input').join(', ')}`
+      : 'MIDI-входы не найдены.';
+  }
+}
+
 syncMidiModalButtonVisibility();
 syncVoiceMidiState();
 
@@ -33,6 +74,8 @@ if (navigator.requestMIDIAccess) {
     .then((access) => {
       midiAccess = access;
       outputs = Array.from(midiAccess.outputs.values());
+      syncMidiInputListeners();
+      midiAccess.onstatechange = syncMidiInputListeners;
 
       if (outputs.length === 0 && document.getElementById("midiError")) {
         document.getElementById("midiError").textContent = "❌ No MIDI outputs found";
@@ -421,6 +464,10 @@ const voiceMidiConfig = {
   "EPiano+FullStrings": {
     "upper": { "channel": 4, "pc": 58, "msb": 6, "lsb": 0 },
     "lower": { "channel": 3, "pc": 41, "msb": 5, "lsb": 0 }
+  },
+  "FatBass": {
+    "upper": { "channel": 4, "pc": 123, "msb": 11, "lsb": 0 },
+    "lower": { "channel": 3, "pc": 0, "msb": 0, "lsb": 0 }
   },
   "Flute": {
     "upper": { "channel": 4, "pc": 99, "msb": 5, "lsb": 0 },
@@ -1096,6 +1143,7 @@ function initMidiModal() {
   const closeBtn = document.getElementById('midiModalClose');
   const sendBtn = document.getElementById('midiModalSend');
   const deviceNameEl = document.getElementById('midiModalDeviceName');
+  const clearReceivedBtn = document.getElementById('midiModalClearReceived');
 
   if (!modal || !trigger) return;
 
@@ -1119,6 +1167,14 @@ function initMidiModal() {
   modal.addEventListener('click', function (e) {
     if (e.target === modal) closeMidiModal();
   });
+  if (clearReceivedBtn) {
+    clearReceivedBtn.addEventListener('click', function () {
+      receivedMidiMessages = [];
+      renderReceivedMidiMessages();
+    });
+  }
+  syncMidiInputListeners();
+  renderReceivedMidiMessages();
 
   const autoSendCheckbox = document.getElementById('midiModalAutoSend');
 

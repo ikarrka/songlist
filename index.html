@@ -120,8 +120,10 @@
 <div id="midi-modal" class="midi-modal" aria-hidden="true">
     <div class="midi-modal-content">
         <button type="button" class="midi-modal-close" id="midiModalClose" aria-label="Закрыть">×</button>
-        <h3>Отправить MIDI на устройство</h3>
-        <p class="midi-modal-device" id="midiModalDeviceName"></p>
+        <div class="midi-modal-title-row">
+            <span>Отправить MIDI на устройство</span>
+            <p class="midi-modal-device" id="midiModalDeviceName"></p>
+        </div>
         <div class="midi-modal-form">
             <label>
                 Канал (1–16):
@@ -169,18 +171,24 @@
                 </div>
             </label>
         </div>
-        <div class="midi-modal-actions">
+        <div class="midi-modal-actions midi-modal-patch-actions">
             <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
-        </div>
-        <div class="midi-modal-actions midi-modal-auto-send">
-            <label><input type="checkbox" id="midiModalAutoSend"> Автоматически отправлять при изменении</label>
+            <label><input type="checkbox" id="midiModalAutoSend"> Автоматическая отправка</label>
         </div>
         <hr class="midi-modal-divider">
         <h4 class="midi-modal-subtitle">SysEx</h4>
         <p class="midi-modal-hint">Байты в HEX через пробел или запятую (F0 и F7 подставятся автоматически при необходимости).</p>
-        <textarea id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="41 10 00 00 00 5B 12 ..."></textarea>
+        <input id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="41 10 00 00 00 5B 12 ..."></input>
         <div class="midi-modal-actions">
             <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+        </div>
+        <div class="midi-modal-receiver">
+            <div class="midi-modal-receiver-heading">
+                <span class="midi-modal-subtitle">Входящие MIDI</span>
+                <span class="midi-modal-hint" id="midiModalInputStatus">Ожидание MIDI-входа…</span>
+                <button type="button" id="midiModalClearReceived" class="midi-modal-clear">Очистить</button>
+            </div>
+            <pre id="midiModalReceived" class="midi-modal-received" aria-live="polite">Сообщений пока нет.</pre>
         </div>
     </div>
 </div>
@@ -194,7 +202,11 @@
             <input type="number" id="setlist-block">
         </label>
         <label>Номер песни:
-                    <input type="number" id="setlist-song" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
+            <div class="setlist-number-control">
+                <button type="button" class="setlist-number-decrement" aria-label="Уменьшить номер песни">−</button>
+                <input type="number" id="setlist-song" min="0" max="127" value="0" inputmode="numeric" pattern="[0-9]*">
+                <button type="button" class="setlist-number-increment" aria-label="Увеличить номер песни">+</button>
+            </div>
         </label>
         <button class="setlist-save" id="setlist-save">Сохранить</button>
         <button type="button" class="setlist-autofill" id="setlist-autofill-next" title="Последний блок и следующий номер песни" aria-label="Подставить последний блок и следующий номер песни">🪄</button>

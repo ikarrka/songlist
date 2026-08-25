@@ -993,12 +993,15 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 }
 
 .setlist-modal label {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-top: 10px;
 }
 
 .setlist-modal input[type="number"] {
-  width: 100%;
+  width: var(--setlist-control-width, 190px);
   box-sizing: border-box;
   padding: 4px;
 }
@@ -1057,20 +1060,31 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   color: var(--surface-text);
   padding: 20px 24px;
   border-radius: 8px;
-  width: 320px;
+  width: 400px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   position: relative;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .midi-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 0.5em;
+  margin: 0;
+  font-size: 1.1em;
+}
+
+.midi-modal-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 24px;
 }
 
 .midi-modal-device {
   font-size: 0.9em;
   opacity: 0.9;
-  margin-bottom: 1em;
+  margin: 0;
+  text-align: right;
 }
 
 .midi-modal-close {
@@ -1089,7 +1103,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 1em;
+  margin-bottom: 0;
 }
 
 .midi-modal-form label {
@@ -1111,13 +1125,15 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   padding: 4px 8px;
 }
 
-.midi-number-control {
+.midi-number-control,
+.setlist-number-control {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.midi-number-control button {
+.midi-number-control button,
+.setlist-number-control button {
   width: 32px;
   height: 32px;
   border: 1px solid var(--border-color, #555);
@@ -1128,9 +1144,23 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   cursor: pointer;
 }
 
-.midi-number-control input[type="number"] {
+.midi-number-control input[type="number"],
+.setlist-number-control input[type="number"] {
   width: 72px;
   text-align: center;
+}
+
+/* Поле номера песни должно занимать ту же строку, что и поле номера блока. */
+.setlist-number-control {
+  display: flex;
+  width: var(--setlist-control-width, 190px);
+  flex: 0 0 var(--setlist-control-width, 190px);
+  box-sizing: border-box;
+}
+
+.setlist-modal .setlist-number-control input[type="number"] {
+  flex: 1;
+  width: auto;
 }
 
 .midi-modal-send {
@@ -1147,21 +1177,63 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   background: var(--setlist-btn-hover);
 }
 
+.midi-modal-patch-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.midi-modal-patch-actions label {
+  font-size: 0.85em;
+}
+
 .midi-modal-divider {
-  margin: 1em 0;
+  margin: 0.2em 0;
   border: none;
   border-top: 1px solid var(--button-border);
 }
 
 .midi-modal-subtitle {
-  margin: 0 0 0.25em 0;
+  margin: 0 0 0.1em 0;
   font-size: 1em;
 }
 
 .midi-modal-hint {
   font-size: 0.85em;
   opacity: 0.9;
-  margin-bottom: 0.5em;
+  margin: 0.1em 0;
+}
+
+.midi-modal-receiver {
+  margin-top: 5px;
+}
+
+.midi-modal-receiver-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.midi-modal-clear {
+  padding: 2px 8px;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--surface-text);
+  cursor: pointer;
+}
+
+.midi-modal-received {
+  height: 90px;
+  box-sizing: border-box;
+  overflow: auto;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: var(--surface-bg, #222);
+  font: 12px/1.4 monospace;
+  white-space: pre-wrap;
 }
 
 .midi-modal-sysex {

@@ -178,7 +178,18 @@ function reorderSongList(band) {
         container.appendChild(hr);
     }
 
-    unnumbered.forEach(item => container.appendChild(item));
+    // После удаления блока элементы уже могут быть переставлены в DOM.
+    // Возвращаем песни без блока в их исходный порядок внутри группы.
+    const defaultOrder = new Map(
+        (originalOrder[band] || []).map((hash, index) => [hash, index])
+    );
+    unnumbered
+        .sort((a, b) => {
+            const aIndex = defaultOrder.get(a.getAttribute('hash')) ?? Number.MAX_SAFE_INTEGER;
+            const bIndex = defaultOrder.get(b.getAttribute('hash')) ?? Number.MAX_SAFE_INTEGER;
+            return aIndex - bIndex;
+        })
+        .forEach(item => container.appendChild(item));
     //ArtistSongToClipboard();
     //ArtistSongToConsoleArray();
     ArtistSongToConsoleRows();

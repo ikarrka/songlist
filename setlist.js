@@ -222,6 +222,19 @@ async function initSetlist() {
     const saveEl = document.getElementById('setlist-save');
     if (saveEl) saveEl.onclick = setlistSaveCurrent;
 
+    const songNumberInput = document.getElementById('setlist-song');
+    function changeSongNumber(step) {
+        if (!songNumberInput) return;
+        const min = Number(songNumberInput.min || 0);
+        const max = Number(songNumberInput.max || 127);
+        const current = Number.parseInt(songNumberInput.value, 10);
+        const next = (Number.isNaN(current) ? min : current) + step;
+        songNumberInput.value = Math.max(min, Math.min(max, next));
+    }
+
+    document.querySelector('.setlist-number-decrement')?.addEventListener('click', () => changeSongNumber(-1));
+    document.querySelector('.setlist-number-increment')?.addEventListener('click', () => changeSongNumber(1));
+
     async function setlistSaveCurrent() {
         if (currentHash == null || currentHash === '') {
             alert('Внутренняя ошибка: не выбрана песня.');
