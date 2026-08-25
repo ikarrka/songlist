@@ -212,7 +212,7 @@ function setlistUpdateHeaderActions() {
 
 
 // --- инициализация ---
-window.addEventListener('DOMContentLoaded', async () => {
+async function initSetlist() {
     const closeEl = document.getElementById('setlist-close');
     if (closeEl) closeEl.onclick = setlistClose;
     window.addEventListener('click', e => {
@@ -324,7 +324,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     await setlistLoadData();
     setlistApplyData();
     cacheOriginalOrder();
-});
+}
 
 async function deleteBlockSongs(band, block) {
     if (confirm(`Удалить блок ${block} из ${band}  ? Восстановить будет невозможно!`)) {

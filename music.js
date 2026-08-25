@@ -28,7 +28,7 @@ const sectionMap = {
 const TransposeButtonDownSymbol = "⬇";
 const TransposeButtonUpSymbol = "⬆";
 
-document.addEventListener("DOMContentLoaded", function () {
+function initMusic() {
     window.addEventListener('beforeunload', function (e) {
         if (isRunningInWebView() || isChromeOnWindows()) {
             return;
@@ -76,7 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
         }
-});
+    initMusicHeaderActions();
+}
 
 function reorderSongList(band) {
     document.querySelectorAll('.reordered').forEach(el => el.remove());
@@ -1597,12 +1598,12 @@ function addEmptySetlistAttribute() {
 }
 
 // --- NEXT button / announcer functionality -------------------------------
-document.addEventListener('DOMContentLoaded', () => {
+function initMusicHeaderActions() {
     transformAccordionHeaders();
     restoreSetListHelper();
     bindNextButtonEvents();
     restoreNextFromStorage();
-});
+}
 
 function setListHelperIsActive() {
     return localStorage.getItem('setListHelper') === 'true';

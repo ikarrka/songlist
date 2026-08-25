@@ -90,8 +90,6 @@ if (navigator.requestMIDIAccess) {
   syncVoiceMidiState();
 }
 
-document.addEventListener('DOMContentLoaded', syncVoiceMidiState);
-
 function fillSelect(selectElem, outputs) {
   if (selectElem === null) {
     console.log('Object from argument selectElem not found');
@@ -858,9 +856,8 @@ function initVoiceMidiHandlers() {
   document.addEventListener("click", handleVoiceMidiClick);
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initVoiceMidiHandlers);
-} else {
+function initMidi() {
+  syncVoiceMidiState();
   initVoiceMidiHandlers();
 }
 
