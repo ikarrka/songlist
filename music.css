@@ -1011,6 +1011,10 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 .setlist-clear {
   margin-top: 12px;
   padding: 6px 10px;
+  height: 28px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 16px;
   background: var(--setlist-btn-bg);
   color: white;
   border: none;
@@ -1020,9 +1024,6 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .setlist-autofill {
   margin-left: 8px;
-  font-size: 1.15em;
-  line-height: 1;
-  padding: 6px 12px;
 }
 
 .setlist-clear {
@@ -1224,7 +1225,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 }
 
 .midi-modal-received {
-  height: 90px;
+  height: 124px;
   box-sizing: border-box;
   overflow: auto;
   margin: 0;
@@ -1236,14 +1237,20 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   white-space: pre-wrap;
 }
 
+.midi-modal-sysex-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .midi-modal-sysex {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   box-sizing: border-box;
   padding: 8px;
   font-family: monospace;
   font-size: 0.9em;
   resize: vertical;
-  margin-bottom: 0.5em;
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--button-bg);

@@ -178,9 +178,9 @@
         <hr class="midi-modal-divider">
         <h4 class="midi-modal-subtitle">SysEx</h4>
         <p class="midi-modal-hint">Байты в HEX через пробел или запятую (F0 и F7 подставятся автоматически при необходимости).</p>
-        <input id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="41 10 00 00 00 5B 12 ..."></input>
-        <div class="midi-modal-actions">
-            <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+        <div class="midi-modal-sysex-row">
+          <input id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="F0 41 10 00 00 00 5B 12 01 F7"></input>
+          <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
         </div>
         <div class="midi-modal-receiver">
             <div class="midi-modal-receiver-heading">
@@ -209,7 +209,7 @@
             </div>
         </label>
         <button class="setlist-save" id="setlist-save">Сохранить</button>
-        <button type="button" class="setlist-autofill" id="setlist-autofill-next" title="Последний блок и следующий номер песни" aria-label="Подставить последний блок и следующий номер песни">🪄</button>
+        <button type="button" class="setlist-autofill" id="setlist-autofill-next" title="Последний блок и следующий номер песни" aria-label="Подставить последний блок и следующий номер песни">↪</button>
         <button class="setlist-clear" id="setlist-clear">Очистить</button>
     </div>
 </div>
