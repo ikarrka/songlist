@@ -1213,15 +1213,36 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
-.midi-modal-clear {
+.midi-modal-receiver-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.midi-modal-clear,
+.midi-modal-copy {
   padding: 2px 8px;
+  min-width: 28px;
+  height: 24px;
+  box-sizing: border-box;
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: transparent;
   color: var(--surface-text);
   cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.midi-modal-copy {
+  font-size: 15px;
 }
 
 .midi-modal-received {

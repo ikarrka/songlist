@@ -186,7 +186,10 @@
             <div class="midi-modal-receiver-heading">
                 <span class="midi-modal-subtitle">Входящие MIDI</span>
                 <span class="midi-modal-hint" id="midiModalInputStatus">Ожидание MIDI-входа…</span>
-                <button type="button" id="midiModalClearReceived" class="midi-modal-clear">Очистить</button>
+                <div class="midi-modal-receiver-actions">
+                    <button type="button" id="midiModalCopyReceived" class="midi-modal-copy" title="Копировать в буфер обмена">⎘</button>
+                    <button type="button" id="midiModalClearReceived" class="midi-modal-clear">Очистить</button>
+                </div>
             </div>
             <pre id="midiModalReceived" class="midi-modal-received" aria-live="polite">Сообщений пока нет.</pre>
         </div>

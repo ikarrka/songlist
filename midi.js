@@ -1,4 +1,4 @@
-﻿let midiAccess = null;
+let midiAccess = null;
 let outputs = [];
 let midiInputs = [];
 let receivedMidiMessages = [];
@@ -1144,6 +1144,8 @@ function initMidiModal() {
   const sendBtn = document.getElementById('midiModalSend');
   const deviceNameEl = document.getElementById('midiModalDeviceName');
   const clearReceivedBtn = document.getElementById('midiModalClearReceived');
+  const copyReceivedBtn = document.getElementById('midiModalCopyReceived');
+  const receivedPre = document.getElementById('midiModalReceived');
 
   if (!modal || !trigger) return;
 
@@ -1172,6 +1174,33 @@ function initMidiModal() {
       receivedMidiMessages = [];
       renderReceivedMidiMessages();
     });
+  }
+  if (copyReceivedBtn && receivedPre) {
+    copyReceivedBtn.addEventListener('click', function () {
+      const text = receivedPre.textContent || '';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function () {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+      const original = copyReceivedBtn.textContent;
+      copyReceivedBtn.textContent = '✓';
+      setTimeout(function () { copyReceivedBtn.textContent = original; }, 900);
+    });
+  }
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e) {}
   }
   syncMidiInputListeners();
   renderReceivedMidiMessages();
