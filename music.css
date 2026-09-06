@@ -233,7 +233,8 @@ yt {
 
 .accordion .toggle-button > mp3,
 .accordion .toggle-button > yt,
-.accordion .toggle-button > chord {
+.accordion .toggle-button > chord,
+.accordion .toggle-button > playback {
   display: none;
 }
 
@@ -616,6 +617,16 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.tool-btn.playback-link {
+  width: auto;
+  min-width: 72px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .sl-btn {

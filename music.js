@@ -569,6 +569,7 @@ function replaceCustomTags(song) {
     const configs1 = [
         { selector: 'yt, YT', text: '►' },
         { selector: 'mp3', text: '♪' },
+        { selector: 'playback', text: 'Playback' },
         { selector: 'chord', text: chordSign }
     ];
     configs1.forEach(({ selector, text }) => {
@@ -811,19 +812,28 @@ function addButtons(song) {
         { txt: "🔍", class: "google-search-btn", action: song => openGoogleSearch(song) },
         { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn down"  },
         { txt: TransposeButtonUpSymbol, transpose: 1, class: "transpose-btn up"  },
+        { txt: "Playback", class: "playback-link", tag: "playback", action: openPlaybackPlayer, last: true },
     ];
 
     buttons.forEach(cfg => {
         if (cfg.transpose && !table) return;
-        if (cfg.tag === 'mp3') {
+        if (cfg.tag === 'mp3' || cfg.tag === 'playback') {
             const rawValue = song
                 ?.querySelector(`button.toggle-button ${cfg.tag}`)
                 ?.textContent
                 ?.trim();
             if (!rawValue) return;
 
-            const fileName = normalizeMp3FileName(rawValue);
-            const filePath = `mp3/${fileName}.mp3`;
+            let fileName;
+            let filePath;
+            if (cfg.tag === 'mp3') {
+                fileName = normalizeMp3FileName(rawValue);
+                filePath = `mp3/${fileName}.mp3`;
+            } else {
+                fileName = normalizePlaybackFileName(rawValue);
+                filePath = `${window.prefixPlayback || 'playback/'}${fileName}.mp3`;
+            }
+
             const btn = document.createElement("button");
             btn.textContent = cfg.txt;
             btn.classList.add("tool-btn");
@@ -1354,6 +1364,33 @@ function normalizeMp3FileName(rawValue) {
     return rawValue.trim().replace(/\.mp3$/i, "");
 }
 
+function normalizePlaybackFileName(rawValue) {
+    if (!rawValue) return "";
+    return rawValue.trim().replace(/\.(mp3|wav|ogg|flac|aac|m4a)$/i, "");
+}
+
+function stopAllAudioPlayers(except) {
+    const ids = ['mp3Player', 'playbackPlayer'];
+    ids.forEach(id => {
+        if (except && id === except) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        try {
+            el.pause();
+            el.currentTime = 0;
+        } catch (e) {}
+    });
+    const panels = [
+        { id: 'mp3Panel', playerId: 'mp3Player' },
+        { id: 'playbackPanel', playerId: 'playbackPlayer' }
+    ];
+    panels.forEach(({ id, playerId }) => {
+        if (except && playerId === except) return;
+        const panel = document.getElementById(id);
+        if (panel) panel.classList.remove('is-open', 'minimized');
+    });
+}
+
 async function checkMp3FileExists(filePath) {
     return new Promise(resolve => {
         const audio = document.createElement('audio');
@@ -1424,6 +1461,8 @@ function openMp3Player(filename) {
         return;
     }
 
+    stopAllAudioPlayers('mp3Player');
+
     player.autoplay = true;
     player.src = `mp3/${resolvedFileName}.mp3`;
     player.currentTime = 0;
@@ -1456,6 +1495,56 @@ function bindMp3HandlersOnce() {
         });
 
     document.getElementById('minimizeMp3Modal')
+        ?.addEventListener('click', () => {
+            panel.classList.toggle('minimized');
+        });
+}
+
+function openPlaybackPlayer(filename) {
+    const resolvedFileName = normalizePlaybackFileName(filename);
+    if (!resolvedFileName) return;
+
+    const panel = document.getElementById('playbackPanel');
+    const player = document.getElementById('playbackPlayer');
+    if (!panel || !player) {
+        console.error('Playback panel or player not found');
+        return;
+    }
+
+    stopAllAudioPlayers('playbackPlayer');
+
+    player.autoplay = true;
+    player.src = `${window.prefixPlayback || 'playback/'}${resolvedFileName}.mp3`;
+    player.currentTime = 0;
+    player.load();
+    player.play().catch(error => {
+        console.warn('Playback autoplay blocked or failed:', error);
+    });
+
+    panel.classList.add('is-open');
+    panel.classList.remove('minimized');
+
+    bindPlaybackHandlersOnce();
+}
+
+function bindPlaybackHandlersOnce() {
+    if (window._playbackHandlerBound) return;
+    window._playbackHandlerBound = true;
+
+    const panel = document.getElementById('playbackPanel');
+    if (!panel) return;
+
+    const playbackPlayer = document.getElementById('playbackPlayer');
+    document.getElementById('closePlaybackModal')
+        ?.addEventListener('click', () => {
+            if (playbackPlayer) {
+                playbackPlayer.pause();
+                playbackPlayer.currentTime = 0;
+            }
+            panel.classList.remove('is-open', 'minimized');
+        });
+
+    document.getElementById('minimizePlaybackModal')
         ?.addEventListener('click', () => {
             panel.classList.toggle('minimized');
         });
@@ -1509,6 +1598,14 @@ function ArtistSongToConsoleRows() {
     return entries.map(({ artist, song, songKey, youtube }) => [artist, song, songKey, youtube]);
 }
 
+function isAccordionInSongBlock(acc) {
+    const blockValue = (acc.getAttribute('setlistblock') || '').trim();
+    const posValue = (acc.getAttribute('setlistposition') || '').trim();
+    const hasBlock = blockValue !== '' && parseInt(blockValue, 10) > 0;
+    const hasPosition = posValue !== '' && parseInt(posValue, 10) > 0;
+    return hasBlock || hasPosition;
+}
+
 function bindLetterSelectEvent() {
     document.addEventListener('change', (event) => {
         const target = event.target;
@@ -1528,6 +1625,8 @@ function bindLetterSelectEvent() {
         );
 
         for (const acc of accordions) {
+            if (isAccordionInSongBlock(acc)) continue;
+
             const artistSpan = acc.querySelector('span.artist');
             if (!artistSpan) continue;
 
@@ -1562,6 +1661,8 @@ function bindArtistSelectEvent() {
         );
 
         for (const acc of accordions) {
+            if (isAccordionInSongBlock(acc)) continue;
+
             const artistSpan = acc.querySelector('span.artist');
             if (!artistSpan) continue;
 

@@ -68,6 +68,7 @@
 
         window.prefix = '';
         window.prefixImage = 'images/';
+        window.prefixPlayback = 'playback/';
 
         document.write(`<script src="${prefix}music.js?v=${unique}"><\/script>`);
         document.write(`<script src="${prefix}midi.js?v=${unique}"><\/script>`);
@@ -113,6 +114,14 @@
     <button type="button" class="minimize-btn" id="minimizeMp3Modal" aria-label="Свернуть">_</button>
     <button type="button" class="close-btn" id="closeMp3Modal" aria-label="Закрыть">×</button>
     <audio id="mp3Player" controls style="width: 100%;"></audio>
+  </div>
+</div>
+
+<div id="playbackPanel" class="mp3-panel playback-panel" aria-label="Playback">
+  <div class="mp3-panel-inner">
+    <button type="button" class="minimize-btn" id="minimizePlaybackModal" aria-label="Свернуть">_</button>
+    <button type="button" class="close-btn" id="closePlaybackModal" aria-label="Закрыть">×</button>
+    <audio id="playbackPlayer" controls style="width: 100%;"></audio>
   </div>
 </div>
 
