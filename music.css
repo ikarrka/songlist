@@ -619,14 +619,27 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   cursor: pointer;
 }
 
+.tool-btn.mp3-link,
 .tool-btn.playback-link {
   width: auto;
   min-width: 72px;
+  height: 34px;
   padding: 0 10px;
+  font-family: Arial, sans-serif;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
   letter-spacing: 0.2px;
   white-space: nowrap;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-btn.playback-link {
+  width: auto;
+  min-width: 72px;
 }
 
 .sl-btn {
@@ -1114,7 +1127,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 .midi-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 0;
 }
 
@@ -1146,19 +1159,27 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .midi-number-control button,
 .setlist-number-control button {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  box-sizing: border-box;
   border: 1px solid var(--border-color, #555);
   background: var(--surface-bg, #222);
   color: var(--surface-text, #fff);
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
 }
 
 .midi-number-control input[type="number"],
 .setlist-number-control input[type="number"] {
   width: 72px;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 4px 8px;
   text-align: center;
 }
 
@@ -1193,10 +1214,15 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
 .midi-modal-patch-actions label {
   font-size: 0.85em;
+}
+
+.midi-modal-patch-actions .midi-modal-send {
+  margin-left: auto;
 }
 
 .midi-modal-divider {
@@ -1271,22 +1297,67 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .midi-modal-sysex-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
 }
 
-.midi-modal-sysex {
+.midi-modal-sysex-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.midi-modal-sysex-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.midi-modal-paste,
+.midi-modal-clear-sysex {
+  align-self: stretch;
+  min-width: 84px;
+  height: 34px;
+  padding: 4px 10px;
   box-sizing: border-box;
-  padding: 8px;
-  font-family: monospace;
-  font-size: 0.9em;
-  resize: vertical;
   border: 1px solid var(--button-border);
   border-radius: 4px;
   background: var(--button-bg);
   color: var(--fontcolor);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+#midiModalSendSysex {
+  margin-left: auto;
+  min-width: 150px;
+}
+
+.midi-modal-sysex {
+  width: 100%;
+  min-width: 0;
+  height: 120px;
+  box-sizing: border-box;
+  padding: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  resize: vertical;
+  border: 1px solid var(--button-border);
+  border-radius: 4px;
+  background: var(--surface-bg, #222);
+  color: var(--surface-text, #fff);
+  white-space: pre-wrap;
+  overflow: auto;
+  outline: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1362,14 +1433,18 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   margin-right: 8px;
   color: var(--tool-btn-color);
   background: transparent;
-  width: 46px;
-  min-width: 46px;
-  height: 46px;
+  width: auto;
+  min-width: 72px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-size: 29px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.2px;
   background-image: none;
 }
 

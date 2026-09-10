@@ -985,27 +985,29 @@ function insertMidiManualAccordion(targetSelector) {
 
 function sendSysEx(dataArray, description = "") {
   if (!selectedMidiOutput()) {
-    return;
+    return false;
   }
 
   if (!Array.isArray(dataArray) || dataArray.length < 3) {
-    console.error("Invalid SysEx data");
-    return;
+    return false;
   }
 
+  const packet = dataArray.slice();
+
   // Проверим, что сообщение имеет начало и конец SysEx
-  if (dataArray[0] !== 0xF0) dataArray.unshift(0xF0);
-  if (dataArray[dataArray.length - 1] !== 0xF7) dataArray.push(0xF7);
+  if (packet[0] !== 0xF0) packet.unshift(0xF0);
+  if (packet[packet.length - 1] !== 0xF7) packet.push(0xF7);
 
   try {
-    midiOutput.send(dataArray);
-    const hexString = dataArray.map(x => x.toString(16).padStart(2, "0").toUpperCase()).join(" ");
+    midiOutput.send(packet);
+    const hexString = packet.map(x => x.toString(16).padStart(2, "0").toUpperCase()).join(" ");
     const log = `[${new Date().toLocaleTimeString()}] SysEx sent${description ? " (" + description + ")" : ""} → ${hexString}`;
     console.log(log);
     const logElem = document.getElementById("log");
     if (logElem) logElem.innerHTML = log;
+    return true;
   } catch (e) {
-    console.error("Failed to send SysEx:", e);
+    return false;
   }
 }
 
@@ -1137,6 +1139,65 @@ function setupMidiModalNumberControls(onChange) {
   });
 }
 
+function parseSysexHexLine(line) {
+  const tokens = String(line || '')
+    .replace(/,/g, ' ')
+    .replace(/\t/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (tokens.length < 3) {
+    return null;
+  }
+
+  const bytes = [];
+  for (const token of tokens) {
+    const clean = token.replace(/^0x/i, '').replace(/^0X/i, '').toUpperCase();
+    if (!/^[0-9A-F]{2}$/.test(clean)) {
+      return null;
+    }
+    bytes.push(parseInt(clean, 16));
+  }
+
+  // Структура каждой SyEx-строки: F0 должен стоять только в начале,
+  // F7 должен стоять только в конце, а в середине их не бывает.
+  const first = bytes[0];
+  const last = bytes[bytes.length - 1];
+  const hasStart = first === 0xF0;
+  const hasEnd = last === 0xF7;
+
+  if (bytes.includes(0xF0) && !hasStart) return null;
+  if (bytes.includes(0xF7) && !hasEnd) return null;
+  if (bytes.slice(1, -1).includes(0xF0)) return null;
+  if (bytes.slice(0, -1).includes(0xF7)) return null;
+
+  // Допустимы строки как с F0/F7 в явном виде, так и без них.
+  // У нас отправщик сам их добавит, если нет.
+  return bytes;
+}
+
+function parseSysexLines(text) {
+  const valid = [];
+  const invalid = [];
+
+  const lines = String(text || '').split(/\r?\n/);
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    const bytes = parseSysexHexLine(trimmed);
+    if (!bytes) {
+      invalid.push({ line: trimmed, lineNo: index + 1 });
+      return;
+    }
+
+    valid.push({ line: trimmed, bytes });
+  });
+
+  return { valid, invalid };
+}
+
 function initMidiModal() {
   const modal = document.getElementById('midi-modal');
   const trigger = document.getElementById('midiModalBtn');
@@ -1244,22 +1305,60 @@ function initMidiModal() {
 
   const sysexInput = document.getElementById('midiModalSysex');
   const sendSysexBtn = document.getElementById('midiModalSendSysex');
+  const pasteSysexBtn = document.getElementById('midiModalPasteSysex');
+  const clearSysexBtn = document.getElementById('midiModalClearSysex');
+
+  if (clearSysexBtn && sysexInput) {
+    clearSysexBtn.addEventListener('click', function () {
+      sysexInput.value = '';
+      sysexInput.focus();
+    });
+  }
+
+  if (pasteSysexBtn && sysexInput) {
+    pasteSysexBtn.addEventListener('click', async function () {
+      try {
+        let text = '';
+        if (navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+          text = await navigator.clipboard.readText();
+        } else {
+          text = '';
+        }
+
+        if (!text.trim()) {
+          return;
+        }
+
+        sysexInput.value = text.trim();
+      } catch (e) {
+      }
+    });
+  }
+
   if (sendSysexBtn && sysexInput) {
     sendSysexBtn.addEventListener('click', function () {
       if (!selectedMidiOutput()) return;
-      const raw = sysexInput.value.trim().replace(/,/g, ' ').split(/\s+/).filter(Boolean);
-      const dataArray = [];
-      for (let i = 0; i < raw.length; i++) {
-        const s = raw[i].replace(/^0x/i, '');
-        const n = parseInt(s, 16);
-        if (isNaN(n) || n < 0 || n > 255) continue;
-        dataArray.push(n);
-      }
-      if (dataArray.length < 3) {
-        console.warn('SysEx: нужно минимум 3 байта');
+
+      const parsed = parseSysexLines(sysexInput.value);
+      if (parsed.valid.length === 0) {
+        alert('Не выполнились строки Sysex:\n' + parsed.invalid.map(item => item.line).join('\n'));
         return;
       }
-      sendSysEx(dataArray.slice(), 'Modal');
+
+      const failedLines = [];
+      parsed.valid.forEach((entry, idx) => {
+        const ok = sendSysEx(entry.bytes.slice(), `Modal line ${idx + 1}`);
+        if (!ok) {
+          failedLines.push(entry.line);
+        }
+      });
+
+      if (parsed.invalid.length > 0) {
+        const list = parsed.invalid.map(item => item.line).join('\n');
+        alert('Не выполнились строки Sysex:\n' + list);
+      } else if (failedLines.length > 0) {
+        alert('Не выполнились строки Sysex:\n' + failedLines.join('\n'));
+      }
     });
   }
 }

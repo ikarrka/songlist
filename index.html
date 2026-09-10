@@ -181,15 +181,20 @@
             </label>
         </div>
         <div class="midi-modal-actions midi-modal-patch-actions">
-            <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
             <label><input type="checkbox" id="midiModalAutoSend"> Автоматическая отправка</label>
+            <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
         </div>
         <hr class="midi-modal-divider">
-        <h4 class="midi-modal-subtitle">SysEx</h4>
-        <p class="midi-modal-hint">Байты в HEX через пробел или запятую (F0 и F7 подставятся автоматически при необходимости).</p>
+        <p class="midi-modal-hint"><strong>SysEx</strong>&nbsp;Байты в HEX через пробел или запятую. Один SysEx — одна строка. F0/F7 подставятся автоматически при необходимости.</p>
         <div class="midi-modal-sysex-row">
-          <input id="midiModalSysex" class="midi-modal-sysex" rows="3" placeholder="F0 41 10 00 00 00 5B 12 01 F7"></input>
-          <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+          <div class="midi-modal-sysex-stack">
+            <div class="midi-modal-sysex-controls">
+              <button type="button" id="midiModalPasteSysex" class="midi-modal-paste">Вставить</button>
+              <button type="button" id="midiModalClearSysex" class="midi-modal-clear midi-modal-clear-sysex">Очистить</button>
+              <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+            </div>
+            <textarea id="midiModalSysex" class="midi-modal-sysex" rows="4" spellcheck="false" placeholder="F0 41 10 00 00 00 5B 12 01 F7"></textarea>
+          </div>
         </div>
         <div class="midi-modal-receiver">
             <div class="midi-modal-receiver-heading">

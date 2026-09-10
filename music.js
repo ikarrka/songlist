@@ -197,8 +197,6 @@ function reorderSongList(band) {
 }
 
 function fillSongHeader(band) {
-    if (band.headerHandled == 1) return;
-    band.headerHandled = 1;
     const items = band.querySelectorAll('.accordion');
 
     const config = {
@@ -233,6 +231,7 @@ function fillSongHeader(band) {
             .map(c => 'span.' + c.className)
             .join(',');
         button.querySelectorAll(selector).forEach(el => el.remove());
+        button.querySelectorAll('span.midi-controls').forEach(el => el.remove());
     }
 
     // 🧩 2️⃣ Создаём пустые <span> по конфигурации
@@ -806,7 +805,7 @@ function addButtons(song) {
 
     const buttons = [
         { txt: "⛭", class: "setlist-btn" },
-        { txt: "♫", class: "mp3-link", tag: "mp3", action: openMp3Player },
+        { txt: "mp3", class: "mp3-link", tag: "mp3", action: openMp3Player },
         { txt: "►", class: "youtube-link", tag: "yt", action: openYoutubeFrame },
         { txt: "☰", tag: "chord", action: link => window.open(link, "_blank") },
         { txt: "🔍", class: "google-search-btn", action: song => openGoogleSearch(song) },
@@ -1065,6 +1064,12 @@ async function buildAllBandsList() {
     const seen = new Set();
     const allAccordions = [];
 
+    function cloneAccordionForAllBands(acc) {
+        const clone = acc.cloneNode(true);
+        clone.querySelectorAll('chord, yt, mp3, playback').forEach(tag => tag.remove());
+        return clone;
+    }
+
     // Собираем все аккордеоны из всех групп
     document.querySelectorAll('.songlist[band]').forEach(container => {
         if (container.getAttribute('band') === 'allbands') return;
@@ -1076,7 +1081,7 @@ async function buildAllBandsList() {
 
             if (!seen.has(uniqueKey)) {
                 seen.add(uniqueKey);
-                allAccordions.push(acc.cloneNode(true));
+                allAccordions.push(cloneAccordionForAllBands(acc));
             }
         });
     });
@@ -1095,6 +1100,8 @@ async function buildAllBandsList() {
     // Добавляем в контейнер
     allAccordions.forEach(acc => allContainer.appendChild(acc));
     transformAccordionHeaders();
+    fillSongHeader(allContainer);
+
     // ✅ Формируем CSV уже ПОСЛЕ сортировки
     const csvRows = [["Artist", "Song"]];
     allAccordions.forEach(acc => {
