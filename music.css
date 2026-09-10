@@ -920,7 +920,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   pointer-events: auto;
   margin: 0 auto;
   box-sizing: border-box;
-  width: min(1200px, 100%);
+  width: min(1200px, 80vw);
   height: 80px;
   background: #000;
   border-radius: 8px 8px 0 0;
