@@ -942,12 +942,6 @@ function copyAccordionContentByHash() {
 }
 
 
-function isTabletOrMobileLayout() {
-    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    const width = Math.min(window.innerWidth || document.documentElement.clientWidth || screen.width, screen.width || window.innerWidth || document.documentElement.clientWidth);
-    return coarse || width <= 1024;
-}
-
 function bindAccordionClickEvent() {
     document.addEventListener("click", function (e) {
 
@@ -987,14 +981,12 @@ function bindAccordionClickEvent() {
             initTransposeForAccordion(accordion);
         }
 
-        if (!isTabletOrMobileLayout()) {
-            const yOffset = 0;
+        const yOffset = 0;
 
-            setTimeout(() => {
-                const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-            }, 200);
-        }
+        setTimeout(() => {
+            const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }, 200);
 
         if (accordion.id === 'checkList') {
             document.querySelectorAll('input.checkmark').forEach(el => el.checked = false);
@@ -1518,6 +1510,12 @@ function openPlaybackPlayer(filename) {
         console.error('Playback panel or player not found');
         return;
     }
+
+    panel.style.position = 'fixed';
+    panel.style.left = '0';
+    panel.style.right = '0';
+    panel.style.top = 'auto';
+    panel.style.bottom = 'env(safe-area-inset-bottom, 0)';
 
     stopAllAudioPlayers('playbackPlayer');
 
