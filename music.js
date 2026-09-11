@@ -981,12 +981,15 @@ function bindAccordionClickEvent() {
             initTransposeForAccordion(accordion);
         }
 
-        const yOffset = 0;
-
+        // Плавно выравниваем именно верхнюю точку аккордеона к верхней границе окна.
         setTimeout(() => {
-            const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }, 200);
+            try {
+                button.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'smooth' });
+            } catch (error) {
+                const y = button.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+            }
+        }, 180);
 
         if (accordion.id === 'checkList') {
             document.querySelectorAll('input.checkmark').forEach(el => el.checked = false);
@@ -1510,12 +1513,6 @@ function openPlaybackPlayer(filename) {
         console.error('Playback panel or player not found');
         return;
     }
-
-    panel.style.position = 'fixed';
-    panel.style.left = '0';
-    panel.style.right = '0';
-    panel.style.top = 'auto';
-    panel.style.bottom = 'env(safe-area-inset-bottom, 0)';
 
     stopAllAudioPlayers('playbackPlayer');
 
