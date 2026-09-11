@@ -841,13 +841,18 @@ function addButtons(song) {
             }
             btn.style.display = 'none';
             wrapper.appendChild(btn);
-            checkMp3FileExists(filePath).then(exists => {
-                if (!exists) {
+
+            const clickHandler = () => cfg.action(fileName);
+            btn.addEventListener("click", clickHandler);
+
+            checkMp3FileExists(filePath).then(result => {
+                if (result === false) {
                     btn.remove();
                     return;
                 }
-                btn.style.display = '';
-                btn.addEventListener("click", () => cfg.action(fileName));
+                if (result === true || result === undefined) {
+                    btn.style.display = '';
+                }
             });
             return;
         }
@@ -937,6 +942,12 @@ function copyAccordionContentByHash() {
 }
 
 
+function isTabletOrMobileLayout() {
+    const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const width = Math.min(window.innerWidth || document.documentElement.clientWidth || screen.width, screen.width || window.innerWidth || document.documentElement.clientWidth);
+    return coarse || width <= 1024;
+}
+
 function bindAccordionClickEvent() {
     document.addEventListener("click", function (e) {
 
@@ -976,12 +987,14 @@ function bindAccordionClickEvent() {
             initTransposeForAccordion(accordion);
         }
 
-        const yOffset = 0;
+        if (!isTabletOrMobileLayout()) {
+            const yOffset = 0;
 
-        setTimeout(() => {
-            const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }, 200);
+            setTimeout(() => {
+                const y = button.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }, 200);
+        }
 
         if (accordion.id === 'checkList') {
             document.querySelectorAll('input.checkmark').forEach(el => el.checked = false);
@@ -1399,46 +1412,34 @@ function stopAllAudioPlayers(except) {
 }
 
 async function checkMp3FileExists(filePath) {
-    return new Promise(resolve => {
-        const audio = document.createElement('audio');
-        let settled = false;
+    const url = encodeURI(filePath);
+    const cache = window.__songlistFileExistsCache || (window.__songlistFileExistsCache = new Map());
+    if (cache.has(url)) {
+        return cache.get(url);
+    }
 
-        const cleanup = () => {
-            if (settled) return;
-            settled = true;
-            audio.src = '';
-            audio.removeAttribute('src');
-        };
+    try {
+        const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+        if (head.ok) {
+            cache.set(url, true);
+            return true;
+        }
+    } catch (error) {
+        // HEAD can be unsupported by some lightweight servers.
+    }
 
-        const ok = () => {
-            if (settled) return;
-            settled = true;
-            cleanup();
-            resolve(true);
-        };
-
-        const fail = () => {
-            if (settled) return;
-            settled = true;
-            cleanup();
-            resolve(false);
-        };
-
-        audio.preload = 'metadata';
-        audio.addEventListener('loadedmetadata', ok);
-        audio.addEventListener('canplaythrough', ok);
-        audio.addEventListener('error', fail);
-        audio.addEventListener('abort', fail);
-
-        audio.src = filePath;
-
-        setTimeout(() => {
-            if (!settled) {
-                cleanup();
-                resolve(false);
-            }
-        }, 3000);
-    });
+    try {
+        const get = await fetch(url, { method: 'GET', cache: 'no-store' });
+        if (get.ok) {
+            cache.set(url, true);
+            return true;
+        }
+        cache.set(url, false);
+        return false;
+    } catch (error) {
+        cache.set(url, undefined);
+        return undefined;
+    }
 }
 
 function openGoogleSearch(song) {

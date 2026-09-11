@@ -15,6 +15,7 @@ const mimeTypes = {
 };
 
 http.createServer((request, response) => {
+    const method = (request.method || 'GET').toUpperCase();
     const pathname = decodeURIComponent(new URL(request.url, 'http://127.0.0.1').pathname);
     const requestedPath = pathname === '/' ? '/index.html' : pathname;
     const filePath = path.resolve(root, `.${requestedPath}`);
@@ -26,6 +27,25 @@ http.createServer((request, response) => {
         return;
     }
 
+    const contentType = mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+
+    if (method === 'HEAD') {
+        fs.stat(filePath, (statError, stats) => {
+            if (statError) {
+                response.writeHead(statError.code === 'ENOENT' ? 404 : 500);
+                response.end(statError.code === 'ENOENT' ? 'Not found' : 'Server error');
+                return;
+            }
+
+            response.writeHead(200, {
+                'Content-Type': contentType,
+                'Content-Length': stats.size,
+            });
+            response.end();
+        });
+        return;
+    }
+
     fs.readFile(filePath, (error, content) => {
         if (error) {
             response.writeHead(error.code === 'ENOENT' ? 404 : 500);
@@ -34,7 +54,7 @@ http.createServer((request, response) => {
         }
 
         response.writeHead(200, {
-            'Content-Type': mimeTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+            'Content-Type': contentType,
         });
         response.end(content);
     });

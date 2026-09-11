@@ -905,7 +905,8 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  top: auto;
+  bottom: env(safe-area-inset-bottom, 0);
   z-index: 999;
   background: transparent;
   pointer-events: none;
