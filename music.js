@@ -981,13 +981,11 @@ function bindAccordionClickEvent() {
             initTransposeForAccordion(accordion);
         }
 
-        // Плавно выравниваем именно верхнюю точку аккордеона к верхней границе окна.
         setTimeout(() => {
             try {
                 button.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'smooth' });
             } catch (error) {
-                const y = button.getBoundingClientRect().top + window.pageYOffset;
-                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                button.scrollIntoView({ block: 'start', inline: 'nearest' });
             }
         }, 180);
 
@@ -1454,103 +1452,96 @@ function openGoogleSearch(song) {
 }
 
 function openMp3Player(filename) {
-    const resolvedFileName = normalizeMp3FileName(filename);
-    if (!resolvedFileName) return;
-
-    const panel = document.getElementById('mp3Panel');
-    const player = document.getElementById('mp3Player');
-    if (!panel || !player) {
-        console.error('MP3 panel or player not found');
-        return;
-    }
-
-    stopAllAudioPlayers('mp3Player');
-
-    player.autoplay = true;
-    player.src = `mp3/${resolvedFileName}.mp3`;
-    player.currentTime = 0;
-    player.load();
-    player.play().catch(error => {
-        console.warn('MP3 autoplay blocked or failed:', error);
-    });
-
-    panel.classList.add('is-open');
-    panel.classList.remove('minimized');
-
-    bindMp3HandlersOnce();
-}
-
-function bindMp3HandlersOnce() {
-    if (window._mp3HandlerBound) return;
-    window._mp3HandlerBound = true;
-
-    const panel = document.getElementById('mp3Panel');
-    if (!panel) return;
-
-    const mp3Player = document.getElementById('mp3Player');
-    document.getElementById('closeMp3Modal')
-        ?.addEventListener('click', () => {
-            if (mp3Player) {
-                mp3Player.pause();
-                mp3Player.currentTime = 0;
-            }
-            panel.classList.remove('is-open', 'minimized');
-        });
-
-    document.getElementById('minimizeMp3Modal')
-        ?.addEventListener('click', () => {
-            panel.classList.toggle('minimized');
-        });
+    openAudioPanel('mp3', filename);
 }
 
 function openPlaybackPlayer(filename) {
-    const resolvedFileName = normalizePlaybackFileName(filename);
+    openAudioPanel('playback', filename);
+}
+
+function openAudioPanel(type, filename) {
+    const files = {
+        mp3: {
+            panelId: 'mp3Panel',
+            playerId: 'mp3Player',
+            closeId: 'closeMp3Modal',
+            minimizeId: 'minimizeMp3Modal',
+            folder: 'mp3/',
+            normalize: normalizeMp3FileName,
+            stopExcept: 'mp3Player',
+            exitMessage: 'MP3 panel or player not found',
+        },
+        playback: {
+            panelId: 'playbackPanel',
+            playerId: 'playbackPlayer',
+            closeId: 'closePlaybackModal',
+            minimizeId: 'minimizePlaybackModal',
+            folder: `${window.prefixPlayback || 'playback/'}`,
+            normalize: normalizePlaybackFileName,
+            stopExcept: 'playbackPlayer',
+            exitMessage: 'Playback panel or player not found',
+        }
+    };
+
+    const cfg = files[type];
+    if (!cfg) return;
+
+    const resolvedFileName = cfg.normalize(filename);
     if (!resolvedFileName) return;
 
-    const panel = document.getElementById('playbackPanel');
-    const player = document.getElementById('playbackPlayer');
+    const panel = document.getElementById(cfg.panelId);
+    const player = document.getElementById(cfg.playerId);
     if (!panel || !player) {
-        console.error('Playback panel or player not found');
+        console.error(cfg.exitMessage);
         return;
     }
 
-    stopAllAudioPlayers('playbackPlayer');
+    stopAllAudioPlayers(cfg.stopExcept);
 
     player.autoplay = true;
-    player.src = `${window.prefixPlayback || 'playback/'}${resolvedFileName}.mp3`;
+    player.src = `${cfg.folder}${resolvedFileName}.mp3`;
     player.currentTime = 0;
     player.load();
     player.play().catch(error => {
-        console.warn('Playback autoplay blocked or failed:', error);
+        console.warn(`${type.toUpperCase()} autoplay blocked or failed:`, error);
     });
 
     panel.classList.add('is-open');
     panel.classList.remove('minimized');
 
-    bindPlaybackHandlersOnce();
+    bindAudioPanelHandlersOnce(cfg);
 }
 
-function bindPlaybackHandlersOnce() {
-    if (window._playbackHandlerBound) return;
-    window._playbackHandlerBound = true;
+function bindAudioPanelHandlersOnce(cfg) {
+    const panel = document.getElementById(cfg.panelId);
+    const player = document.getElementById(cfg.playerId);
+    if (!panel || !player) return;
 
-    const panel = document.getElementById('playbackPanel');
-    if (!panel) return;
+    const key = `${cfg.panelId}::${cfg.playerId}`;
+    if (window.__songlistAudioHandlerBound && window.__songlistAudioHandlerBound[key]) return;
+    if (!window.__songlistAudioHandlerBound) {
+        window.__songlistAudioHandlerBound = {};
+    }
 
-    const playbackPlayer = document.getElementById('playbackPlayer');
-    document.getElementById('closePlaybackModal')
-        ?.addEventListener('click', () => {
-            if (playbackPlayer) {
-                playbackPlayer.pause();
-                playbackPlayer.currentTime = 0;
-            }
+    window.__songlistAudioHandlerBound[key] = true;
+
+    const closeButton = document.getElementById(cfg.closeId);
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            try {
+                player.pause();
+                player.currentTime = 0;
+            } catch (e) {}
             panel.classList.remove('is-open', 'minimized');
         });
+    }
 
-    document.getElementById('minimizePlaybackModal')
-        ?.addEventListener('click', () => {
+    const minimizeButton = document.getElementById(cfg.minimizeId);
+    if (minimizeButton) {
+        minimizeButton.addEventListener('click', () => {
             panel.classList.toggle('minimized');
         });
+    }
 }
 
 function readArtistSongFromToggleButton(btn) {
