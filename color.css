@@ -11,7 +11,7 @@
     --bank-bg: #d4edda;
     --voice-bg: #333333;
     --split-bg: #87ceeb;
-    --button-bg: #eeeeee;
+    --button-bg: rgb(238, 238, 238);
 
     /* Текстовые цвета */
     --bank-text: #000000;
