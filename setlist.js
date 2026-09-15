@@ -223,17 +223,29 @@ async function initSetlist() {
     if (saveEl) saveEl.onclick = setlistSaveCurrent;
 
     const songNumberInput = document.getElementById('setlist-song');
+    const blockNumberInput = document.getElementById('setlist-block');
+
+    function changeNumberInput(input, step, min, max) {
+        if (!input) return;
+        const lower = Number(input.min || min || 0);
+        const upper = Number(input.max || max || 999);
+        const current = Number.parseInt(input.value, 10);
+        const next = (Number.isNaN(current) ? lower : current) + step;
+        input.value = Math.max(lower, Math.min(upper, next));
+    }
+
     function changeSongNumber(step) {
-        if (!songNumberInput) return;
-        const min = Number(songNumberInput.min || 0);
-        const max = Number(songNumberInput.max || 127);
-        const current = Number.parseInt(songNumberInput.value, 10);
-        const next = (Number.isNaN(current) ? min : current) + step;
-        songNumberInput.value = Math.max(min, Math.min(max, next));
+        changeNumberInput(songNumberInput, step, 0, 127);
+    }
+
+    function changeBlockNumber(step) {
+        changeNumberInput(blockNumberInput, step, 0, 999);
     }
 
     document.querySelector('.setlist-number-decrement')?.addEventListener('click', () => changeSongNumber(-1));
     document.querySelector('.setlist-number-increment')?.addEventListener('click', () => changeSongNumber(1));
+    document.querySelector('.setlist-block-decrement')?.addEventListener('click', () => changeBlockNumber(-1));
+    document.querySelector('.setlist-block-increment')?.addEventListener('click', () => changeBlockNumber(1));
 
     async function setlistSaveCurrent() {
         if (currentHash == null || currentHash === '') {

@@ -265,6 +265,13 @@ function fillSongHeader(band) {
                     value = keyVal;
                     style = { fontWeight: 'bold' };
                 }
+
+                if (value && item.hasAttribute('keyrender')) {
+                    const transposeValue = parseInt(item.getAttribute('transpose'), 10);
+                    if (!Number.isNaN(transposeValue) && transposeValue !== 0) {
+                        value = transposeKeyValue(value, transposeValue) || value;
+                    }
+                }
                 break;
             }
 
@@ -786,9 +793,86 @@ function transposeSong(direction = 1, table) {
     });
 }
 
+function transposeSongKey(song, direction) {
+    if (!song || (direction !== 1 && direction !== -1)) return;
+
+    const attribute = song.hasAttribute("key") ? "key" : "keycustom";
+    if (!song.hasAttribute(attribute)) return;
+
+    const displayedKey = song.querySelector(".song-key");
+    const value = displayedKey?.textContent.trim() || song.getAttribute(attribute)?.trim() || "";
+    const nextValue = transposeKeyValue(value, direction);
+    if (!nextValue) return;
+
+    if (displayedKey) displayedKey.textContent = nextValue;
+}
+
+function transposeKeyValue(value, direction) {
+    if (!value || !Number.isInteger(direction) || direction === 0) return null;
+
+    const match = value.match(/^([A-Ga-g])([#b]?)(.*)$/);
+    if (!match || !/^(m|maj|min|dim|aug|sus\d*|add\d*)?$/.test(match[3])) return null;
+
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const flatMap = { "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#" };
+    const root = flatMap[`${match[1].toUpperCase()}${match[2]}`] || `${match[1].toUpperCase()}${match[2]}`;
+    const noteIndex = notes.indexOf(root);
+    if (noteIndex === -1) return null;
+
+    const nextNote = notes[(noteIndex + direction + notes.length) % notes.length];
+    return `${nextNote}${match[3]}`;
+}
+
+function captureTransposeBaseline(song) {
+    if (!song) return;
+
+    song.querySelectorAll("span.chord").forEach(chord => {
+        chord.dataset.transposeBaseline = chord.textContent;
+    });
+
+    const keyAttribute = song.hasAttribute("key") ? "key" : song.hasAttribute("keycustom") ? "keycustom" : "";
+    song.dataset.transposeBaselineKeyAttribute = keyAttribute;
+    if (keyAttribute) {
+        const displayedKey = song.querySelector(".song-key")?.textContent.trim();
+        song.dataset.transposeBaselineKey = song.hasAttribute("keyrender") && displayedKey
+            ? displayedKey
+            : song.getAttribute(keyAttribute) || "";
+    }
+    song.dataset.transposeBaselineValue = song.dataset.currentTranspose || "0";
+}
+
+function updateTransposeResetButton(song) {
+    const resetButton = song?.querySelector(".transpose-reset-btn");
+    if (!resetButton) return;
+
+    const currentValue = song.dataset.currentTranspose || "0";
+    const baselineValue = song.dataset.transposeBaselineValue || "0";
+    resetButton.style.display = currentValue === baselineValue ? "none" : "";
+}
+
+function restoreTransposeBaseline(song) {
+    if (!song) return;
+
+    song.querySelectorAll("span.chord[data-transpose-baseline]").forEach(chord => {
+        chord.textContent = chord.dataset.transposeBaseline;
+    });
+
+    const keyAttribute = song.dataset.transposeBaselineKeyAttribute;
+    if (keyAttribute) {
+        const keyValue = song.dataset.transposeBaselineKey || "";
+        const displayedKey = song.querySelector(".song-key");
+        if (displayedKey) displayedKey.textContent = keyValue;
+    }
+
+    song.dataset.currentTranspose = song.dataset.transposeBaselineValue || "0";
+    updateScoreImagesForTranspose(song);
+    updateTransposeResetButton(song);
+}
+
 function addButtons(song) {
     if (!song) return;
     const table = song.querySelector("table.structure");
+    captureTransposeBaseline(song);
     let targetCell;
     const wrapper = document.createElement("div");
     wrapper.className = "tool-buttons";
@@ -811,6 +895,7 @@ function addButtons(song) {
         { txt: "🔍", class: "google-search-btn", action: song => openGoogleSearch(song) },
         { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn down"  },
         { txt: TransposeButtonUpSymbol, transpose: 1, class: "transpose-btn up"  },
+        { txt: "⌂", class: "transpose-reset-btn", reset: true },
         { txt: "Playback", class: "playback-link", tag: "playback", action: openPlaybackPlayer, last: true },
     ];
 
@@ -889,11 +974,30 @@ function addButtons(song) {
             btn.addEventListener("click", () => cfg.action(song));
         }
 
+        if (cfg.reset) {
+            btn.style.display = "none";
+            btn.style.fontWeight = "900";
+            btn.style.fontSize = "20px";
+            btn.title = "Вернуться к исходной тональности";
+            btn.addEventListener("click", () => restoreTransposeBaseline(song));
+        }
+
         if (cfg.transpose) {
             btn.style.fontWeight = "bold";
-            btn.addEventListener("click", () =>
-                transposeSong(cfg.transpose, table)
-            );
+            btn.addEventListener("click", () => {
+                transposeSong(cfg.transpose, table);
+                if (song.dataset.transposeInitializing !== "1" || !song.hasAttribute("keyrender")) {
+                    transposeSongKey(song, cfg.transpose);
+                }
+
+                const currentTranspose = parseInt(song.dataset.currentTranspose || "0", 10) || 0;
+                song.dataset.currentTranspose = String(currentTranspose + cfg.transpose);
+                updateTransposeResetButton(song);
+
+                if (song.dataset.transposeInitializing !== "1") {
+                    updateScoreImagesForTranspose(song);
+                }
+            });
         }
 
         wrapper.appendChild(btn);
@@ -974,8 +1078,12 @@ function bindAccordionClickEvent() {
 
             // ленивая загрузка картинок
             accordion.querySelectorAll('img[imagetype="scores"][data-src], img[imagetype="customImage"][data-src]').forEach(img => {
-                img.src = prefixImage + img.dataset.src + '?v=' + Date.now();
-                img.removeAttribute("data-src");
+                if (img.getAttribute("imagetype") === "scores") {
+                    loadScoreImage(img, accordion);
+                } else {
+                    img.src = prefixImage + img.dataset.src + '?v=' + Date.now();
+                    img.removeAttribute("data-src");
+                }
             });
 
             initTransposeForAccordion(accordion);
@@ -1128,38 +1236,96 @@ async function buildAllBandsList() {
     }
 }
 
+function getScoreImageSource(img, transposeValue) {
+    const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
+    if (!originalSource || transposeValue === 0) return originalSource;
+
+    const direction = transposeValue > 0 ? "plus" : "minus";
+    const variantAttribute = `data-src-transpose-${direction}-${Math.abs(transposeValue)}`;
+    return img.getAttribute(variantAttribute) || null;
+}
+
+function setScoreImageNotice(img, originalSource) {
+    let notice = img.nextElementSibling;
+    if (!notice || !notice.classList.contains("score-image-notice")) {
+        notice = document.createElement("div");
+        notice.classList.add("score-image-notice", "tilde-text");
+        img.insertAdjacentElement("afterend", notice);
+    }
+
+    notice.replaceChildren();
+    notice.innerHTML = '&#119070; ';
+
+    const link = document.createElement("a");
+    link.href = prefixImage + originalSource;
+    link.target = "_blank";
+    link.className = "originalImage";
+    link.textContent = "original";
+
+    notice.append("Notes removed due to key mismatch ", link);
+    img.style.display = "none";
+}
+
+function loadScoreImage(img, acc) {
+    const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
+    if (!originalSource) return;
+
+    img.setAttribute("data-original-src", originalSource);
+    const transposeValue = parseInt(acc?.dataset.currentTranspose || "0", 10) || 0;
+    const source = getScoreImageSource(img, transposeValue);
+    if (!source) {
+        setScoreImageNotice(img, originalSource);
+        return;
+    }
+
+    img.src = prefixImage + source + '?v=' + Date.now();
+    img.style.display = "";
+    const notice = img.nextElementSibling;
+    if (notice?.classList.contains("score-image-notice")) notice.remove();
+}
+
+function updateScoreImagesForTranspose(acc) {
+    acc.querySelectorAll('img[imagetype="scores"]').forEach(img => {
+        if (img.getAttribute("data-original-src") || img.getAttribute("data-src")) {
+            loadScoreImage(img, acc);
+        }
+    });
+}
+
 function initTransposeForAccordion(acc) {
     if (!acc || acc.dataset.transposeApplied === "1") return;
 
     const transposeValue = parseInt(acc.getAttribute("transpose"), 10);
     if (isNaN(transposeValue) || transposeValue === 0) return;
 
-    acc.querySelectorAll('img[imagetype="scores"]').forEach(img => {
-        const src = img.getAttribute("data-src");
-        const notice = document.createElement("div");
-
-        const a = document.createElement('a');
-        a.href = src;
-        a.target = '_blank';
-        a.className = 'originalImage';
-        a.textContent = 'original';
-
-        notice.innerHTML = '&#119070; ';
-        notice.append('Notes removed due to key mismatch ', a);
-
-        notice.classList.add("tilde-text");
-        img.replaceWith(notice);
-    });
+    acc.dataset.currentTranspose = "0";
+    acc.dataset.transposeInitializing = "1";
 
     const btnContainer = acc.querySelector(".tool-buttons");
-    if (!btnContainer) return;
+    if (!btnContainer) {
+        acc.dataset.currentTranspose = String(transposeValue);
+        captureTransposeBaseline(acc);
+        delete acc.dataset.transposeInitializing;
+        updateScoreImagesForTranspose(acc);
+        acc.dataset.transposeApplied = "1";
+        updateTransposeResetButton(acc);
+        return;
+    }
 
     // Ищем кнопки по содержимому текста
     const minusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
         .find(btn => btn.textContent.trim() === TransposeButtonDownSymbol || btn.textContent.trim() === "-");
     const plusBtn = Array.from(btnContainer.querySelectorAll(".transpose-btn"))
         .find(btn => btn.textContent.trim() === TransposeButtonUpSymbol);
-    if (!minusBtn || !plusBtn) return;
+    if (!minusBtn || !plusBtn) {
+        acc.dataset.currentTranspose = String(transposeValue);
+        captureTransposeBaseline(acc);
+        delete acc.dataset.transposeInitializing;
+        updateScoreImagesForTranspose(acc);
+        acc.dataset.transposeApplied = "1";
+        updateTransposeResetButton(acc);
+        return;
+    }
 
     const btn = transposeValue > 0 ? plusBtn : minusBtn;
     const count = Math.abs(transposeValue);
@@ -1168,7 +1334,11 @@ function initTransposeForAccordion(acc) {
         btn.click();
     }
 
+    delete acc.dataset.transposeInitializing;
+    captureTransposeBaseline(acc);
+    updateScoreImagesForTranspose(acc);
     acc.dataset.transposeApplied = "1";
+    updateTransposeResetButton(acc);
 }
 
 function initClickOnPads(song) {
@@ -1675,6 +1845,15 @@ function bindArtistSelectEvent() {
 function bindScrollToTopEvent() {
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
     if (!scrollToTopBtn) return;
+
+    function updateScrollToTopVisibility() {
+        const shouldShow = window.scrollY > 20;
+        scrollToTopBtn.classList.toggle('is-visible', shouldShow);
+    }
+
+    updateScrollToTopVisibility();
+    window.addEventListener('scroll', updateScrollToTopVisibility, { passive: true });
+
     scrollToTopBtn.addEventListener('click', () => {
         window.scrollTo({
             top: 0,

@@ -216,7 +216,11 @@
         <button class="setlist-close" id="setlist-close">×</button>
         <h3>Настройка блока</h3>
         <label>Номер блока:
-            <input type="number" id="setlist-block">
+            <div class="setlist-number-control setlist-block-number-control">
+                <button type="button" class="setlist-block-decrement" aria-label="Уменьшить номер блока">−</button>
+                <input type="number" id="setlist-block" min="0" max="999" value="0" inputmode="numeric" pattern="[0-9]*">
+                <button type="button" class="setlist-block-increment" aria-label="Увеличить номер блока">+</button>
+            </div>
         </label>
         <label>Номер песни:
             <div class="setlist-number-control">
