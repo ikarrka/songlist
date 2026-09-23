@@ -146,28 +146,51 @@ function reorderSongList(band) {
 
         if (lastBlock !== block) {
             const header = document.createElement('h2');
-            header.className = 'reordered';
-            header.textContent = `Block ${block}`;
+            header.className = 'reordered block-header';
             header.setAttribute('data-band', band);
-            item.style.marginTop = '20px';
-            item.insertBefore(header, item.firstChild);
+            header.dataset.block = String(block);
+
+            const collapseBtn = document.createElement('button');
+            collapseBtn.type = 'button';
+            collapseBtn.className = 'block-collapse-btn';
+            collapseBtn.setAttribute('aria-expanded', 'true');
+            collapseBtn.setAttribute('aria-label', 'Свернуть блок');
+
+            const title = document.createElement('span');
+            title.className = 'block-header-title';
+            title.textContent = `Block ${block}`;
 
             const removeBtn = document.createElement('span');
             removeBtn.classList.add('block-remove-btn');
             removeBtn.dataset.block = block;
-
             removeBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 deleteBlockSongs(band, block);
             });
 
+            collapseBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const collapsed = header.classList.toggle('is-collapsed');
+                collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                collapseBtn.setAttribute('aria-label', collapsed ? 'Развернуть блок' : 'Свернуть блок');
+                container.querySelectorAll('.accordion').forEach(acc => {
+                    const accBlock = parseInt(acc.getAttribute('setlistblock')?.trim() ?? '', 10);
+                    const normalized = (isNaN(accBlock) || accBlock === 0) ? 1 : accBlock;
+                    if (normalized === block) {
+                        acc.classList.toggle('block-collapsed-hide', collapsed);
+                    }
+                });
+            });
+
+            header.appendChild(collapseBtn);
+            header.appendChild(title);
             header.appendChild(removeBtn);
+            container.appendChild(header);
             lastBlock = block;
-        } else {
-            item.style.marginTop = '';
         }
 
-        container.appendChild(item);
+        item.style.marginTop = '';
+        container.appendChild(item)
     });
 
     if (numbered.length > 0 && unnumbered.length > 0) {
