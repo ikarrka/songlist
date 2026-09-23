@@ -2,6 +2,76 @@ let midiAccess = null;
 let outputs = [];
 let midiInputs = [];
 let receivedMidiMessages = [];
+const pendingMidiBankByChannel = Object.create(null);
+
+function formatReceivedMidiMessage(data) {
+  const hex = data
+    .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
+    .join(' ');
+  if (!data.length) return hex;
+
+  const statusByte = data[0];
+  // SysEx: leave as hex (F0 ... F7), do not rewrite as MSB/LSB/Program
+  if (statusByte === 0xF0 || statusByte === 0xF7 || data.includes(0xF0)) {
+    return hex;
+  }
+
+  const messageType = statusByte & 0xF0;
+  const channel = (statusByte & 0x0F) + 1;
+
+  // Control Change: Bank Select MSB (CC0) / LSB (CC32)
+  if (messageType === 0xB0 && data.length >= 3) {
+    const controller = data[1];
+    const value = data[2];
+    if (controller === 0x00) {
+      pendingMidiBankByChannel[channel] = {
+        ...(pendingMidiBankByChannel[channel] || {}),
+        msb: value,
+      };
+      return `Ch ${channel}: MSB=${value}  (${hex})`;
+    }
+    if (controller === 0x20) {
+      pendingMidiBankByChannel[channel] = {
+        ...(pendingMidiBankByChannel[channel] || {}),
+        lsb: value,
+      };
+      return `Ch ${channel}: LSB=${value}  (${hex})`;
+    }
+    if (controller === 0x01) {
+      return `Ch ${channel}: Modulation=${value}  (${hex})`;
+    }
+    return `Ch ${channel}: CC${controller}=${value}  (${hex})`;
+  }
+
+  // Program Change — показать вместе с последними MSB/LSB канала
+  if (messageType === 0xC0 && data.length >= 2) {
+    const program = data[1];
+    const bank = pendingMidiBankByChannel[channel] || {};
+    const msbPart = bank.msb !== undefined ? `MSB=${bank.msb} ` : '';
+    const lsbPart = bank.lsb !== undefined ? `LSB=${bank.lsb} ` : '';
+    return `Ch ${channel}: ${msbPart}${lsbPart}Program=${program}  (${hex})`;
+  }
+
+  if (messageType === 0x90 && data.length >= 3) {
+    return `Ch ${channel}: NoteOn note=${data[1]} vel=${data[2]}  (${hex})`;
+  }
+  if (messageType === 0x80 && data.length >= 3) {
+    return `Ch ${channel}: NoteOff note=${data[1]} vel=${data[2]}  (${hex})`;
+  }
+
+  // Pitch Bend: 14-bit value, center = 8192
+  if (messageType === 0xE0 && data.length >= 3) {
+    const lsb = data[1] & 0x7F;
+    const msb = data[2] & 0x7F;
+    const value = (msb << 7) | lsb;
+    const offset = value - 8192;
+    const offsetText = offset === 0 ? 'center' : (offset > 0 ? `+${offset}` : `${offset}`);
+    return `Ch ${channel}: PitchBend=${value} (${offsetText})  (${hex})`;
+  }
+
+  return hex;
+}
+
 
 let midiOutput = null;
 
@@ -45,11 +115,8 @@ function syncMidiInputListeners() {
       if (data.length === 0 || data.every(byte => byte === 0) || [0xF8, 0xF9, 0xFD, 0xFE, 0xFF].includes(statusByte)) {
         return;
       }
-      const source = event.currentTarget?.name || input.name || 'MIDI input';
-      const bytes = data
-        .map(byte => byte.toString(16).toUpperCase().padStart(2, '0'))
-        .join(' ');
-      receivedMidiMessages.push(`${source}: ${bytes}`);
+      const formatted = formatReceivedMidiMessage(data);
+      receivedMidiMessages.push(formatted);
       if (receivedMidiMessages.length > 100) receivedMidiMessages.shift();
       renderReceivedMidiMessages();
     };
@@ -1361,4 +1428,326 @@ function initMidiModal() {
       }
     });
   }
+}
+
+
+function initSoundPickerModal() {
+  const modal = document.getElementById('sound-picker-modal');
+  const closeBtn = document.getElementById('soundPickerClose');
+  const banksEl = document.getElementById('soundPickerBanks');
+  const bodyEl = document.getElementById('soundPickerBody');
+  const bankTitleEl = document.getElementById('soundPickerBankTitle');
+  if (!modal || !banksEl || !bodyEl) return;
+
+  const bankLabels = {
+    factory: 'Factory',
+    atelier: 'Atelier',
+    extra: 'Extra',
+    slt: 'SLT',
+  };
+
+  let activeBankKey = null;
+  let selectedSoundKey = null;
+  let selectionCallback = null;
+
+  function getSoundListData() {
+    return (typeof soundList !== 'undefined' && soundList) ? soundList : null;
+  }
+
+  function openSoundPicker(options) {
+    const data = getSoundListData();
+    if (!data) {
+      alert('Список звуков не загружен (soundList).');
+      return;
+    }
+    selectionCallback = (options && typeof options.onSelect === 'function') ? options.onSelect : null;
+    if (!activeBankKey || !data[activeBankKey]) {
+      activeBankKey = Object.keys(data)[0] || null;
+    }
+    renderBanks();
+    renderBody();
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSoundPicker() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    selectionCallback = null;
+  }
+
+  function renderBanks() {
+    const data = getSoundListData();
+    banksEl.innerHTML = '';
+    if (!data) return;
+    Object.keys(data).forEach((key) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sound-picker-bank-btn' + (key === activeBankKey ? ' is-active' : '');
+      const bankSoundCount = (data[key].sections || []).reduce((sum, section) => sum + ((section.sounds || []).length), 0);
+      btn.textContent = (bankLabels[key] || key) + ' (' + bankSoundCount + ')';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', key === activeBankKey ? 'true' : 'false');
+      btn.addEventListener('click', () => {
+        activeBankKey = key;
+        renderBanks();
+        renderBody();
+      });
+      banksEl.appendChild(btn);
+    });
+  }
+
+  function renderBody() {
+    const data = getSoundListData();
+    bodyEl.innerHTML = '';
+    if (!data || !activeBankKey || !data[activeBankKey]) {
+      bodyEl.innerHTML = '<p class="sound-picker-empty">Нет данных.</p>';
+      if (bankTitleEl) bankTitleEl.textContent = '';
+      return;
+    }
+
+    const bank = data[activeBankKey];
+    if (bankTitleEl) bankTitleEl.textContent = bank.title || '';
+
+    (bank.sections || []).forEach((section, sectionIndex) => {
+      const sectionEl = document.createElement('section');
+      sectionEl.className = 'sound-picker-section';
+
+      const title = document.createElement('h4');
+      title.className = 'sound-picker-section-title';
+      const soundCount = (section.sounds || []).length;
+      title.textContent = (section.name || ('Section ' + (sectionIndex + 1))) + ' (' + soundCount + ')';
+      sectionEl.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'sound-picker-sounds';
+
+      (section.sounds || []).forEach((sound, soundIndex) => {
+        const soundKey = activeBankKey + ':' + sectionIndex + ':' + soundIndex;
+        const soundName = sound.name || ('Sound ' + (soundIndex + 1));
+        const isVr730Exclusive = /~/.test(soundName);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sound-picker-sound-btn' + (selectedSoundKey === soundKey ? ' is-selected' : '');
+        btn.textContent = soundName;
+        btn.title = isVr730Exclusive ? (soundName + ' (только VR730)') : soundName;
+        if (isVr730Exclusive) {
+          btn.disabled = true;
+          btn.classList.add('is-disabled');
+        } else {
+          btn.addEventListener('click', () => {
+            selectedSoundKey = soundKey;
+            const chosen = {
+              name: soundName,
+              msb: sound.msb,
+              lsb: sound.lsb,
+              prg: sound.prg,
+              bank: activeBankKey,
+              section: section.name || '',
+            };
+            if (selectionCallback) {
+              const cb = selectionCallback;
+              closeSoundPicker();
+              cb(chosen);
+              return;
+            }
+            applySoundToMidiForm(sound);
+            renderBody();
+          });
+        }
+        grid.appendChild(btn);
+      });
+
+      sectionEl.appendChild(grid);
+      bodyEl.appendChild(sectionEl);
+    });
+  }
+
+  function applySoundToMidiForm(sound) {
+    const msb = document.getElementById('midiModalMsb');
+    const lsb = document.getElementById('midiModalLsb');
+    const program = document.getElementById('midiModalProgram');
+    if (!sound) return;
+    if (msb && sound.msb != null) msb.value = sound.msb;
+    if (lsb && sound.lsb != null) lsb.value = sound.lsb;
+    if (program && sound.prg != null) program.value = sound.prg;
+  }
+
+  window.openSoundPicker = openSoundPicker;
+  window.closeSoundPicker = closeSoundPicker;
+
+  if (closeBtn) closeBtn.addEventListener('click', closeSoundPicker);
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeSoundPicker();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+      event.stopPropagation();
+      closeSoundPicker();
+    }
+  });
+}
+
+function buildTransposeOptions(selectEl, selectedValue) {
+  if (!selectEl) return;
+  selectEl.innerHTML = '';
+  for (let value = -3; value <= 3; value += 1) {
+    const option = document.createElement('option');
+    option.value = String(value);
+    option.textContent = (value > 0 ? '+' : '') + value;
+    if (value === selectedValue) option.selected = true;
+    selectEl.appendChild(option);
+  }
+}
+
+function buildSplitNoteOptions(selectEl) {
+  if (!selectEl) return;
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  selectEl.innerHTML = '';
+  // MIDI note 36 = C2 ... 96 = C7
+  for (let midiNote = 36; midiNote <= 96; midiNote += 1) {
+    const name = noteNames[midiNote % 12] + (Math.floor(midiNote / 12) - 1);
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    if (name === 'C4') option.selected = true;
+    selectEl.appendChild(option);
+  }
+}
+
+function initRegistrationModal() {
+  const modal = document.getElementById('registration-modal');
+  const openBtn = document.getElementById('midiModalOpenRegistration');
+  const closeBtn = document.getElementById('registrationClose');
+  const saveBtn = document.getElementById('registrationSave');
+  const nameInput = document.getElementById('registrationName');
+  const lowerBtn = document.getElementById('registrationLowerSoundBtn');
+  const upperBtn = document.getElementById('registrationUpperSoundBtn');
+  const lowerTranspose = document.getElementById('registrationLowerTranspose');
+  const upperTranspose = document.getElementById('registrationUpperTranspose');
+  const splitEnabled = document.getElementById('registrationSplitEnabled');
+  const splitNoteRow = document.getElementById('registrationSplitNoteRow');
+  const splitNote = document.getElementById('registrationSplitNote');
+  if (!modal || !openBtn) return;
+
+  let lowerSound = null;
+  let upperSound = null;
+
+  buildTransposeOptions(lowerTranspose, 0);
+  buildTransposeOptions(upperTranspose, 0);
+  buildSplitNoteOptions(splitNote);
+
+  function syncSplitNoteVisibility() {
+    const enabled = splitEnabled && splitEnabled.value === 'yes';
+    if (splitNoteRow) splitNoteRow.hidden = !enabled;
+  }
+
+  function resetForm() {
+    if (nameInput) nameInput.value = '';
+    lowerSound = null;
+    upperSound = null;
+    if (lowerBtn) lowerBtn.textContent = 'Выбрать звук';
+    if (upperBtn) upperBtn.textContent = 'Выбрать звук';
+    if (lowerTranspose) lowerTranspose.value = '0';
+    if (upperTranspose) upperTranspose.value = '0';
+    if (splitEnabled) splitEnabled.value = 'no';
+    if (splitNote) splitNote.value = 'C4';
+    syncSplitNoteVisibility();
+  }
+
+  function openRegistrationModal() {
+    resetForm();
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    if (nameInput) nameInput.focus();
+  }
+
+  function closeRegistrationModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function pickSound(target) {
+    if (typeof window.openSoundPicker !== 'function') {
+      alert('Модалка выбора звука не готова.');
+      return;
+    }
+    window.openSoundPicker({
+      onSelect: (sound) => {
+        if (target === 'lower') {
+          lowerSound = sound;
+          if (lowerBtn) {
+            lowerBtn.textContent = sound.name;
+            lowerBtn.title = sound.name;
+          }
+        } else {
+          upperSound = sound;
+          if (upperBtn) {
+            upperBtn.textContent = sound.name;
+            upperBtn.title = sound.name;
+          }
+        }
+      },
+    });
+  }
+
+  function saveRegistration() {
+    const name = (nameInput && nameInput.value.trim()) || '';
+    const errors = [];
+    if (!name) errors.push('Укажите название регистрации.');
+    if (!upperSound) errors.push('Выберите звук Upper.');
+    if (errors.length) {
+      alert(errors.join('\n'));
+      if (!name && nameInput) nameInput.focus();
+      else if (!upperSound && upperBtn) upperBtn.focus();
+      return;
+    }
+
+    const result = {
+      name,
+      lower: {
+        channel: 3,
+        sound: lowerSound,
+        transpose: lowerTranspose ? Number(lowerTranspose.value) : 0,
+      },
+      upper: {
+        channel: 4,
+        sound: upperSound,
+        transpose: upperTranspose ? Number(upperTranspose.value) : 0,
+      },
+      split: (splitEnabled && splitEnabled.value === 'yes')
+        ? { enabled: true, note: splitNote ? splitNote.value : 'C4' }
+        : { enabled: false },
+    };
+    alert(JSON.stringify(result, null, 2));
+  }
+
+  openBtn.addEventListener('click', openRegistrationModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeRegistrationModal);
+  if (saveBtn) saveBtn.addEventListener('click', saveRegistration);
+  if (lowerBtn) lowerBtn.addEventListener('click', () => pickSound('lower'));
+  if (upperBtn) upperBtn.addEventListener('click', () => pickSound('upper'));
+  if (splitEnabled) splitEnabled.addEventListener('change', syncSplitNoteVisibility);
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeRegistrationModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const soundModal = document.getElementById('sound-picker-modal');
+    if (soundModal && soundModal.classList.contains('is-open')) return;
+    if (modal.classList.contains('is-open')) closeRegistrationModal();
+  });
+
+  syncSplitNoteVisibility();
+}
+
+function bootMidiUiHelpers() {
+  initSoundPickerModal();
+  initRegistrationModal();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootMidiUiHelpers);
+} else {
+  bootMidiUiHelpers();
 }

@@ -71,6 +71,7 @@
         window.prefixPlayback = 'playback/';
 
         document.write(`<script src="${prefix}music.js?v=${unique}"><\/script>`);
+        document.write(`<script src="${prefix}V-Combo_VR_soundlist.js?v=${unique}"><\/script>`);
         document.write(`<script src="${prefix}midi.js?v=${unique}"><\/script>`);
         document.write(`<script src="${prefix}setlist.js?v=${unique}"><\/script>`);
         document.write(`<script src="${prefix}bootstrap.js?v=${unique}"><\/script>`);
@@ -183,6 +184,7 @@
         <div class="midi-modal-actions midi-modal-patch-actions">
             <label><input type="checkbox" id="midiModalAutoSend"> Автоматическая отправка</label>
             <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
+            <button type="button" id="midiModalOpenRegistration" class="midi-modal-paste midi-modal-registration-btn">Создать регистрацию</button>
         </div>
         <hr class="midi-modal-divider">
         <p class="midi-modal-hint"><strong>SysEx</strong>&nbsp;Байты в HEX через пробел или запятую. Один SysEx — одна строка. F0/F7 подставятся автоматически при необходимости.</p>
@@ -211,6 +213,71 @@
 </div>
 
 <!-- Модальное окно только для setlist -->
+<!-- Модалка выбора звука VR -->
+<!-- Модалка создания регистрации -->
+<div id="registration-modal" class="registration-modal" aria-hidden="true">
+    <div class="registration-modal-content" role="dialog" aria-modal="true" aria-labelledby="registrationTitle">
+        <button type="button" class="registration-close" id="registrationClose" aria-label="Закрыть">×</button>
+        <h3 id="registrationTitle">Создание регистрации</h3>
+
+        <label class="registration-field">
+            <span>Название</span>
+            <input type="text" id="registrationName" placeholder="Название регистрации" autocomplete="off">
+        </label>
+
+        <div class="registration-parts-row">
+            <fieldset class="registration-part">
+                <legend>Lower <span class="registration-channel">(ch 3)</span></legend>
+                <div class="registration-row">
+                    <button type="button" id="registrationLowerSoundBtn" class="midi-modal-paste registration-sound-btn">Выбрать звук</button>
+                    <label class="registration-transpose">
+                        <span>Tr</span>
+                        <select id="registrationLowerTranspose"></select>
+                    </label>
+                </div>
+            </fieldset>
+            <fieldset class="registration-part">
+                <legend>Upper <span class="registration-channel">(ch 4)</span></legend>
+                <div class="registration-row">
+                    <button type="button" id="registrationUpperSoundBtn" class="midi-modal-paste registration-sound-btn">Выбрать звук</button>
+                    <label class="registration-transpose">
+                        <span>Tr</span>
+                        <select id="registrationUpperTranspose"></select>
+                    </label>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="registration-split-row">
+            <label class="registration-field registration-inline registration-split-enabled">
+                <span>Split</span>
+                <select id="registrationSplitEnabled">
+                    <option value="no">нет</option>
+                    <option value="yes">есть</option>
+                </select>
+            </label>
+            <label class="registration-field registration-inline" id="registrationSplitNoteRow" hidden>
+                <span>Нота</span>
+                <select id="registrationSplitNote"></select>
+            </label>
+        </div>
+
+        <div class="registration-actions">
+            <button type="button" id="registrationSave" class="midi-modal-paste registration-save">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<div id="sound-picker-modal" class="sound-picker-modal" aria-hidden="true">
+    <div class="sound-picker-modal-content" role="dialog" aria-modal="true" aria-labelledby="soundPickerTitle">
+        <button type="button" class="sound-picker-close" id="soundPickerClose" aria-label="Закрыть">×</button>
+        <h3 id="soundPickerTitle">Выбор звука</h3>
+        <p class="sound-picker-subtitle" id="soundPickerBankTitle"></p>
+        <div class="sound-picker-banks" id="soundPickerBanks" role="tablist"></div>
+        <div class="sound-picker-body" id="soundPickerBody"></div>
+    </div>
+</div>
+
 <div id="setlist-modal" class="setlist-modal">
     <div class="setlist-modal-content">
         <button class="setlist-close" id="setlist-close">×</button>

@@ -1632,3 +1632,338 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
     max-height: none;
   }
 }
+
+
+/* Sound picker modal (VR tones) */
+.midi-modal-patch-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sound-picker-modal {
+  display: none;
+  position: fixed;
+  z-index: 3100;
+  inset: 0;
+  background: var(--overlay-bg);
+  justify-content: center;
+  align-items: center;
+}
+
+.sound-picker-modal.is-open {
+  display: flex;
+}
+
+.sound-picker-modal-content {
+  position: relative;
+  background: var(--setlist-modal-bg);
+  color: var(--surface-text);
+  padding: 10px 12px 12px;
+  border-radius: 8px;
+  width: min(760px, calc(100vw - 20px));
+  max-height: calc(100vh - 24px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.sound-picker-modal-content h3 {
+  margin: 0 24px 2px 0;
+  font-size: 1.05em;
+}
+
+.sound-picker-subtitle {
+  margin: 0 24px 6px 0;
+  opacity: 0.75;
+  font-size: 0.85em;
+}
+
+.sound-picker-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sound-picker-banks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.sound-picker-bank-btn,.sound-picker-banks .sound-picker-bank-btn {
+  border: 1px solid rgba(127, 127, 127, 0.55);
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.sound-picker-bank-btn.is-active {
+  background: #3a7afe;
+  border-color: #3a7afe;
+  color: #fff;
+}
+
+.sound-picker-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.sound-picker-section {
+  margin-bottom: 8px;
+}
+
+.sound-picker-section-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 4px;
+  padding: 2px 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  background: var(--setlist-modal-bg);
+  border-bottom: 1px solid rgba(127, 127, 127, 0.35);
+}
+
+.sound-picker-sounds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 3px;
+}
+
+.sound-picker-sound-btn {
+  text-align: left;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  background: rgba(127, 127, 127, 0.08);
+  color: inherit;
+  border-radius: 4px;
+  padding: 2px 5px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sound-picker-sound-btn:hover {
+  border-color: #3a7afe;
+}
+
+.sound-picker-sound-btn.is-selected {
+  background: #3a7afe;
+  border-color: #3a7afe;
+  color: #fff;
+}
+
+.sound-picker-empty {
+  opacity: 0.7;
+  padding: 12px 0;
+}
+
+.sound-picker-sound-btn:disabled,
+.sound-picker-sound-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.sound-picker-sound-btn:disabled:hover,
+.sound-picker-sound-btn.is-disabled:hover {
+  border-color: rgba(127, 127, 127, 0.4);
+}
+
+/* Registration modal */
+.registration-modal {
+  display: none;
+  position: fixed;
+  z-index: 3050;
+  inset: 0;
+  background: var(--overlay-bg);
+  justify-content: center;
+  align-items: center;
+}
+
+.registration-modal.is-open {
+  display: flex;
+}
+
+.registration-modal-content {
+  position: relative;
+  background: var(--setlist-modal-bg);
+  color: var(--surface-text);
+  padding: 12px 14px 14px;
+  border-radius: 8px;
+  width: min(640px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.registration-modal-content h3 {
+  margin: 0 28px 10px 0;
+  font-size: 1.1em;
+}
+
+.registration-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.registration-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.registration-field.registration-inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.registration-field input[type="text"],
+.registration-field select,
+.registration-inline select {
+  border: 1px solid rgba(127, 127, 127, 0.5);
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+  min-width: 110px;
+}
+
+.registration-parts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.registration-part {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 6px;
+  padding: 6px 8px 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.registration-part legend {
+  padding: 0 4px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.registration-channel {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.registration-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.registration-sound-btn.midi-modal-paste {
+  flex: 0 1 58%;
+  max-width: 150px;
+  min-width: 0;
+  height: 30px;
+  padding: 2px 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 12px;
+}
+
+.registration-transpose {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.registration-transpose select {
+  border: 1px solid var(--button-border);
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 12px;
+  min-width: 52px;
+  height: 34px;
+  box-sizing: border-box;
+}
+
+.registration-split-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.registration-split-row .registration-field {
+  margin-bottom: 0;
+}
+
+.registration-split-row .registration-inline {
+  flex: 0 0 auto;
+}
+
+.registration-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.registration-save.midi-modal-paste {
+  min-width: 110px;
+  height: 34px;
+  padding: 4px 12px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 560px) {
+  .registration-parts-row {
+    grid-template-columns: 1fr;
+  }
+}
