@@ -174,6 +174,8 @@ function reorderSongList(band) {
                 collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
                 collapseBtn.setAttribute('aria-label', collapsed ? 'Развернуть блок' : 'Свернуть блок');
                 container.querySelectorAll('.accordion').forEach(acc => {
+                    const numVal = acc.getAttribute('setlistposition')?.trim() ?? '';
+                    if (!numVal) return;
                     const accBlock = parseInt(acc.getAttribute('setlistblock')?.trim() ?? '', 10);
                     const normalized = (isNaN(accBlock) || accBlock === 0) ? 1 : accBlock;
                     if (normalized === block) {

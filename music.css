@@ -831,7 +831,49 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
    -------------------------------------------------------------------------- */
 .block-header {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 20px 0 8px;
   padding-right: 15px;
+}
+
+.block-header:first-child {
+  margin-top: 0;
+}
+
+.block-collapse-btn {
+  flex: 0 0 auto;
+  width: 1.4em;
+  height: 1.4em;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--fontcolor);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 0.85em;
+}
+
+.block-collapse-btn::before {
+  content: "▼";
+  display: block;
+}
+
+.block-header.is-collapsed .block-collapse-btn::before {
+  content: "▶";
+}
+
+.block-header-title {
+  flex: 0 1 auto;
+}
+
+.accordion.block-collapsed-hide {
+  display: none;
 }
 
 /* Shared control-button visual language for modal/action widgets */
