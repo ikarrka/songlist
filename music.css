@@ -440,7 +440,8 @@ table.structure tr.interlude td:first-child {
 .pad,
 .bank,
 .split,
-.voice {
+.voice,
+.vr {
   border: 1px solid;
   border-radius: 6px;
   padding: 5px;
@@ -469,6 +470,31 @@ table.structure tr.interlude td:first-child {
 }
 
 .voice.no-midi:active {
+  animation: none !important;
+}
+
+.vr {
+  background-color: #8B4513;
+  color: #ffffff;
+  border-color: #5c2e0a;
+  margin-bottom: 5px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.vr:active,
+.vr.is-pressed {
+  animation: flash-border 0.25s;
+  position: relative;
+}
+
+.vr.no-midi {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.vr.no-midi:active {
   animation: none !important;
 }
 
@@ -1323,17 +1349,6 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   width: auto;
 }
 
-.midi-modal-send {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, var(--accent-blue, #0077cc) 0%, var(--accent-song, #000066) 100%);
-  color: #ffffff;
-  border: 1px solid var(--accent-blue, #0077cc);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1em;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), inset 0 1px rgba(255,255,255,0.2);
-}
-
 
 .midi-modal-patch-actions {
   display: flex;
@@ -1346,7 +1361,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   font-size: var(--midi-modal-font-size);
 }
 
-.midi-modal-patch-actions .midi-modal-send {
+.midi-modal-patch-actions #midiModalVCombo {
   margin-left: auto;
 }
 
@@ -1718,8 +1733,20 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   font-size: 1.05em;
 }
 
+.sound-picker-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 28px 6px 0;
+}
+
+.sound-picker-heading h3 {
+  margin: 0;
+}
+
 .sound-picker-subtitle {
-  margin: 0 24px 6px 0;
+  margin: 0;
   opacity: 0.75;
   font-size: 0.85em;
 }
@@ -1835,6 +1862,55 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 }
 
 /* Registration modal */
+.registration-saved-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.registration-saved-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  height: 34px;
+  border: 1px solid rgba(127, 127, 127, 0.5);
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.registration-copy-btn {
+  flex: 0 0 34px;
+  box-sizing: border-box;
+  width: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--button-border);
+  border-radius: 6px;
+  background: var(--button-bg);
+  color: var(--fontcolor);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.registration-create-heading {
+  margin: 4px 0 8px;
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
 .registration-modal {
   display: none;
   position: fixed;
@@ -1989,6 +2065,35 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 .registration-split-row .registration-inline {
   flex: 0 0 auto;
+}
+
+.registration-preview {
+  margin-top: 10px;
+  border: 1px solid var(--button-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--button-bg) 92%, black 8%);
+  overflow: hidden;
+}
+
+.registration-preview-label {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.85;
+  border-bottom: 1px solid var(--button-border);
+}
+
+.registration-preview-json {
+  margin: 0;
+  padding: 8px;
+  max-height: 220px;
+  overflow: auto;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--fontcolor);
 }
 
 .registration-actions {

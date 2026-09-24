@@ -112,7 +112,17 @@
 | Уровень | На чём стоят атрибуты | Когда работает | Функция |
 |---|---|---|---|
 | **Уровень аккордеона (вся песня)** | `div.accordion[hash]` / `div.accordion[hashreference]` | Фаза 1 shell, сразу после загрузки | [`copyAccordionContentByHash()`](file:///d:/source/songlist/music.js#L892-L928) — копирует ВСЁ содержимое аккордеона у донора. Сохраняет `.custom-content`. |
-| **Уровень секции песни** | Дочерние теги внутри `<song>`: `<intro hash=X>`, `<chorus hashreference=X>` | Фаза 2 лениво, **перед** `convertSongToTable` | [`processHashReferences()`](file:///d:/source/songlist/music.js#L455-L484) — копирует innerHTML, **только если имя тега совпадает** с донором (chorus→chorus, verse→verse). |
+| **Уровень секции песни** | Дочерние теги внутри `<song>`: `<intro hash=X>`, `<chorus hashreference=X>` | Фаза 2 лениво, **перед** `convertSongToTable` | [`processHashReferences()`](file:///d:/source/songlist/music.js) — копирует `innerHTML` с донора. По умолчанию **имя тега должно совпадать** (chorus→chorus, verse→verse). **Исключение:** пара `intro` ↔ `instr` разрешена в обе стороны (`<instr hashreference="X">` может брать контент из `<intro hash="X">` и наоборот). При несовпадении типа (и вне этой пары) копирование тихо пропускается. |
+
+### Правила для секций (hashreference)
+
+Пример:
+```html
+<intro hash="same1">…текст…</intro>
+<instr hashreference="same1"></instr>
+```
+
+Аккордеонный уровень (`div.accordion`) проверку типа части не делает: оба конца уже `div.accordion`.
 
 ---
 
@@ -146,6 +156,14 @@ const hasBlock = (blockValue.trim() !== '') && (parseInt(blockValue, 10) > 0);
 ```
 То есть `"0"` — тоже считается «не назначено».
 
+### Сворачивание блоков setlist
+
+У каждого блока («Block N») в панели setlist есть шеврон ▼/▶ перед заголовком. Клик сворачивает/разворачивает **песни этого блока** (класс `block-collapsed-hide` на карточках). Заголовок блока и кнопка удаления остаются. Анимация не используется. Сворачивание блока 1 не должно прятать песни без номера блока.
+
+### Второй ключ jsonstorage — VR-регистрации
+
+Кроме setlist (`JSON_URL`) в [setlist.js](file:///d:/source/songlist/setlist.js) есть отдельный URL `REGISTRATIONS_JSON_URL` (Name2). Там хранится **массив** виртуальных регистраций (см. §10). Загрузка/сохранение: `registrationsLoadData` / `registrationsSaveData`.
+
 ---
 
 ## 8. Короткий чек-лист что будет работать без интернета (для PWA/Service Worker)
@@ -159,3 +177,50 @@ const hasBlock = (blockValue.trim() !== '') && (parseInt(blockValue, 10) > 0);
 | MP3-бэкинги (`mp3/*.mp3`) | ⚠️ Только после первого открытия (если есть `<mp3>` и пользователь кликнул) | Лениво. ⚠️ Кнопка `♫` **вообще не появится**, если в кэше нет записи HEAD/metadata о существовании файла. |
 | Playback-файлы (`playback/*.mp3`) | ⚠️ Только после первого открытия (если есть `<playback>` и пользователь кликнул Playback) | Лениво. Тоже самое — кнопка **отобразится только если `checkMp3FileExists` вернул true**. |
 | Сохранённый setlist | ⚠️ Только если пользователь был онлайн и он успел сохраниться / загрузиться из jsonstorage.net | Внешнее API; нужен fallback на localStorage |
+
+---
+
+## 9. Инлайн-чипы в тексте песни: `span.voice`, `span.vr` и др.
+
+Стилизуются как компактные «плашки» (см. блоки `.voice` / `.midi` / `.pad` / `.bank` / `.split` / `.vr` в [music.css](file:///d:/source/songlist/music.css)). Обработка MIDI — в [midi.js](file:///d:/source/songlist/midi.js).
+
+| Разметка | Назначение | Поведение |
+|---|---|---|
+| `<span class="voice">…</span>` (ключ голоса — атрибуты, см. `getVoiceMidiKey`) | Пресет голоса V-Combo из `voiceMidiConfig` | Клик шлёт Upper (и Lower при наличии) bank+PC. Без выбранного MIDI-выхода — класс `no-midi` (не кликается). Устройство должно быть разрешено: в имени MIDI-порта есть `roland` / `vcombo` / `vr` (после нормализации). |
+| `<span class="vr">ТочноеИмя</span>` | Виртуальная регистрация | Имя в тексте **строго** = `name` сохранённой регистрации (без case-fold/trim). Клик: Upper ch4 bank+PC, через 100 мс Lower ch3 если есть sound; volume / transpose / split **по MIDI не уходят** — только alert. Нет регистрации → `console.warn`. Те же правила `no-midi` и проверки устройства, что у `span.voice`. Фон чипа — коричневый (`#8B4513`). |
+
+Атрибут аккордеона `voice="…"` (шапка) — отдельный путь: при открытии песни может сразу вызвать `sendVComboVoice` (см. §4). Инлайн `span.voice` — ручной клик по тексту.
+
+---
+
+## 10. MIDI-модалка, выбор звуков V-Combo, VR-регистрации
+
+UI в [index.html](file:///d:/source/songlist/index.html), логика в [midi.js](file:///d:/source/songlist/midi.js). Список тембров — [V-Combo_VR_soundlist.js](file:///d:/source/songlist/V-Combo_VR_soundlist.js) (массив данных **не править ради UI-фильтра**).
+
+### Главный экран
+
+- Кнопка MIDI (`#midiModalBtn`) — модалка Patch / SysEx / auto / v-combo.
+- Кнопка **VR** (`#vrRegistrationBtn`) — модалка «Виртуальные регистрации».
+
+### Модалка MIDI
+
+- Поля MSB / LSB / Program, канал, **auto** (`#midiModalAutoSend`).
+- **v-combo** открывает пикер звуков: выбор всегда заполняет MSB/LSB/PC; если auto включён — шлёт patch и **оставляет** пикер открытым; если auto выкл — только заполняет поля и **закрывает** пикер.
+- Кнопки Send / Send Sysex в стиле `tool-btn playback-link`; v-combo — `tool-btn mp3-link`.
+
+### Пикер звуков
+
+- Банки Factory / Atelier / Extra / SLT, секции со счётчиками.
+- Звуки с `~` в имени (эксклюзивы VR730) **не показываются**; пустые после фильтра секции скрыты; счётчики банков/секций без них.
+- Подзаголовок банка: из `bank.title` убирается хвост `(VR730 exclusives marked with ~)` (сам файл списка не меняется).
+
+### VR-регистрации
+
+Сохраняются массивом на `REGISTRATIONS_JSON_URL`. Поля одной регистрации:
+
+- `name` (обязательно, уникально без учёта регистра при сохранении);
+- `upper`: channel 4, sound `{name,msb,lsb,prg,…}`, transpose −3…+3, volume 1–12 (по умолчанию 10) — **обязателен sound**;
+- `lower`: channel 3, те же поля — опционально (без sound Lower при клике по `span.vr` не шлётся);
+- `split`: `{enabled:false}` или `{enabled:true, note:"C2"…"C7"}`.
+
+В модалке: select сохранённых + копирование имени, форма создания, превью при сохранении.

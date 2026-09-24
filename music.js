@@ -415,9 +415,9 @@ function paintChords(song) {
     paintedSongs.add(song);
 
     // const chordRegex =
-    //     /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add)?|dim|aug|sus|add)?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
+    //     /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add)?|dim|aug|sus|add)?\+?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
 const chordRegex =
-    /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add|dim)?|dim|aug|sus|add)?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
+    /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add|dim)?|dim|aug|sus|add)?\+?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
 
     const pres = song.querySelectorAll("pre");
     pres.forEach(pre => {
@@ -508,9 +508,17 @@ function processHashReferences(songContainer) {
             const hashrefAttr = node.getAttribute('hashreference');
             const currentTagName = node.tagName.toLowerCase();
             
-            // Копируем только если hash существует и тип тега совпадает
-            if (hashrefAttr && hashMap[hashrefAttr] && hashMap[hashrefAttr].tagName === currentTagName) {
-                node.innerHTML = hashMap[hashrefAttr].content;
+            // Копируем если hash есть и тип тега совпадает,
+            // либо это пара intro <-> instr (разрешено в обе стороны)
+            if (hashrefAttr && hashMap[hashrefAttr]) {
+                const sourceTag = hashMap[hashrefAttr].tagName;
+                const sameTag = sourceTag === currentTagName;
+                const introInstrPair =
+                    (sourceTag === 'intro' && currentTagName === 'instr') ||
+                    (sourceTag === 'instr' && currentTagName === 'intro');
+                if (sameTag || introInstrPair) {
+                    node.innerHTML = hashMap[hashrefAttr].content;
+                }
             }
         }
     });
@@ -963,7 +971,7 @@ function addButtons(song) {
                     return;
                 }
                 if (result === true || result === undefined) {
-                    btn.style.display = '';
+                    btn.removeAttribute('style');
                 }
             });
             return;

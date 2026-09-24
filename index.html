@@ -51,6 +51,7 @@
     <span id="midiContent">
         MIDI device <select id="midiSelectDevice"></select> <span id="midiError" style="color: red;">Wait...</span>
         <button type="button" id="midiModalBtn" class="tool-btn midi-modal-trigger" title="Настроить и отправить MIDI команду" aria-label="MIDI команда">&#127929;</button>
+        <button type="button" id="vrRegistrationBtn" class="tool-btn midi-modal-trigger" title="VR регистрации" aria-label="VR регистрации">VR</button>
         <hr>
     </span>
     <div class="accordion" id="checkListAccordion">
@@ -182,9 +183,9 @@
             </label>
         </div>
         <div class="midi-modal-actions midi-modal-patch-actions">
-            <label><input type="checkbox" id="midiModalAutoSend"> Автоматическая отправка</label>
-            <button type="button" id="midiModalSend" class="midi-modal-send">Отправить Patch</button>
-            <button type="button" id="midiModalOpenRegistration" class="midi-modal-paste midi-modal-registration-btn">Создать регистрацию</button>
+            <label><input type="checkbox" id="midiModalAutoSend"> auto</label>
+            <button type="button" id="midiModalVCombo" class="tool-btn mp3-link">v-combo</button>
+            <button type="button" id="midiModalSend" class="tool-btn playback-link">Отправить Patch</button>
         </div>
         <hr class="midi-modal-divider">
         <p class="midi-modal-hint"><strong>SysEx</strong>&nbsp;Байты в HEX через пробел или запятую. Один SysEx — одна строка. F0/F7 подставятся автоматически при необходимости.</p>
@@ -193,7 +194,7 @@
             <div class="midi-modal-sysex-controls">
               <button type="button" id="midiModalPasteSysex" class="midi-modal-paste">Вставить</button>
               <button type="button" id="midiModalClearSysex" class="midi-modal-clear midi-modal-clear-sysex">Очистить</button>
-              <button type="button" id="midiModalSendSysex" class="midi-modal-send">Отправить SysEx</button>
+              <button type="button" id="midiModalSendSysex" class="tool-btn playback-link">Отправить SysEx</button>
             </div>
             <textarea id="midiModalSysex" class="midi-modal-sysex midi-modal-text" rows="4" spellcheck="false" placeholder="F0 41 10 00 00 00 5B 12 01 F7"></textarea>
           </div>
@@ -218,7 +219,14 @@
 <div id="registration-modal" class="registration-modal" aria-hidden="true">
     <div class="registration-modal-content" role="dialog" aria-modal="true" aria-labelledby="registrationTitle">
         <button type="button" class="registration-close" id="registrationClose" aria-label="Закрыть">×</button>
-        <h3 id="registrationTitle">Создание регистрации</h3>
+        <h3 id="registrationTitle">Виртуальные регистрации</h3>
+
+        <div class="registration-saved-row">
+            <select id="registrationSavedSelect" class="registration-saved-select"></select>
+            <button type="button" id="registrationCopyName" class="registration-copy-btn" title="Копировать название" aria-label="Копировать название">📋</button>
+        </div>
+
+        <div class="registration-create-heading">Создание регистрации</div>
 
         <label class="registration-field">
             <span>Название</span>
@@ -234,6 +242,10 @@
                         <span>Tr</span>
                         <select id="registrationLowerTranspose"></select>
                     </label>
+                    <label class="registration-transpose registration-vol">
+                        <span>vol</span>
+                        <select id="registrationLowerVolume"></select>
+                    </label>
                 </div>
             </fieldset>
             <fieldset class="registration-part">
@@ -243,6 +255,10 @@
                     <label class="registration-transpose">
                         <span>Tr</span>
                         <select id="registrationUpperTranspose"></select>
+                    </label>
+                    <label class="registration-transpose registration-vol">
+                        <span>vol</span>
+                        <select id="registrationUpperVolume"></select>
                     </label>
                 </div>
             </fieldset>
@@ -265,14 +281,20 @@
         <div class="registration-actions">
             <button type="button" id="registrationSave" class="midi-modal-paste registration-save">Сохранить</button>
         </div>
+        <div class="registration-preview" id="registrationPreview" hidden>
+            <div class="registration-preview-label">Конфиг</div>
+            <pre id="registrationPreviewJson" class="registration-preview-json"></pre>
+        </div>
     </div>
 </div>
 
 <div id="sound-picker-modal" class="sound-picker-modal" aria-hidden="true">
     <div class="sound-picker-modal-content" role="dialog" aria-modal="true" aria-labelledby="soundPickerTitle">
         <button type="button" class="sound-picker-close" id="soundPickerClose" aria-label="Закрыть">×</button>
-        <h3 id="soundPickerTitle">Выбор звука</h3>
-        <p class="sound-picker-subtitle" id="soundPickerBankTitle"></p>
+        <div class="sound-picker-heading">
+            <h3 id="soundPickerTitle">Выбор звука</h3>
+            <p class="sound-picker-subtitle" id="soundPickerBankTitle"></p>
+        </div>
         <div class="sound-picker-banks" id="soundPickerBanks" role="tablist"></div>
         <div class="sound-picker-body" id="soundPickerBody"></div>
     </div>

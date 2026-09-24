@@ -80,12 +80,12 @@ const midiModalBtn = document.getElementById('midiModalBtn');
 
 function syncMidiModalButtonVisibility() {
   if (!midiModalBtn) return;
-  midiModalBtn.style.display = '';
+  midiModalBtn.removeAttribute('style');
 }
 
 function syncVoiceMidiState() {
   const enableVoiceClicks = !!selectedMidiOutput();
-  document.querySelectorAll('span.voice').forEach((element) => {
+  document.querySelectorAll('span.voice, span.vr').forEach((element) => {
     if (enableVoiceClicks) {
       element.classList.remove('no-midi');
     } else {
@@ -970,9 +970,119 @@ function initVoiceMidiHandlers() {
   document.addEventListener("click", handleVoiceMidiClick);
 }
 
+function getRegistrationsListForVr() {
+  if (typeof registrationsData !== 'undefined' && Array.isArray(registrationsData)) {
+    return registrationsData;
+  }
+  return [];
+}
+
+function findRegistrationByExactName(name) {
+  return getRegistrationsListForVr().find((item) => item && item.name === name) || null;
+}
+
+function hasRegistrationSound(part) {
+  return !!(part && part.sound && part.sound.msb !== undefined && part.sound.lsb !== undefined && part.sound.prg !== undefined);
+}
+
+function sendRegistrationPatches(registration) {
+  if (!selectedMidiOutput()) {
+    return false;
+  }
+  if (!isVoiceMidiDeviceAllowed()) {
+    return false;
+  }
+
+  const upper = registration.upper || null;
+  const lower = registration.lower || null;
+  const upperOk = hasRegistrationSound(upper);
+  const lowerOk = hasRegistrationSound(lower);
+
+  if (!upperOk) {
+    console.warn('[MIDI] span.vr: у регистрации нет Upper sound', registration.name);
+    return false;
+  }
+
+  sendMidiPatch(
+    Math.max(0, Number(upper.channel) - 1),
+    Number(upper.sound.msb),
+    Number(upper.sound.lsb),
+    Number(upper.sound.prg),
+    `${registration.name} upper`
+  );
+
+  if (lowerOk) {
+    setTimeout(() => {
+      sendMidiPatch(
+        Math.max(0, Number(lower.channel) - 1),
+        Number(lower.sound.msb),
+        Number(lower.sound.lsb),
+        Number(lower.sound.prg),
+        `${registration.name} lower`
+      );
+    }, 100);
+  }
+
+  return true;
+}
+
+function buildRegistrationAlert(registration) {
+  const lines = [];
+  const upper = registration.upper || {};
+  const lower = registration.lower || {};
+  const lowerOk = hasRegistrationSound(lower);
+
+  lines.push(`Upper vol: ${upper.volume ?? ''}`);
+  if (lowerOk) {
+    lines.push(`Lower vol: ${lower.volume ?? ''}`);
+  }
+  lines.push(`Upper transpose: ${upper.transpose ?? 0}`);
+  if (lowerOk) {
+    lines.push(`Lower transpose: ${lower.transpose ?? 0}`);
+  }
+  if (registration.split && registration.split.enabled) {
+    lines.push(`Split note: ${registration.split.note || ''}`);
+  }
+  return lines.join('\n');
+}
+
+function handleVrMidiClick(event) {
+  const target = event.target instanceof Element ? event.target.closest('span.vr') : null;
+  if (!target) {
+    return;
+  }
+
+  if (!selectedMidiOutput()) {
+    return;
+  }
+
+  const name = target.textContent;
+  const registration = findRegistrationByExactName(name);
+  if (!registration) {
+    console.warn('[MIDI] span.vr: регистрация не найдена:', name);
+    return;
+  }
+
+  const sent = sendRegistrationPatches(registration);
+  if (!sent) {
+    return;
+  }
+
+  target.classList.add('is-pressed');
+  window.setTimeout(() => target.classList.remove('is-pressed'), 250);
+
+  alert(buildRegistrationAlert(registration));
+}
+
+function initVrMidiHandlers() {
+  document.removeEventListener('click', handleVrMidiClick);
+  document.addEventListener('click', handleVrMidiClick);
+}
+
 function initMidi() {
   syncVoiceMidiState();
   initVoiceMidiHandlers();
+  initVrMidiHandlers();
 }
 
 function sendMidiByForm() {
@@ -1364,6 +1474,20 @@ function initMidiModal() {
 
   setupMidiModalNumberControls(triggerAutoSendIfEnabled);
 
+  window.sendMidiModalPatch = sendModalPatch;
+
+  const vComboBtn = document.getElementById('midiModalVCombo');
+  if (vComboBtn) {
+    vComboBtn.addEventListener('click', function () {
+      if (typeof window.openSoundPicker !== 'function') {
+        alert('Модалка выбора звука не готова.');
+        return;
+      }
+      // без onSelect — режим MIDI patch: поля + auto/закрытие внутри пикера
+      window.openSoundPicker();
+    });
+  }
+
   if (sendBtn) {
     sendBtn.addEventListener('click', function () {
       sendModalPatch();
@@ -1484,7 +1608,9 @@ function initSoundPickerModal() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'sound-picker-bank-btn' + (key === activeBankKey ? ' is-active' : '');
-      const bankSoundCount = (data[key].sections || []).reduce((sum, section) => sum + ((section.sounds || []).length), 0);
+      const bankSoundCount = (data[key].sections || []).reduce((sum, section) => {
+        return sum + (section.sounds || []).filter((sound) => !/~/.test((sound && sound.name) || '')).length;
+      }, 0);
       btn.textContent = (bankLabels[key] || key) + ' (' + bankSoundCount + ')';
       btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-selected', key === activeBankKey ? 'true' : 'false');
@@ -1507,7 +1633,11 @@ function initSoundPickerModal() {
     }
 
     const bank = data[activeBankKey];
-    if (bankTitleEl) bankTitleEl.textContent = bank.title || '';
+    if (bankTitleEl) {
+      bankTitleEl.textContent = String(bank.title || '')
+        .replace(/s*(VR730 exclusives marked with ~)/gi, '')
+        .trim();
+    }
 
     (bank.sections || []).forEach((section, sectionIndex) => {
       const sectionEl = document.createElement('section');
@@ -1515,46 +1645,57 @@ function initSoundPickerModal() {
 
       const title = document.createElement('h4');
       title.className = 'sound-picker-section-title';
-      const soundCount = (section.sounds || []).length;
+      const visibleSounds = (section.sounds || [])
+        .map((sound, soundIndex) => ({ sound, soundIndex }))
+        .filter(({ sound }) => !/~/.test((sound && sound.name) || ''));
+      const soundCount = visibleSounds.length;
+      if (!soundCount) {
+        return;
+      }
       title.textContent = (section.name || ('Section ' + (sectionIndex + 1))) + ' (' + soundCount + ')';
       sectionEl.appendChild(title);
 
       const grid = document.createElement('div');
       grid.className = 'sound-picker-sounds';
 
-      (section.sounds || []).forEach((sound, soundIndex) => {
+      visibleSounds.forEach(({ sound, soundIndex }) => {
         const soundKey = activeBankKey + ':' + sectionIndex + ':' + soundIndex;
         const soundName = sound.name || ('Sound ' + (soundIndex + 1));
-        const isVr730Exclusive = /~/.test(soundName);
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'sound-picker-sound-btn' + (selectedSoundKey === soundKey ? ' is-selected' : '');
         btn.textContent = soundName;
-        btn.title = isVr730Exclusive ? (soundName + ' (только VR730)') : soundName;
-        if (isVr730Exclusive) {
-          btn.disabled = true;
-          btn.classList.add('is-disabled');
-        } else {
-          btn.addEventListener('click', () => {
-            selectedSoundKey = soundKey;
-            const chosen = {
-              name: soundName,
-              msb: sound.msb,
-              lsb: sound.lsb,
-              prg: sound.prg,
-              bank: activeBankKey,
-              section: section.name || '',
-            };
-            if (selectionCallback) {
-              const cb = selectionCallback;
-              closeSoundPicker();
-              cb(chosen);
-              return;
+        btn.title = soundName;
+        btn.dataset.msb = sound.msb != null ? String(sound.msb) : '';
+        btn.dataset.lsb = sound.lsb != null ? String(sound.lsb) : '';
+        btn.dataset.prg = sound.prg != null ? String(sound.prg) : '';
+        btn.addEventListener('click', () => {
+          selectedSoundKey = soundKey;
+          const chosen = {
+            name: soundName,
+            msb: sound.msb,
+            lsb: sound.lsb,
+            prg: sound.prg,
+            bank: activeBankKey,
+            section: section.name || '',
+          };
+          if (selectionCallback) {
+            const cb = selectionCallback;
+            closeSoundPicker();
+            cb(chosen);
+            return;
+          }
+          applySoundToMidiForm(sound);
+          renderBody();
+          const autoSend = document.getElementById('midiModalAutoSend');
+          if (autoSend && autoSend.checked) {
+            if (typeof window.sendMidiModalPatch === 'function') {
+              window.sendMidiModalPatch();
             }
-            applySoundToMidiForm(sound);
-            renderBody();
-          });
-        }
+          } else {
+            closeSoundPicker();
+          }
+        });
         grid.appendChild(btn);
       });
 
@@ -1588,6 +1729,19 @@ function initSoundPickerModal() {
   });
 }
 
+function buildVolumeOptions(selectEl, selectedValue) {
+  if (!selectEl) return;
+  selectEl.innerHTML = '';
+  const selected = selectedValue == null ? 10 : Number(selectedValue);
+  for (let value = 1; value <= 12; value += 1) {
+    const option = document.createElement('option');
+    option.value = String(value);
+    option.textContent = String(value);
+    if (value === selected) option.selected = true;
+    selectEl.appendChild(option);
+  }
+}
+
 function buildTransposeOptions(selectEl, selectedValue) {
   if (!selectEl) return;
   selectEl.innerHTML = '';
@@ -1617,7 +1771,7 @@ function buildSplitNoteOptions(selectEl) {
 
 function initRegistrationModal() {
   const modal = document.getElementById('registration-modal');
-  const openBtn = document.getElementById('midiModalOpenRegistration');
+  const openBtn = document.getElementById('vrRegistrationBtn');
   const closeBtn = document.getElementById('registrationClose');
   const saveBtn = document.getElementById('registrationSave');
   const nameInput = document.getElementById('registrationName');
@@ -1625,6 +1779,12 @@ function initRegistrationModal() {
   const upperBtn = document.getElementById('registrationUpperSoundBtn');
   const lowerTranspose = document.getElementById('registrationLowerTranspose');
   const upperTranspose = document.getElementById('registrationUpperTranspose');
+  const lowerVolume = document.getElementById('registrationLowerVolume');
+  const upperVolume = document.getElementById('registrationUpperVolume');
+  const previewBox = document.getElementById('registrationPreview');
+  const previewJson = document.getElementById('registrationPreviewJson');
+  const savedSelect = document.getElementById('registrationSavedSelect');
+  const copyNameBtn = document.getElementById('registrationCopyName');
   const splitEnabled = document.getElementById('registrationSplitEnabled');
   const splitNoteRow = document.getElementById('registrationSplitNoteRow');
   const splitNote = document.getElementById('registrationSplitNote');
@@ -1635,7 +1795,48 @@ function initRegistrationModal() {
 
   buildTransposeOptions(lowerTranspose, 0);
   buildTransposeOptions(upperTranspose, 0);
+  buildVolumeOptions(lowerVolume, 10);
+  buildVolumeOptions(upperVolume, 10);
   buildSplitNoteOptions(splitNote);
+
+  function getRegistrationsList() {
+    if (typeof registrationsData !== 'undefined' && Array.isArray(registrationsData)) {
+      return registrationsData;
+    }
+    return [];
+  }
+
+  function refreshSavedRegistrationsSelect(selectedName) {
+    if (!savedSelect) return;
+    const list = getRegistrationsList();
+    const previous = selectedName != null ? selectedName : savedSelect.value;
+    savedSelect.innerHTML = '';
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = list.length ? '— выбрать —' : '— нет сохранённых —';
+    savedSelect.appendChild(empty);
+    list
+      .slice()
+      .sort((a, b) => String(a && a.name || '').localeCompare(String(b && b.name || ''), 'ru'))
+      .forEach((item) => {
+        if (!item || !item.name) return;
+        const option = document.createElement('option');
+        option.value = item.name;
+        option.textContent = item.name;
+        savedSelect.appendChild(option);
+      });
+    if (previous && [...savedSelect.options].some((o) => o.value === previous)) {
+      savedSelect.value = previous;
+    }
+  }
+
+  async function ensureRegistrationsLoaded() {
+    if (typeof registrationsLoadData === 'function') {
+      await registrationsLoadData();
+    }
+    refreshSavedRegistrationsSelect();
+  }
+
 
   function syncSplitNoteVisibility() {
     const enabled = splitEnabled && splitEnabled.value === 'yes';
@@ -1650,15 +1851,24 @@ function initRegistrationModal() {
     if (upperBtn) upperBtn.textContent = 'Выбрать звук';
     if (lowerTranspose) lowerTranspose.value = '0';
     if (upperTranspose) upperTranspose.value = '0';
+    if (lowerVolume) lowerVolume.value = '10';
+    if (upperVolume) upperVolume.value = '10';
     if (splitEnabled) splitEnabled.value = 'no';
     if (splitNote) splitNote.value = 'C4';
+    if (previewBox) previewBox.hidden = true;
+    if (previewJson) previewJson.textContent = '';
     syncSplitNoteVisibility();
   }
 
-  function openRegistrationModal() {
+  async function openRegistrationModal() {
     resetForm();
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
+    try {
+      await ensureRegistrationsLoaded();
+    } catch (e) {
+      console.warn(e);
+    }
     if (nameInput) nameInput.focus();
   }
 
@@ -1691,14 +1901,22 @@ function initRegistrationModal() {
     });
   }
 
-  function saveRegistration() {
+  async function saveRegistration() {
     const name = (nameInput && nameInput.value.trim()) || '';
     const errors = [];
     if (!name) errors.push('Укажите название регистрации.');
     if (!upperSound) errors.push('Выберите звук Upper.');
+
+    const existing = getRegistrationsList();
+    const nameTaken = existing.some(
+      (item) => item && String(item.name || '').trim().toLowerCase() === name.toLowerCase()
+    );
+    if (name && nameTaken) errors.push('Регистрация с таким названием уже есть.');
+
     if (errors.length) {
       alert(errors.join('\n'));
       if (!name && nameInput) nameInput.focus();
+      else if (nameTaken && nameInput) nameInput.focus();
       else if (!upperSound && upperBtn) upperBtn.focus();
       return;
     }
@@ -1709,22 +1927,65 @@ function initRegistrationModal() {
         channel: 3,
         sound: lowerSound,
         transpose: lowerTranspose ? Number(lowerTranspose.value) : 0,
+        volume: lowerVolume ? Number(lowerVolume.value) : 10,
       },
       upper: {
         channel: 4,
         sound: upperSound,
         transpose: upperTranspose ? Number(upperTranspose.value) : 0,
+        volume: upperVolume ? Number(upperVolume.value) : 10,
       },
       split: (splitEnabled && splitEnabled.value === 'yes')
         ? { enabled: true, note: splitNote ? splitNote.value : 'C4' }
         : { enabled: false },
     };
-    alert(JSON.stringify(result, null, 2));
+
+    try {
+      if (typeof registrationsSaveData !== 'function') {
+        throw new Error('registrationsSaveData недоступна');
+      }
+      const next = existing.concat([result]);
+      await registrationsSaveData(next);
+      refreshSavedRegistrationsSelect(name);
+      const text = JSON.stringify(result, null, 2);
+      if (previewJson) previewJson.textContent = text;
+      if (previewBox) {
+        previewBox.hidden = false;
+        previewBox.scrollIntoView({ block: 'nearest' });
+      }
+    } catch (e) {
+      console.warn(e);
+      alert('Не удалось сохранить регистрацию.');
+    }
   }
 
   openBtn.addEventListener('click', openRegistrationModal);
   if (closeBtn) closeBtn.addEventListener('click', closeRegistrationModal);
   if (saveBtn) saveBtn.addEventListener('click', saveRegistration);
+  if (copyNameBtn) {
+    copyNameBtn.addEventListener('click', async () => {
+      const value = savedSelect ? savedSelect.value.trim() : '';
+      if (!value) {
+        alert('Выберите регистрацию для копирования названия.');
+        return;
+      }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = value;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+      } catch (e) {
+        console.warn(e);
+        alert('Не удалось скопировать название.');
+      }
+    });
+  }
   if (lowerBtn) lowerBtn.addEventListener('click', () => pickSound('lower'));
   if (upperBtn) upperBtn.addEventListener('click', () => pickSound('upper'));
   if (splitEnabled) splitEnabled.addEventListener('change', syncSplitNoteVisibility);

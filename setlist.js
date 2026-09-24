@@ -1,5 +1,8 @@
 const JSON_URL = 'https://api.jsonstorage.net/v1/json/ef4d2848-a5ef-434e-b514-f75122723e86/45cc7c86-37f4-42d8-91c3-68567347ba29'; // ← вставь свой URL
 const API_KEY = 'd9568e85-92da-4e7c-ab00-ec475625f04e';
+const REGISTRATIONS_JSON_URL = 'https://api.jsonstorage.net/v1/json/ef4d2848-a5ef-434e-b514-f75122723e86/670c01cc-2209-408f-8086-5fd3fe9aa0bc';
+let registrationsData = [];
+
 let setlistData = {};
 let currentHash = null;
 let setlistLoaderCounter = 0;
@@ -183,7 +186,7 @@ function setlistUpdateHeaderActions() {
                 btn.textContent = '✖';
                 headerRow.insertBefore(btn, nextBtn || null);
             } else {
-                removeBtn.style.display = '';
+                removeBtn.removeAttribute('style');
             }
         } else {
             if (removeBtn) {
@@ -407,4 +410,38 @@ function cacheOriginalOrder() {
             list.querySelectorAll('.accordion')
         ).map(el => el.getAttribute('hash'));
     });
+}
+
+
+async function registrationsLoadData() {
+    try {
+        const res = await fetch(REGISTRATIONS_JSON_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            registrationsData = data;
+        } else if (data && Array.isArray(data.registrations)) {
+            registrationsData = data.registrations;
+        } else {
+            registrationsData = [];
+        }
+    } catch (e) {
+        console.warn('Registrations: не удалось загрузить данные', e);
+        registrationsData = [];
+    }
+    return registrationsData;
+}
+
+async function registrationsSaveData(list) {
+    const payload = Array.isArray(list) ? list : [];
+    registrationsData = payload;
+    const res = await fetch(REGISTRATIONS_JSON_URL + '?apiKey=' + API_KEY, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+    }
+    return registrationsData;
 }
