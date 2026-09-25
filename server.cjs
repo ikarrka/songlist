@@ -10,6 +10,7 @@ const mimeTypes = {
     '.js': 'text/javascript; charset=utf-8',
     '.json': 'application/json; charset=utf-8',
     '.mp3': 'audio/mpeg',
+    '.pdf': 'application/pdf',
     '.png': 'image/png',
     '.xml': 'application/xml; charset=utf-8',
 };

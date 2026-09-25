@@ -33,7 +33,8 @@ pre {
 }
 
 chord,
-yt {
+yt,
+pdf {
   display: none;
 }
 
@@ -41,6 +42,7 @@ yt {
    2. HEADER / PAGE CHROME
    -------------------------------------------------------------------------- */
 #themeToggle,
+#alarmBtn,
 #clearDataBtn,
 #clearNextBtn {
   width: 34px;
@@ -59,6 +61,18 @@ yt {
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+#alarmBtn {
+  padding: 0;
+  background: #c62828;
+  color: #fff;
+}
+
+#alarmBtn svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 
@@ -94,6 +108,7 @@ yt {
 
 #cell_theme_toggle .header-right {
   justify-content: flex-end;
+  gap: 3px;
 }
 
 .artist-select,
@@ -237,7 +252,8 @@ yt {
 .accordion .toggle-button > mp3,
 .accordion .toggle-button > yt,
 .accordion .toggle-button > chord,
-.accordion .toggle-button > playback {
+.accordion .toggle-button > playback,
+.accordion .toggle-button > pdf {
   display: none;
 }
 
@@ -1199,9 +1215,14 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 
 /* MIDI modal */
 .midi-modal-trigger {
-  margin-left: 6px;
+  margin-left: 3px;
   font-size: 1.1em;
   vertical-align: middle;
+}
+
+/* Inline whitespace is the remaining inter-button gap in the MIDI/VR pair. */
+#midiModalBtn + #vrRegistrationBtn {
+  margin-left: 0;
 }
 
 .midi-modal {
@@ -1505,6 +1526,131 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 /* --------------------------------------------------------------------------
    11. OVERLAYS / IFRAME
    -------------------------------------------------------------------------- */
+
+.pdf-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.92);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.pdf-overlay.is-open {
+  display: flex;
+}
+
+.pdf-canvas-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 0 8px 72px;
+  box-sizing: border-box;
+}
+
+.pdf-canvas-wrap canvas {
+  flex-shrink: 0;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.pdf-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10001;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.pdf-close-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.pdf-toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0px);
+  height: 40px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.pdf-page-info {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+  min-width: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.pdf-toolbar .pdf-nav-btn {
+  position: absolute;
+  top: 0;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  pointer-events: auto;
+}
+
+#pdfPrevBtn {
+  left: 12px;
+}
+
+#pdfNextBtn {
+  right: 12px;
+}
+
+.tool-btn.pdf-link {
+  width: auto;
+  min-width: 72px;
+  height: 34px;
+  padding: 0 12px;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
 .iframe-overlay {
   position: fixed;
   inset: 0;

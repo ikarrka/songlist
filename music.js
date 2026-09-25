@@ -281,20 +281,21 @@ function fillSongHeader(band) {
 
         switch (attr) {
             case 'key': {
+                const keyCustomStyle = { fontWeight: 'bold', color: 'green', fontSize: '1.2em' };
                 const keyVal = item.getAttribute('key');
                 const customVal = item.getAttribute(conf.altAttr);
                 if (customVal) {
                     value = customVal;
-                    style = { fontWeight: 'bold', color: 'green', fontSize: '1.2em' };
+                    style = keyCustomStyle;
                 } else if (keyVal) {
                     value = keyVal;
                     style = { fontWeight: 'bold' };
-                }
-
-                if (value && item.hasAttribute('keyrender')) {
-                    const transposeValue = parseInt(item.getAttribute('transpose'), 10);
-                    if (!Number.isNaN(transposeValue) && transposeValue !== 0) {
-                        value = transposeKeyValue(value, transposeValue) || value;
+                    if (item.hasAttribute('keyrender')) {
+                        const transposeValue = parseInt(item.getAttribute('transpose'), 10);
+                        if (!Number.isNaN(transposeValue) && transposeValue !== 0) {
+                            value = transposeKeyValue(value, transposeValue) || value;
+                            style = keyCustomStyle;
+                        }
                     }
                 }
                 break;
@@ -611,6 +612,7 @@ function replaceCustomTags(song) {
         { selector: 'yt, YT', text: '►' },
         { selector: 'mp3', text: '♪' },
         { selector: 'playback', text: 'Playback' },
+        { selector: 'pdf', text: 'PDF' },
         { selector: 'chord', text: chordSign }
     ];
     configs1.forEach(({ selector, text }) => {
@@ -925,6 +927,7 @@ function addButtons(song) {
     const buttons = [
         { txt: "⛭", class: "setlist-btn" },
         { txt: "mp3", class: "mp3-link", tag: "mp3", action: openMp3Player },
+        { txt: "PDF", class: "pdf-link", tag: "pdf", action: openPdfViewer },
         { txt: "►", class: "youtube-link", tag: "yt", action: openYoutubeFrame },
         { txt: "☰", tag: "chord", action: link => window.open(link, "_blank") },
         { txt: "🔍", class: "google-search-btn", action: song => openGoogleSearch(song) },
@@ -936,7 +939,7 @@ function addButtons(song) {
 
     buttons.forEach(cfg => {
         if (cfg.transpose && !table) return;
-        if (cfg.tag === 'mp3' || cfg.tag === 'playback') {
+        if (cfg.tag === 'mp3' || cfg.tag === 'playback' || cfg.tag === 'pdf') {
             const rawValue = song
                 ?.querySelector(`button.toggle-button ${cfg.tag}`)
                 ?.textContent
@@ -948,9 +951,12 @@ function addButtons(song) {
             if (cfg.tag === 'mp3') {
                 fileName = normalizeMp3FileName(rawValue);
                 filePath = `mp3/${fileName}.mp3`;
-            } else {
+            } else if (cfg.tag === 'playback') {
                 fileName = normalizePlaybackFileName(rawValue);
                 filePath = `${window.prefixPlayback || 'playback/'}${fileName}.mp3`;
+            } else {
+                fileName = normalizePdfFileName(rawValue);
+                filePath = `pdf/${fileName}.pdf`;
             }
 
             const btn = document.createElement("button");
@@ -1215,7 +1221,7 @@ async function buildAllBandsList() {
 
     function cloneAccordionForAllBands(acc) {
         const clone = acc.cloneNode(true);
-        clone.querySelectorAll('chord, yt, mp3, playback').forEach(tag => tag.remove());
+        clone.querySelectorAll('chord, yt, mp3, playback, pdf').forEach(tag => tag.remove());
         return clone;
     }
 
@@ -1587,6 +1593,11 @@ function normalizePlaybackFileName(rawValue) {
     return rawValue.trim().replace(/\.(mp3|wav|ogg|flac|aac|m4a)$/i, "");
 }
 
+function normalizePdfFileName(rawValue) {
+    if (!rawValue) return "";
+    return rawValue.trim().replace(/\.pdf$/i, "");
+}
+
 function stopAllAudioPlayers(except) {
     const ids = ['mp3Player', 'playbackPlayer'];
     ids.forEach(id => {
@@ -1654,6 +1665,221 @@ function openGoogleSearch(song) {
     
     const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     window.open(url, '_blank');
+}
+
+
+async function ensurePdfJs() {
+    if (window.pdfjsLib) return window.pdfjsLib;
+    const pdfjsLib = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+    window.pdfjsLib = pdfjsLib;
+    return pdfjsLib;
+}
+
+const pdfViewerState = {
+    pdf: null,
+    pageNum: 1,
+    pageCount: 0,
+    rendering: false,
+    pendingPage: null,
+    keyHandler: null,
+};
+
+async function openPdfViewer(filename) {
+    const name = normalizePdfFileName(filename);
+    if (!name) return;
+
+    const overlay = document.getElementById("pdfOverlay");
+    if (!overlay) {
+        console.error("PDF overlay not found");
+        return;
+    }
+
+    try {
+        const pdfjsLib = await ensurePdfJs();
+        const url = encodeURI(`pdf/${name}.pdf`);
+        const pdf = await pdfjsLib.getDocument(url).promise;
+
+        pdfViewerState.pdf = pdf;
+        pdfViewerState.pageNum = 1;
+        pdfViewerState.pageCount = pdf.numPages;
+        pdfViewerState.pendingPage = null;
+        pdfViewerState.rendering = false;
+
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+
+        bindPdfViewerHandlersOnce();
+        attachPdfKeyboard();
+        updatePdfPageCounter();
+        await renderPdfPage(1);
+    } catch (err) {
+        console.error("Failed to open PDF:", err);
+    }
+}
+
+function closePdfViewer() {
+    const overlay = document.getElementById("pdfOverlay");
+    if (overlay) {
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+    }
+    detachPdfKeyboard();
+
+    const canvas = document.getElementById("pdfCanvas");
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = 0;
+        canvas.height = 0;
+    }
+
+    pdfViewerState.pdf = null;
+    pdfViewerState.pageNum = 1;
+    pdfViewerState.pageCount = 0;
+    pdfViewerState.pendingPage = null;
+    pdfViewerState.rendering = false;
+}
+
+async function renderPdfPage(num) {
+    if (!pdfViewerState.pdf) return;
+    if (pdfViewerState.rendering) {
+        pdfViewerState.pendingPage = num;
+        return;
+    }
+
+    pdfViewerState.rendering = true;
+    try {
+        const page = await pdfViewerState.pdf.getPage(num);
+        const canvas = document.getElementById("pdfCanvas");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
+        // Native PDF page size (no fit-to-width). DPR sharpens backing store;
+        // CSS size stays unscaled so aspect ratio is never stretched.
+        const viewport = page.getViewport({ scale: 1 });
+        const outputScale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = Math.floor(viewport.width) + "px";
+        canvas.style.height = Math.floor(viewport.height) + "px";
+
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+        await page.render({
+            canvasContext: ctx,
+            viewport,
+            transform,
+        }).promise;
+
+        pdfViewerState.pageNum = num;
+        updatePdfPageCounter();
+        // Top-align after render so title/page number aren't left above the scrollport
+        const wrap = document.getElementById("pdfCanvasWrap");
+        if (wrap) {
+            wrap.scrollTop = 0;
+            wrap.scrollLeft = 0;
+        }
+    } catch (err) {
+        console.error("PDF render failed:", err);
+    } finally {
+        pdfViewerState.rendering = false;
+        if (pdfViewerState.pendingPage !== null) {
+            const pending = pdfViewerState.pendingPage;
+            pdfViewerState.pendingPage = null;
+            renderPdfPage(pending);
+        }
+    }
+}
+
+function updatePdfPageCounter() {
+    const el = document.getElementById("pdfPageInfo");
+    if (el) {
+        el.textContent = `${pdfViewerState.pageNum} / ${pdfViewerState.pageCount}`;
+    }
+    const prev = document.getElementById("pdfPrevBtn");
+    const next = document.getElementById("pdfNextBtn");
+    if (prev) prev.disabled = pdfViewerState.pageNum <= 1;
+    if (next) next.disabled = pdfViewerState.pageNum >= pdfViewerState.pageCount;
+}
+
+function goPdfPage(delta) {
+    if (!pdfViewerState.pdf) return;
+    const next = Math.min(
+        pdfViewerState.pageCount,
+        Math.max(1, pdfViewerState.pageNum + delta)
+    );
+    if (next !== pdfViewerState.pageNum) {
+        renderPdfPage(next);
+    }
+}
+
+function attachPdfKeyboard() {
+    detachPdfKeyboard();
+    pdfViewerState.keyHandler = (e) => {
+        if (e.key === "Escape") {
+            e.preventDefault();
+            closePdfViewer();
+            return;
+        }
+        if (e.key === "ArrowLeft" || e.key === "PageUp") {
+            e.preventDefault();
+            goPdfPage(-1);
+            return;
+        }
+        if (e.key === "ArrowRight" || e.key === "PageDown") {
+            e.preventDefault();
+            goPdfPage(1);
+        }
+    };
+    document.addEventListener("keydown", pdfViewerState.keyHandler);
+}
+
+function detachPdfKeyboard() {
+    if (pdfViewerState.keyHandler) {
+        document.removeEventListener("keydown", pdfViewerState.keyHandler);
+        pdfViewerState.keyHandler = null;
+    }
+}
+
+function bindPdfViewerHandlersOnce() {
+    if (window._pdfViewerHandlersBound) return;
+    window._pdfViewerHandlersBound = true;
+
+    document.getElementById("pdfCloseBtn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closePdfViewer();
+    });
+
+    document.getElementById("pdfPrevBtn")?.addEventListener("click", () => goPdfPage(-1));
+    document.getElementById("pdfNextBtn")?.addEventListener("click", () => goPdfPage(1));
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+        const overlay = document.getElementById("pdfOverlay");
+        if (!overlay || !overlay.classList.contains("is-open") || !pdfViewerState.pdf) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            renderPdfPage(pdfViewerState.pageNum);
+        }, 150);
+    });
+
+    const wrap = document.getElementById("pdfCanvasWrap");
+    if (wrap) {
+        let startX = null;
+        wrap.addEventListener("touchstart", (e) => {
+            if (e.changedTouches && e.changedTouches[0]) {
+                startX = e.changedTouches[0].clientX;
+            }
+        }, { passive: true });
+        wrap.addEventListener("touchend", (e) => {
+            if (startX == null || !e.changedTouches || !e.changedTouches[0]) return;
+            const dx = e.changedTouches[0].clientX - startX;
+            startX = null;
+            if (Math.abs(dx) < 50) return;
+            goPdfPage(dx < 0 ? 1 : -1);
+        }, { passive: true });
+    }
 }
 
 function openMp3Player(filename) {
