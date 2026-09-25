@@ -1043,6 +1043,7 @@ function buildRegistrationAlert(registration) {
   if (registration.split && registration.split.enabled) {
     lines.push(`Split note: ${registration.split.note || ''}`);
   }
+  lines.push(`Reverb: ${registration.reverb != null ? registration.reverb : 0}%`);
   return lines.join('\n');
 }
 
@@ -1568,6 +1569,7 @@ function initSoundPickerModal() {
     atelier: 'Atelier',
     extra: 'Extra',
     slt: 'SLT',
+    gm2: 'VR GM2',
   };
 
   let activeBankKey = null;
@@ -1769,6 +1771,19 @@ function buildSplitNoteOptions(selectEl) {
   }
 }
 
+function buildReverbOptions(selectEl, selectedValue) {
+  if (!selectEl) return;
+  selectEl.innerHTML = '';
+  const selected = selectedValue == null ? 0 : Number(selectedValue);
+  for (let value = 0; value <= 100; value += 10) {
+    const option = document.createElement('option');
+    option.value = String(value);
+    option.textContent = String(value);
+    if (value === selected) option.selected = true;
+    selectEl.appendChild(option);
+  }
+}
+
 function initRegistrationModal() {
   const modal = document.getElementById('registration-modal');
   const openBtn = document.getElementById('vrRegistrationBtn');
@@ -1783,11 +1798,13 @@ function initRegistrationModal() {
   const upperVolume = document.getElementById('registrationUpperVolume');
   const previewBox = document.getElementById('registrationPreview');
   const previewJson = document.getElementById('registrationPreviewJson');
+  const previewCloseBtn = document.getElementById('registrationPreviewClose');
   const savedSelect = document.getElementById('registrationSavedSelect');
   const copyNameBtn = document.getElementById('registrationCopyName');
   const splitEnabled = document.getElementById('registrationSplitEnabled');
   const splitNoteRow = document.getElementById('registrationSplitNoteRow');
   const splitNote = document.getElementById('registrationSplitNote');
+  const reverbSelect = document.getElementById('registrationReverb');
   if (!modal || !openBtn) return;
 
   let lowerSound = null;
@@ -1798,6 +1815,7 @@ function initRegistrationModal() {
   buildVolumeOptions(lowerVolume, 10);
   buildVolumeOptions(upperVolume, 10);
   buildSplitNoteOptions(splitNote);
+  buildReverbOptions(reverbSelect, 0);
 
   function getRegistrationsList() {
     if (typeof registrationsData !== 'undefined' && Array.isArray(registrationsData)) {
@@ -1855,9 +1873,65 @@ function initRegistrationModal() {
     if (upperVolume) upperVolume.value = '10';
     if (splitEnabled) splitEnabled.value = 'no';
     if (splitNote) splitNote.value = 'C4';
+    if (reverbSelect) reverbSelect.value = '0';
     if (previewBox) previewBox.hidden = true;
     if (previewJson) previewJson.textContent = '';
     syncSplitNoteVisibility();
+  }
+
+  function applyRegistrationSoundBtn(btn, sound) {
+    if (!btn) return;
+    if (sound && sound.name) {
+      btn.textContent = sound.name;
+      btn.title = sound.name;
+    } else {
+      btn.textContent = 'Выбрать звук';
+      btn.title = '';
+    }
+  }
+
+  function loadRegistrationIntoForm(reg) {
+    if (!reg) return;
+    if (nameInput) nameInput.value = reg.name || '';
+    const lower = reg.lower || {};
+    const upper = reg.upper || {};
+    lowerSound = lower.sound || null;
+    upperSound = upper.sound || null;
+    applyRegistrationSoundBtn(lowerBtn, lowerSound);
+    applyRegistrationSoundBtn(upperBtn, upperSound);
+    if (lowerTranspose) {
+      lowerTranspose.value = String(lower.transpose != null ? lower.transpose : 0);
+    }
+    if (upperTranspose) {
+      upperTranspose.value = String(upper.transpose != null ? upper.transpose : 0);
+    }
+    if (lowerVolume) {
+      lowerVolume.value = String(lower.volume != null ? lower.volume : 10);
+    }
+    if (upperVolume) {
+      upperVolume.value = String(upper.volume != null ? upper.volume : 10);
+    }
+    const split = reg.split || {};
+    if (splitEnabled) splitEnabled.value = split.enabled ? 'yes' : 'no';
+    if (splitNote) splitNote.value = split.note || 'C4';
+    if (reverbSelect) {
+      reverbSelect.value = String(reg.reverb != null ? reg.reverb : 0);
+    }
+    syncSplitNoteVisibility();
+    const text = JSON.stringify(reg, null, 2);
+    if (previewJson) previewJson.textContent = text;
+    if (previewBox) previewBox.hidden = true;
+  }
+
+  function onSavedRegistrationChange() {
+    if (!savedSelect) return;
+    const selectedName = (savedSelect.value || '').trim();
+    if (!selectedName) return;
+    const reg = getRegistrationsList().find(
+      (item) => item && item.name === selectedName
+    );
+    if (!reg) return;
+    loadRegistrationIntoForm(reg);
   }
 
   async function openRegistrationModal() {
@@ -1869,6 +1943,7 @@ function initRegistrationModal() {
     } catch (e) {
       console.warn(e);
     }
+    refreshSavedRegistrationsSelect('');
     if (nameInput) nameInput.focus();
   }
 
@@ -1908,15 +1983,13 @@ function initRegistrationModal() {
     if (!upperSound) errors.push('Выберите звук Upper.');
 
     const existing = getRegistrationsList();
-    const nameTaken = existing.some(
+    const existingIndex = existing.findIndex(
       (item) => item && String(item.name || '').trim().toLowerCase() === name.toLowerCase()
     );
-    if (name && nameTaken) errors.push('Регистрация с таким названием уже есть.');
 
     if (errors.length) {
       alert(errors.join('\n'));
       if (!name && nameInput) nameInput.focus();
-      else if (nameTaken && nameInput) nameInput.focus();
       else if (!upperSound && upperBtn) upperBtn.focus();
       return;
     }
@@ -1938,13 +2011,16 @@ function initRegistrationModal() {
       split: (splitEnabled && splitEnabled.value === 'yes')
         ? { enabled: true, note: splitNote ? splitNote.value : 'C4' }
         : { enabled: false },
+      reverb: reverbSelect ? Number(reverbSelect.value) : 0,
     };
 
     try {
       if (typeof registrationsSaveData !== 'function') {
         throw new Error('registrationsSaveData недоступна');
       }
-      const next = existing.concat([result]);
+      const next = existingIndex >= 0
+        ? existing.map((item, i) => (i === existingIndex ? result : item))
+        : existing.concat([result]);
       await registrationsSaveData(next);
       refreshSavedRegistrationsSelect(name);
       const text = JSON.stringify(result, null, 2);
@@ -1962,6 +2038,12 @@ function initRegistrationModal() {
   openBtn.addEventListener('click', openRegistrationModal);
   if (closeBtn) closeBtn.addEventListener('click', closeRegistrationModal);
   if (saveBtn) saveBtn.addEventListener('click', saveRegistration);
+  if (savedSelect) savedSelect.addEventListener('change', onSavedRegistrationChange);
+  if (previewCloseBtn) {
+    previewCloseBtn.addEventListener('click', () => {
+      if (previewBox) previewBox.hidden = true;
+    });
+  }
   if (copyNameBtn) {
     copyNameBtn.addEventListener('click', async () => {
       const value = savedSelect ? savedSelect.value.trim() : '';

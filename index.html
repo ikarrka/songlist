@@ -276,13 +276,17 @@
                 <span>Нота</span>
                 <select id="registrationSplitNote"></select>
             </label>
-        </div>
-
-        <div class="registration-actions">
+            <label class="registration-field registration-inline">
+                <span>Реверб</span>
+                <select id="registrationReverb"></select>
+            </label>
             <button type="button" id="registrationSave" class="midi-modal-paste registration-save">Сохранить</button>
         </div>
         <div class="registration-preview" id="registrationPreview" hidden>
-            <div class="registration-preview-label">Конфиг</div>
+            <div class="registration-preview-label">
+                <span>Конфиг</span>
+                <button type="button" id="registrationPreviewClose" class="registration-preview-close" title="Скрыть конфиг" aria-label="Скрыть конфиг">×</button>
+            </div>
             <pre id="registrationPreviewJson" class="registration-preview-json"></pre>
         </div>
     </div>
