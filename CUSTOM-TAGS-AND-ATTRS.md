@@ -37,6 +37,9 @@
 | `<mp3>` | Редко в `.toggle-button`. Содержимое — имя файла (или `<name>.mp3`) в папке `mp3/` | В [addButtons](file:///d:/source/songlist/music.js#L789-L890) создаётся кнопка `♫`. **Перед показом** асинхронно проверяется, что `mp3/<name>.mp3` реально существует на сервере (через `checkMp3FileExists` — см. ниже). Если файла нет — кнопка удаляется. При клике открывает `mp3Panel` и останавливает playback. | — |
 | `<playback>` | В `.toggle-button` рядом с `<mp3>`. Содержимое — имя файла (или `<name>.mp3`) в папке `playback/`. **На песню берётся только первый встреченный тег.** | Обрабатывается **в том же цикле** `addButtons`, что и `<mp3>`. Создаётся кнопка с **текстом** «Playback» (последней в тулбаре). Аналогично проверяется существование `playback/<name>.mp3` — при 404 **кнопка не рисуется вовсе**. При клике останавливает **и mp3, и предыдущий playback** (`stopAllAudioPlayers`), открывает `playbackPanel`. | — |
 | `<pdf>` | В `.toggle-button`. Содержимое — имя файла (или `<name>.pdf`) в папке `pdf/` | В [addButtons](file:///d:/source/songlist/music.js) создаётся кнопка `PDF` (тот же file-check путь, что у mp3/playback). Имя нормализуется (`normalizePdfFileName` снимает `.pdf`). При клике открывается fullscreen-оверлей `#pdfOverlay` (PDF.js CDN): одна страница на canvas, prev/next + `n / N`, свайп, Arrow/Page keys; закрытие только × и Escape. | - |
+| `<greenpad>` | Внутри секций песни (номера пэдов) | В [replaceCustomTags](file:///d:/source/songlist/music.js) **до** `handleMidi`: `<greenpad>...</greenpad>` → `<span class="square-green-button">...</span>` (содержимое без изменений). Клики/MIDI — на `.square-green-button`. В allbands-клоне сырой тег удаляется как chord/yt/…. | — |
+| `<voice>` | Внутри секций песни (пресет голоса V-Combo) | В [replaceCustomTags](file:///d:/source/songlist/music.js) **до** `handleMidi`: `<voice>...</voice>` → `<span class="voice">...</span>` (содержимое без изменений). **Без** `dimmed`. Клики/MIDI — на `.voice` (см. §9). В allbands-клоне сырой тег удаляется как chord/yt/…. | — |
+| `<bank>` | Внутри секций песни (банк тембра, напр. `17-2`) | В [replaceCustomTags](file:///d:/source/songlist/music.js) **до** `handleMidi`: `<bank>...</bank>` → `<span class="bank">...</span>` (содержимое без изменений). **Без** `dimmed`. В allbands-клоне сырой тег удаляется как chord/yt/…. Не путать с атрибутом аккордеона `bank="…"` (§4). | — |
 
 Мапа лейблов задаётся в константе [`sectionMap`](file:///d:/source/songlist/music.js#L17-L25).
 
@@ -181,16 +184,17 @@ const hasBlock = (blockValue.trim() !== '') && (parseInt(blockValue, 10) > 0);
 
 ---
 
-## 9. Инлайн-чипы в тексте песни: `span.voice`, `span.vr` и др.
+## 9. Инлайн-чипы в тексте песни: `<voice>`/`<bank>` → `span.voice`/`span.bank`, `span.vr` и др.
 
-Стилизуются как компактные «плашки» (см. блоки `.voice` / `.midi` / `.pad` / `.bank` / `.split` / `.vr` в [music.css](file:///d:/source/songlist/music.css)). Обработка MIDI — в [midi.js](file:///d:/source/songlist/midi.js).
+Исходная разметка инлайн-голоса/банка — кастомные теги `<voice>` / `<bank>` (см. таблицу в §2); в [replaceCustomTags](file:///d:/source/songlist/music.js) **до** `handleMidi` они становятся `span.voice` / `span.bank`. Стилизуются как компактные «плашки» (см. блоки `.voice` / `.midi` / `.pad` / `.bank` / `.split` / `.vr` в [music.css](file:///d:/source/songlist/music.css)). Обработка MIDI — в [midi.js](file:///d:/source/songlist/midi.js). Атрибуты аккордеона `voice=""` / `bank=""` **не** затрагиваются.
 
 | Разметка | Назначение | Поведение |
 |---|---|---|
-| `<span class="voice">…</span>` (ключ голоса — атрибуты, см. `getVoiceMidiKey`) | Пресет голоса V-Combo из `voiceMidiConfig` | Клик шлёт Upper (и Lower при наличии) bank+PC. Без выбранного MIDI-выхода — класс `no-midi` (не кликается). Устройство должно быть разрешено: в имени MIDI-порта есть `roland` / `vcombo` / `vr` (после нормализации). |
+| `<voice>…</voice>` → `<span class="voice">…</span>` (ключ голоса — атрибуты/`textContent`, см. `getVoiceMidiKey`) | Пресет голоса V-Combo из `voiceMidiConfig` | Клик шлёт Upper (и Lower при наличии) bank+PC. Без выбранного MIDI-выхода — класс `no-midi` (не кликается). Устройство должно быть разрешено: в имени MIDI-порта есть `roland` / `vcombo` / `vr` (после нормализации). |
+| `<bank>…</bank>` → `<span class="bank">…</span>` | Отображение банка тембра в тексте (напр. `17-2`) | Чип для визуальной пометки; не путать с атрибутом аккордеона `bank` и с MIDI bank select. |
 | `<span class="vr">ТочноеИмя</span>` | Виртуальная регистрация | Имя в тексте **строго** = `name` сохранённой регистрации (без case-fold/trim). Клик: Upper ch4 bank+PC, через 100 мс Lower ch3 если есть sound; volume / transpose / split **по MIDI не уходят** — только alert. Нет регистрации → `console.warn`. Те же правила `no-midi` и проверки устройства, что у `span.voice`. Фон чипа — коричневый (`#8B4513`). |
 
-Атрибут аккордеона `voice="…"` (шапка) — отдельный путь: при открытии песни может сразу вызвать `sendVComboVoice` (см. §4). Инлайн `span.voice` — ручной клик по тексту.
+Атрибут аккордеона `voice="…"` (шапка) — отдельный путь: при открытии песни может сразу вызвать `sendVComboVoice` (см. §4). Инлайн `<voice>` / `span.voice` — ручной клик по тексту.
 
 ---
 

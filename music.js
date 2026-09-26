@@ -603,7 +603,7 @@ function markScrollableCells(scope) {
 }
 
 /**
- * convert <yt> and <chord> tags to links and symbols
+ * hide <yt>/<chord>/...; convert <greenpad>/<voice>/<bank> -> span chips
  */
 function replaceCustomTags(song) {
     const chordSign = '☰'
@@ -619,6 +619,32 @@ function replaceCustomTags(song) {
         song.querySelectorAll(selector).forEach(tag => {
             tag.style.display = "none";
         });
+    });
+
+    // <greenpad>...</greenpad> -> <span class="square-green-button">...</span> (before handleMidi)
+    song.querySelectorAll('greenpad').forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'square-green-button';
+        // Render-time MIDI gate (same as updateMidiIndicators)
+        span.classList.toggle('dimmed', !midiOutput);
+        span.innerHTML = tag.innerHTML;
+        tag.replaceWith(span);
+    });
+
+    // <voice>...</voice> -> <span class="voice">...</span> (before handleMidi; no dimmed)
+    song.querySelectorAll('voice').forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'voice';
+        span.innerHTML = tag.innerHTML;
+        tag.replaceWith(span);
+    });
+
+    // <bank>...</bank> -> <span class="bank">...</span> (before handleMidi; no dimmed)
+    song.querySelectorAll('bank').forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'bank';
+        span.innerHTML = tag.innerHTML;
+        tag.replaceWith(span);
     });
 
     // Дополнительная обработка обычных <a>
@@ -1227,7 +1253,7 @@ async function buildAllBandsList() {
 
     function cloneAccordionForAllBands(acc) {
         const clone = acc.cloneNode(true);
-        clone.querySelectorAll('chord, yt, mp3, playback, pdf').forEach(tag => tag.remove());
+        clone.querySelectorAll('chord, yt, mp3, playback, pdf, greenpad, voice, bank').forEach(tag => tag.remove());
         return clone;
     }
 
@@ -1391,6 +1417,8 @@ function initTransposeForAccordion(acc) {
 function initClickOnPads(song) {
     if (!song || typeof song.querySelectorAll !== "function") return;
     song.querySelectorAll(".square-green-button").forEach(btn => {
+        // Same gate as updateMidiIndicators: dim pads when no MIDI output (render/setup time)
+        btn.classList.toggle("dimmed", !midiOutput);
         btn.addEventListener("click", () => {
             handleGreenPadButton(btn.textContent.trim());
             showGreenPadConfirmation(btn);
