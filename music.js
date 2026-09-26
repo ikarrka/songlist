@@ -716,6 +716,8 @@ function setActiveSongList() {
         // ----- select букв
         const letterSelect = document.createElement('select');
         letterSelect.className = 'artist-letter-select';
+        letterSelect.id = 'artistLetterSelect';
+        letterSelect.name = 'artistLetter';
 
         [...lettersSet]
             .sort()
@@ -731,6 +733,8 @@ function setActiveSongList() {
         // ----- select артистов
         const artistSelect = document.createElement('select');
         artistSelect.className = 'artist-select';
+        artistSelect.id = 'artistSelect';
+        artistSelect.name = 'artist';
 
         [...artistSet]
             .sort((a, b) => a.localeCompare(b))
@@ -764,6 +768,8 @@ function setActiveSongList() {
     // создаём селект
     const select = document.createElement("select");
     select.className = "band-select";
+    select.id = "bandSelect";
+    select.name = "band";
 
     bands.forEach(b => {
         const opt = document.createElement("option");
