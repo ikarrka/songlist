@@ -84,6 +84,7 @@ function syncMidiModalButtonVisibility() {
 }
 
 function syncVoiceMidiState() {
+  initializeVoiceMidiKeys();
   const enableVoiceClicks = !!selectedMidiOutput();
   document.querySelectorAll('span.voice, span.vr').forEach((element) => {
     if (enableVoiceClicks) {
@@ -837,6 +838,14 @@ function getVoiceMidiKey(element) {
     const value = element.getAttribute(name);
     if (typeof value === "string" && value.trim()) {
       return value.trim();
+    }
+  }
+
+  // Defense in depth: only for span.voice (avoid accordion textContent)
+  if (typeof element.matches === "function" && element.matches("span.voice")) {
+    const textValue = (element.textContent || "").trim();
+    if (textValue) {
+      return textValue;
     }
   }
 

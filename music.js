@@ -586,6 +586,12 @@ function convertSongToTable(song) {
     replaceBackticksWithSpace(table);
     replaceCustomTags(song);
     handleMidi(table);
+    if (typeof initializeVoiceMidiKeys === 'function') {
+        initializeVoiceMidiKeys();
+    }
+    if (typeof syncVoiceMidiState === 'function') {
+        syncVoiceMidiState();
+    }
     markScrollableCells(table);
 }
 
@@ -632,9 +638,24 @@ function replaceCustomTags(song) {
     });
 
     // <voice>...</voice> -> <span class="voice">...</span> (before handleMidi; no dimmed)
+    // Copy attrs; stamp sym:v from text when no mapping key (MIDI click needs it)
     song.querySelectorAll('voice').forEach(tag => {
         const span = document.createElement('span');
         span.className = 'voice';
+        Array.from(tag.attributes).forEach(attr => {
+            span.setAttribute(attr.name, attr.value);
+        });
+        const keyAttrs = ['sym:v', '#sym:v', 'data-sym-v', 'data-voice-key', 'data-voice', 'voice'];
+        const hasKey = keyAttrs.some(name => {
+            const value = span.getAttribute(name);
+            return typeof value === 'string' && value.trim();
+        });
+        if (!hasKey) {
+            const textValue = (tag.textContent || '').trim();
+            if (textValue) {
+                span.setAttribute('sym:v', textValue);
+            }
+        }
         span.innerHTML = tag.innerHTML;
         tag.replaceWith(span);
     });
@@ -1154,7 +1175,7 @@ function bindAccordionClickEvent() {
                 if (img.getAttribute("imagetype") === "scores") {
                     loadScoreImage(img, accordion);
                 } else {
-                    img.src = prefixImage + img.dataset.src + '?v=' + Date.now();
+                    img.src = buildImageUrl(img.dataset.src) + '?v=' + Date.now();
                     img.removeAttribute("data-src");
                 }
             });
@@ -1309,6 +1330,10 @@ async function buildAllBandsList() {
     }
 }
 
+function buildImageUrl(filename) {
+    // encodeURIComponent so characters like '#' (e.g. A#.png) are not treated as URL fragments
+    return prefixImage + encodeURIComponent(filename);
+}
 function getScoreImageSource(img, transposeValue) {
     const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
     if (!originalSource || transposeValue === 0) return originalSource;
@@ -1330,7 +1355,7 @@ function setScoreImageNotice(img, originalSource) {
     notice.innerHTML = '&#119070; ';
 
     const link = document.createElement("a");
-    link.href = prefixImage + originalSource;
+    link.href = buildImageUrl(originalSource);
     link.target = "_blank";
     link.className = "originalImage";
     link.textContent = "original";
@@ -1351,7 +1376,7 @@ function loadScoreImage(img, acc) {
         return;
     }
 
-    img.src = prefixImage + source + '?v=' + Date.now();
+    img.src = buildImageUrl(source) + '?v=' + Date.now();
     img.style.display = "";
     const notice = img.nextElementSibling;
     if (notice?.classList.contains("score-image-notice")) notice.remove();
