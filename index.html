@@ -234,6 +234,38 @@
     </div>
 </div>
 
+<!-- ALARM: VCombo bank + Fantom scene / greenpads -->
+<div id="alarm-modal" class="alarm-modal" aria-hidden="true">
+    <div class="alarm-modal-content" role="dialog" aria-modal="true" aria-labelledby="alarmModalTitle">
+        <button type="button" class="alarm-modal-close" id="alarmModalClose" aria-label="Закрыть">×</button>
+        <div class="alarm-modal-title-row">
+            <span class="alarm-modal-title-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 3.25A5.25 5.25 0 0 0 6.75 8.5v3.08c0 .64-.2 1.27-.58 1.79L4.8 15.6c-.35.48-.01 1.15.58 1.15h13.24c.59 0 .93-.67.58-1.15l-1.37-2.23a3.25 3.25 0 0 1-.58-1.79V8.5A5.25 5.25 0 0 0 12 3.25Z"/>
+                    <path fill="currentColor" d="M9.25 18.05a2.78 2.78 0 0 0 5.5 0Z"/>
+                    <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5.2 4.3C3.9 5.4 3.1 7.1 3.1 8.9M18.8 4.3c1.3 1.1 2.1 2.8 2.1 4.6"/>
+                </svg>
+            </span>
+            <span id="alarmModalTitle">ALARM</span>
+        </div>
+        <p class="alarm-modal-heading">Roland VCombo 09</p>
+        <span class="bank">2-1</span>
+        <hr>
+        <p class="alarm-modal-heading">Roland Fantom</p>
+        <button type="button" class="square-gray-button" midi="3,8" id="alarmFantomSceneBtn">Сцена Bass | Piano</button>
+        <div class="alarm-greenpads" id="alarmGreenpads">
+            <greenpad>1</greenpad>
+            <greenpad>2</greenpad>
+            <greenpad>3</greenpad>
+            <greenpad>4</greenpad>
+            <greenpad>5</greenpad>
+            <greenpad>6</greenpad>
+            <greenpad>7</greenpad>
+            <greenpad>8</greenpad>
+        </div>
+    </div>
+</div>
+
 <!-- Модальное окно только для setlist -->
 <!-- Модалка выбора звука VR -->
 <!-- Модалка создания регистрации -->

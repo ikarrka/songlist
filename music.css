@@ -151,6 +151,31 @@ pdf {
   margin: 0;
 }
 
+/* Header pad: same look as span.square-green-button (<greenpad>), current size, display-only */
+.accordion .toggle-button .midi-controls .pad {
+  user-select: none;
+  position: relative;
+  width: 1.6em;
+  height: 1.6em;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #4CAF50;
+  color: #000000;
+  border: 2px solid #000000;
+  font-size: 0.95em;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* Header row: primary toggle + small next button */
 .accordion .header-row {
   display: flex;
@@ -761,8 +786,9 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
 .square-green-button::after {
   content: "✓";
   position: absolute;
-  top: 50%;
-  left: calc(100% + 8px);
+  bottom: calc(100% + 6px);
+  left: 50%;
+  top: auto;
   width: 60px;
   height: 60px;
   display: grid;
@@ -776,18 +802,24 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   box-shadow: 0 0 14px rgba(0, 200, 70, 0.85);
   pointer-events: none;
   opacity: 0;
-  transform: translateY(-50%) scale(0.35);
+  transform: translateX(-50%) scale(0.35);
+}
+
+.square-green-button.pad-confirmed {
+  position: relative;
+  z-index: 1000;
 }
 
 .square-green-button.pad-confirmed::after {
+  z-index: 1001;
   animation: pad-confirmation 0.75s ease-out forwards;
 }
 
 @keyframes pad-confirmation {
-  0% { opacity: 0; transform: translateY(-50%) scale(0.35); }
-  20% { opacity: 1; transform: translateY(-50%) scale(1.15); }
-  45% { opacity: 1; transform: translateY(-50%) scale(1); }
-  100% { opacity: 0; transform: translateY(-85%) scale(0.85); }
+  0% { opacity: 0; transform: translateX(-50%) scale(0.35); }
+  20% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+  45% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-20%) scale(0.85); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1249,6 +1281,7 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   border-radius: 8px;
   width: 400px;
   max-height: calc(100vh - 32px);
+  overflow-x: hidden;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -1289,6 +1322,129 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   cursor: pointer;
   line-height: 1;
 }
+
+/* ALARM modal (X-close only; no Escape / outside click) */
+.alarm-modal {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  background: var(--overlay-bg);
+  justify-content: center;
+  align-items: center;
+}
+
+.alarm-modal.is-open {
+  display: flex;
+}
+
+.alarm-modal-content {
+  --alarm-modal-font-size: 14px;
+  background: var(--setlist-modal-bg);
+  color: var(--surface-text);
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+  font-size: var(--alarm-modal-font-size);
+  line-height: 1.4;
+}
+
+.alarm-modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding-right: 24px;
+  font-size: var(--alarm-modal-font-size);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.alarm-modal-title-icon {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #c62828;
+  color: #fff;
+}
+
+.alarm-modal-title-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.alarm-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: var(--surface-text);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.alarm-modal-heading {
+  margin: 0.75em 0 0.4em;
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.alarm-modal-heading:first-of-type {
+  margin-top: 0.25em;
+}
+
+.alarm-modal .bank {
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.alarm-modal hr {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--surface-text, #212529) 25%, transparent);
+}
+
+.alarm-greenpads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+  justify-items: center;
+  overflow: visible;
+}
+
+.alarm-greenpads .square-green-button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.alarm-modal .square-gray-button {
+  display: block;
+  width: fit-content;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 
 .midi-modal-form {
   display: flex;

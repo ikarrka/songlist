@@ -2093,6 +2093,67 @@ function initRegistrationModal() {
   syncSplitNoteVisibility();
 }
 
+/** ALARM modal: VCombo bank chip + Fantom scene D009 (midi 3,8) + greenpads 1-8. Close via X only. */
+function initAlarmModal() {
+  const modal = document.getElementById('alarm-modal');
+  const trigger = document.getElementById('alarmBtn');
+  const closeBtn = document.getElementById('alarmModalClose');
+  if (!modal || !trigger) return;
+
+  // Convert <greenpad> tags the same way songs do (replaceCustomTags).
+  modal.querySelectorAll('greenpad').forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'square-green-button';
+    span.classList.toggle('dimmed', !midiOutput);
+    span.textContent = (tag.textContent || '').trim();
+    tag.replaceWith(span);
+  });
+
+  function refreshAlarmMidiDim() {
+    modal.querySelectorAll('.square-green-button, .square-gray-button').forEach(el => {
+      el.classList.toggle('dimmed', !midiOutput);
+    });
+  }
+
+  function openAlarmModal() {
+    refreshAlarmMidiDim();
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeAlarmModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+    trigger.addEventListener('click', openAlarmModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeAlarmModal);
+  // Intentionally no Escape / click-outside close (user choice).
+
+  // Greenpads: same path as song pads (handleGreenPadButton + confirmation).
+  modal.querySelectorAll('.square-green-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      handleGreenPadButton(btn.textContent.trim());
+      if (typeof showGreenPadConfirmation === 'function') {
+        showGreenPadConfirmation(btn);
+      }
+    });
+  });
+
+  // Fantom scene Bank A Scene 1 — same path as song gray MIDI buttons.
+  const sceneBtn = document.getElementById('alarmFantomSceneBtn');
+  if (sceneBtn) {
+    sceneBtn.classList.toggle('dimmed', !midiOutput);
+    sceneBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      sendFantomSceneChange(sceneBtn);
+    });
+  }
+
+  window.refreshAlarmMidiDim = refreshAlarmMidiDim;
+}
+
 function bootMidiUiHelpers() {
   initSoundPickerModal();
   initRegistrationModal();

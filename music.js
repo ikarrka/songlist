@@ -233,8 +233,8 @@ function fillSongHeader(band) {
         voice: { className: 'voice' },
         split: { className: 'split' },
         midi: { className: 'midi' },
-        pad: { className: 'pad' },
         scene: { className: 'scene' },
+        pad: { className: 'pad' },
         note: { className: 'note' }, // 🆕 добавлен новый тип
     };
 
@@ -311,16 +311,7 @@ function fillSongHeader(band) {
             case 'pad': {
                 if (item.hasAttribute('pad')) {
                     value = item.getAttribute('pad');
-                    style = {
-                        fontWeight: 'bold',
-                        color: '#ffffff',
-                        //fontSize: '1.2em',
-                        backgroundColor: '#1f7a1f',
-                        border: '1px solid #1f7a1f',
-                        borderRadius: '6px',
-                        padding: '5px'
-                    };
-
+                    // Visuals: same as span.square-green-button (from <greenpad>), size via CSS; no click/MIDI
                 }
                 break;
             }
@@ -1336,11 +1327,20 @@ function buildImageUrl(filename) {
 }
 function getScoreImageSource(img, transposeValue) {
     const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
-    if (!originalSource || transposeValue === 0) return originalSource;
+    if (!originalSource) return originalSource;
 
-    const direction = transposeValue > 0 ? "plus" : "minus";
-    const variantAttribute = `data-src-transpose-${direction}-${Math.abs(transposeValue)}`;
-    return img.getAttribute(variantAttribute) || null;
+    // Circle of 12: 0 and +/-12 = original; minus-N === plus-(12-N)
+    let n = ((transposeValue % 12) + 12) % 12;
+    if (n === 0) return originalSource;
+
+    const primary = img.getAttribute(`data-src-transpose-plus-${n}`)
+        || img.getAttribute(`data-src-transpose-minus-${n}`);
+    if (primary) return primary;
+
+    const pair = 12 - n;
+    return img.getAttribute(`data-src-transpose-minus-${pair}`)
+        || img.getAttribute(`data-src-transpose-plus-${pair}`)
+        || null;
 }
 
 function setScoreImageNotice(img, originalSource) {
