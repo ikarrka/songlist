@@ -182,6 +182,14 @@ function reorderSongList(band) {
                         acc.classList.toggle('block-collapsed-hide', collapsed);
                     }
                 });
+                try {
+                    const all = JSON.parse(localStorage.getItem('collapsedBlocks') || '{}');
+                    if (!all[band]) all[band] = {};
+                    if (collapsed) all[band][String(block)] = true;
+                    else delete all[band][String(block)];
+                    if (Object.keys(all[band]).length === 0) delete all[band];
+                    localStorage.setItem('collapsedBlocks', JSON.stringify(all));
+                } catch (_) { /* ignore */ }
             });
 
             header.appendChild(collapseBtn);
@@ -194,6 +202,16 @@ function reorderSongList(band) {
         item.style.marginTop = '';
         container.appendChild(item)
     });
+
+    // restore remembered collapsed blocks for this band
+    try {
+        const all = JSON.parse(localStorage.getItem('collapsedBlocks') || '{}');
+        const saved = all[band] || {};
+        container.querySelectorAll('.block-header').forEach(hdr => {
+            const b = hdr.dataset.block;
+            if (saved[b]) hdr.querySelector('.block-collapse-btn')?.click();
+        });
+    } catch (_) { /* ignore */ }
 
     if (numbered.length > 0 && unnumbered.length > 0) {
         const hr = document.createElement('hr');
@@ -409,7 +427,7 @@ function paintChords(song) {
     // const chordRegex =
     //     /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add)?|dim|aug|sus|add)?\+?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
 const chordRegex =
-    /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add|dim)?|dim|aug|sus|add)?\+?\d*(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
+    /(?<![A-Za-z0-9])([A-H](?:#|b)?(?:maj|min|m(?:sus|add|dim)?|dim|aug|sus|add)?\+?\d*\+?(?:(?:sus|add)\d*)?(?:\/[A-H](?:#|b)?)?)(?![A-Za-z0-9])/g;
 
     const pres = song.querySelectorAll("pre");
     pres.forEach(pre => {
@@ -720,8 +738,9 @@ function setActiveSongList() {
 
     if (bands.length === 0) return;
 
-    // текущая выбранная группа (по умолчанию первая)
-    let selected = bands[0];
+    // текущая выбранная группа: из localStorage, если ещё есть в списке, иначе первая
+    const savedBand = localStorage.getItem("selectedBand");
+    let selected = (savedBand && bands.includes(savedBand)) ? savedBand : bands[0];
     const buildArtistSelectors = (band) => {
 
         const cellLetter = document.getElementById('cell_letter_select');
@@ -819,6 +838,7 @@ function setActiveSongList() {
 
     // обработчик смены выбора
     select.addEventListener("change", () => {
+        localStorage.setItem("selectedBand", select.value);
         applyFilter(select.value);
     });
 
@@ -1329,17 +1349,17 @@ function getScoreImageSource(img, transposeValue) {
     const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
     if (!originalSource) return originalSource;
 
-    // Circle of 12: 0 and +/-12 = original; minus-N === plus-(12-N)
-    let n = ((transposeValue % 12) + 12) % 12;
-    if (n === 0) return originalSource;
+    // Circle of 12: 0 / +/-12 = original; plus-N === minus-(12-N) (not plus-N === minus-N)
+    let signed = transposeValue % 12;
+    if (signed === 0) return originalSource;
 
-    const primary = img.getAttribute(`data-src-transpose-plus-${n}`)
-        || img.getAttribute(`data-src-transpose-minus-${n}`);
-    if (primary) return primary;
+    const abs = Math.abs(signed);
+    const direction = signed > 0 ? "plus" : "minus";
+    const opposite = signed > 0 ? "minus" : "plus";
+    const pair = 12 - abs;
 
-    const pair = 12 - n;
-    return img.getAttribute(`data-src-transpose-minus-${pair}`)
-        || img.getAttribute(`data-src-transpose-plus-${pair}`)
+    return img.getAttribute(`data-src-transpose-${direction}-${abs}`)
+        || img.getAttribute(`data-src-transpose-${opposite}-${pair}`)
         || null;
 }
 
