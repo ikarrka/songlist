@@ -2267,7 +2267,19 @@ function restoreSetListHelper() {
     });
 }
 
+function ensureAccordionToggleButtons() {
+    document.querySelectorAll('div.accordion').forEach(accordion => {
+        if (accordion.querySelector(':scope > button.toggle-button, :scope > .header-row > button.toggle-button')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'toggle-button';
+        accordion.insertBefore(btn, accordion.firstChild);
+    });
+}
+
 function transformAccordionHeaders() {
+    ensureAccordionToggleButtons();
+
     document.querySelectorAll('.accordion').forEach(accordion => {
         // already transformed?
         if (accordion.querySelector(':scope > .header-row')) return;
