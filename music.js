@@ -209,7 +209,12 @@ function reorderSongList(band) {
         const saved = all[band] || {};
         container.querySelectorAll('.block-header').forEach(hdr => {
             const b = hdr.dataset.block;
-            if (saved[b]) hdr.querySelector('.block-collapse-btn')?.click();
+            if (!saved[b]) return;
+            const btn = hdr.querySelector('.block-collapse-btn');
+            if (!btn) return;
+            // click() would leave a focus ring that looks like a wrong icon
+            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            btn.blur();
         });
     } catch (_) { /* ignore */ }
 
@@ -1346,7 +1351,7 @@ function buildImageUrl(filename) {
     return prefixImage + encodeURIComponent(filename);
 }
 function getScoreImageSource(img, transposeValue) {
-    const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
+    const originalSource = img.getAttribute("data-src");
     if (!originalSource) return originalSource;
 
     // Circle of 12: 0 / +/-12 = original; plus-N === minus-(12-N) (not plus-N === minus-N)
@@ -1385,10 +1390,9 @@ function setScoreImageNotice(img, originalSource) {
 }
 
 function loadScoreImage(img, acc) {
-    const originalSource = img.getAttribute("data-original-src") || img.getAttribute("data-src");
+    const originalSource = img.getAttribute("data-src");
     if (!originalSource) return;
 
-    img.setAttribute("data-original-src", originalSource);
     const transposeValue = parseInt(acc?.dataset.currentTranspose || "0", 10) || 0;
     const source = getScoreImageSource(img, transposeValue);
     if (!source) {
@@ -1404,7 +1408,7 @@ function loadScoreImage(img, acc) {
 
 function updateScoreImagesForTranspose(acc) {
     acc.querySelectorAll('img[imagetype="scores"]').forEach(img => {
-        if (img.getAttribute("data-original-src") || img.getAttribute("data-src")) {
+        if (img.getAttribute("data-src")) {
             loadScoreImage(img, acc);
         }
     });
