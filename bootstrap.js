@@ -16,13 +16,23 @@
         }
 
         const files = await manifestResponse.json();
-        const fragments = await Promise.all(files.map(async file => {
-            const response = await fetch(`songs/${file}`);
-            if (!response.ok) {
-                throw new Error(`Cannot load ${file}: ${response.status}`);
+        const fragments = (await Promise.all(files.map(async file => {
+            try {
+                const response = await fetch(`songs/${file}`);
+                if (!response.ok) {
+                    console.warn(`Cannot load ${file}: ${response.status}`);
+                    return '';
+                }
+                return response.text();
+            } catch (error) {
+                console.warn(`Cannot load ${file}:`, error);
+                return '';
             }
-            return response.text();
-        }));
+        }))).filter(Boolean);
+
+        if (fragments.length === 0) {
+            throw new Error('Cannot load any song file');
+        }
 
         document.getElementById('songlists').innerHTML = fragments.join('\n');
 
