@@ -674,6 +674,16 @@ table.structure tr.controls-row td.controls-cell .tool-buttons {
   text-shadow: 0 0 0.2px currentColor;
 }
 
+.transpose-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool-btn.transpose-disable-btn svg {
+  display: block;
+}
+
 .google-search-btn svg {
   width: 18px;
   height: 18px;

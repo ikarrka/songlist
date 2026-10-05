@@ -585,6 +585,15 @@ function convertSongToTable(song) {
             const pre = document.createElement('pre');
             pre.innerHTML = content;
 
+            // Song markup uses an opening <transpose> tag as a section marker.
+            // Keep it at its source position and move its wrapped content after
+            // it, so the custom element contains only its controls.
+            Array.from(pre.querySelectorAll("transpose")).reverse().forEach(marker => {
+                const sectionContent = document.createDocumentFragment();
+                while (marker.firstChild) sectionContent.appendChild(marker.firstChild);
+                marker.after(sectionContent);
+            });
+
             td2.appendChild(pre);
             tr.appendChild(td1);
             tr.appendChild(td2);
@@ -956,6 +965,123 @@ function updateTransposeResetButton(song) {
     resetButton.style.display = currentValue === baselineValue ? "none" : "";
 }
 
+function transposeChordValue(chord, step) {
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const flatMap = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
+    return chord.replace(/[A-G](#|b)?/g, match => {
+        const root = flatMap[match] || match;
+        const index = notes.indexOf(root);
+        return index < 0 ? match : notes[(index + step % 12 + 12) % 12];
+    });
+}
+
+function applySongTransposeState(song) {
+    const table = song?.querySelector("table.structure");
+    if (!table) return;
+    const markers = Array.from(table.querySelectorAll("transpose"));
+    const rows = Array.from(table.querySelectorAll("tr.songpart:not(.controls-row)"));
+    const markerState = markers.map(marker => ({
+        row: marker.closest("tr.songpart"),
+        offset: Number(marker.dataset.transposeOffset || 0)
+    }));
+    const globalOffset = Number(song.dataset.currentTranspose || 0) - Number(song.dataset.transposeBaselineValue || 0);
+
+    rows.forEach(row => {
+        const rowIndex = rows.indexOf(row);
+        const sectionOffset = markerState.reduce((sum, marker) => {
+            const markerIndex = rows.indexOf(marker.row);
+            return markerIndex <= rowIndex ? sum + marker.offset : sum;
+        }, 0);
+        row.querySelectorAll("span.chord[data-transpose-baseline]").forEach(chord => {
+            chord.textContent = transposeChordValue(chord.dataset.transposeBaseline, globalOffset + sectionOffset);
+        });
+        row.querySelectorAll('img[imagetype="scores"][data-src]').forEach(img => {
+            loadScoreImage(img, song, Number(song.dataset.transposeBaselineValue || 0) + globalOffset + sectionOffset);
+        });
+    });
+}
+
+function updateSectionTransposeButtons(song) {
+    song?.querySelectorAll("transpose .transpose-reset-btn").forEach(button => {
+        const marker = button.closest("transpose");
+        button.style.display = Number(marker?.dataset.transposeOffset || 0) === 0 ? "none" : "";
+    });
+}
+
+function createTransposeControls(song, container, isSection = false) {
+    const controls = document.createElement("span");
+    controls.className = "transpose-controls";
+    const definitions = [
+        { text: TransposeButtonDownSymbol, direction: -1, classes: "transpose-btn down" },
+        { text: TransposeButtonUpSymbol, direction: 1, classes: "transpose-btn up" },
+        { text: "⌂", reset: true, classes: "transpose-reset-btn" }
+    ];
+    definitions.forEach(definition => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tool-btn ${definition.classes}`;
+        button.textContent = definition.text;
+        if (definition.reset) {
+            button.style.display = "none";
+            button.style.fontWeight = "900";
+            button.style.fontSize = "20px";
+            button.title = "Вернуться к текущей тональности";
+            button.addEventListener("click", () => {
+                if (isSection) {
+                    const marker = button.closest("transpose");
+                    if (marker) marker.dataset.transposeOffset = "0";
+                    applySongTransposeState(song);
+                    updateSectionTransposeButtons(song);
+                } else {
+                    restoreTransposeBaseline(song);
+                    song.querySelectorAll("transpose").forEach(marker => marker.dataset.transposeOffset = "0");
+                    applySongTransposeState(song);
+                    updateSectionTransposeButtons(song);
+                }
+            });
+        } else {
+            button.style.fontWeight = "bold";
+            button.addEventListener("click", () => {
+                if (isSection) {
+                    const marker = button.closest("transpose");
+                    if (marker) marker.dataset.transposeOffset = String(Number(marker.dataset.transposeOffset || 0) + definition.direction);
+                    applySongTransposeState(song);
+                    updateSectionTransposeButtons(song);
+                } else {
+                    const table = song.querySelector("table.structure");
+                    transposeSong(definition.direction, table);
+                    if (song.dataset.transposeInitializing !== "1" || !song.hasAttribute("keyrender")) transposeSongKey(song, definition.direction);
+                    song.dataset.currentTranspose = String((Number(song.dataset.currentTranspose) || 0) + definition.direction);
+                    applySongTransposeState(song);
+                    updateTransposeResetButton(song);
+                    updateSectionTransposeButtons(song);
+                }
+            });
+        }
+        controls.appendChild(button);
+    });
+    // Section markers are written as opening <transpose> tags in song markup.
+    // Put their buttons at the opening tag, before the section content, so the
+    // controls stay where the marker appears in the source instead of after
+    // everything wrapped by that marker.
+    if (isSection) container.prepend(controls);
+    else container.appendChild(controls);
+    return controls;
+}
+
+function disableSectionTransposes(song) {
+    song.querySelectorAll("transpose").forEach(marker => {
+        marker.querySelectorAll(":scope > .transpose-controls").forEach(controls => controls.remove());
+
+        // <transpose> is used as a section wrapper in song markup. Unwrap it
+        // instead of removing it, so the score and text inside remain intact.
+        while (marker.firstChild) marker.parentNode.insertBefore(marker.firstChild, marker);
+        marker.remove();
+    });
+    applySongTransposeState(song);
+    updateSectionTransposeButtons(song);
+}
+
 function restoreTransposeBaseline(song) {
     if (!song) return;
 
@@ -1000,9 +1126,6 @@ function addButtons(song) {
         { txt: "►", class: "youtube-link", tag: "yt", action: openYoutubeFrame },
         { txt: "☰", tag: "chord", action: link => window.open(link, "_blank") },
         { txt: "🔍", class: "google-search-btn", action: song => openGoogleSearch(song) },
-        { txt: TransposeButtonDownSymbol, transpose: -1, class: "transpose-btn down"  },
-        { txt: TransposeButtonUpSymbol, transpose: 1, class: "transpose-btn up"  },
-        { txt: "⌂", class: "transpose-reset-btn", reset: true },
         { txt: "Playback", class: "playback-link", tag: "playback", action: openPlaybackPlayer, last: true },
     ];
 
@@ -1084,36 +1207,27 @@ function addButtons(song) {
             btn.addEventListener("click", () => cfg.action(song));
         }
 
-        if (cfg.reset) {
-            btn.style.display = "none";
-            btn.style.fontWeight = "900";
-            btn.style.fontSize = "20px";
-            btn.title = "Вернуться к исходной тональности";
-            btn.addEventListener("click", () => restoreTransposeBaseline(song));
-        }
-
-        if (cfg.transpose) {
-            btn.style.fontWeight = "bold";
-            btn.addEventListener("click", () => {
-                transposeSong(cfg.transpose, table);
-                if (song.dataset.transposeInitializing !== "1" || !song.hasAttribute("keyrender")) {
-                    transposeSongKey(song, cfg.transpose);
-                }
-
-                const currentTranspose = parseInt(song.dataset.currentTranspose || "0", 10) || 0;
-                song.dataset.currentTranspose = String(currentTranspose + cfg.transpose);
-                updateTransposeResetButton(song);
-
-                if (song.dataset.transposeInitializing !== "1") {
-                    updateScoreImagesForTranspose(song);
-                }
-            });
-        }
-
         wrapper.appendChild(btn);
     });
 
-    if (table) targetCell.classList.add("transpose-cell");
+    if (table) {
+        targetCell.classList.add("transpose-cell");
+        if (table.querySelector("transpose")) {
+        const emergency = document.createElement("button");
+        emergency.type = "button";
+        emergency.className = "tool-btn transpose-disable-btn";
+        emergency.title = "Отключить все секционные транспозиции";
+        emergency.setAttribute("aria-label", emergency.title);
+        emergency.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 20 20 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        emergency.addEventListener("click", () => disableSectionTransposes(song));
+        wrapper.appendChild(emergency);
+        }
+        createTransposeControls(song, wrapper, false);
+        table.querySelectorAll("transpose").forEach(marker => {
+            marker.dataset.transposeOffset = marker.dataset.transposeOffset || "0";
+            createTransposeControls(song, marker, true);
+        });
+    }
     targetCell.appendChild(wrapper);
 }
 
@@ -1389,11 +1503,13 @@ function setScoreImageNotice(img, originalSource) {
     img.style.display = "none";
 }
 
-function loadScoreImage(img, acc) {
+function loadScoreImage(img, acc, transposeOverride) {
     const originalSource = img.getAttribute("data-src");
     if (!originalSource) return;
 
-    const transposeValue = parseInt(acc?.dataset.currentTranspose || "0", 10) || 0;
+    const transposeValue = Number.isFinite(transposeOverride)
+        ? transposeOverride
+        : parseInt(acc?.dataset.currentTranspose || "0", 10) || 0;
     const source = getScoreImageSource(img, transposeValue);
     if (!source) {
         setScoreImageNotice(img, originalSource);
