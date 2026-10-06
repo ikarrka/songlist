@@ -435,6 +435,7 @@ table.structure tr.chorus td:first-child,
 table.structure tr.instr td:first-child,
 table.structure tr.coda td:first-child,
 table.structure tr.bridge td:first-child,
+table.structure tr.remark td:first-child,
 table.structure tr.prechorus td:first-child,
 table.structure tr.interlude td:first-child {
   font-family: monospace;
@@ -463,6 +464,10 @@ table.structure tr.coda td:first-child {
 }
 
 table.structure tr.bridge td:first-child {
+  color: var(--color-bridge);
+}
+
+table.structure tr.remark td:first-child {
   color: var(--color-bridge);
 }
 

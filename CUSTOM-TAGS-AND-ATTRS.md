@@ -28,6 +28,7 @@
 | `<chorus>` | — | `<tr class="songpart chorus">` | **Cho** |
 | `<prechorus>` / `<pre-chorus>` | — | `<tr class="songpart prechorus">` | **Pre** |
 | `<bridge>` | — | `<tr class="songpart bridge">` | **Brd** |
+| `<remark>` | — | `<tr class="songpart remark">`; лейбл оформляется цветом `<bridge>` | **Rem** |
 | `<interlude>` | — | `<tr class="songpart interlude">` | **Inr** |
 | `<instr>` | Инструментальная секция | `<tr class="songpart instr">` | **Ins** |
 | `<coda>` | Outro/кода | `<tr class="songpart coda">` | **Cod** |
@@ -42,6 +43,12 @@
 | `<bank>` | Внутри секций песни (банк тембра, напр. `17-2`) | В [replaceCustomTags](file:///d:/source/songlist/music.js) **до** `handleMidi`: `<bank>...</bank>` → `<span class="bank">...</span>` (содержимое без изменений). **Без** `dimmed`. В allbands-клоне сырой тег удаляется как chord/yt/…. Не путать с атрибутом аккордеона `bank="…"` (§4). | — |
 
 Мапа лейблов задаётся в константе [`sectionMap`](file:///d:/source/songlist/music.js#L17-L25).
+
+Для пометки внутри структуры песни используйте `<remark>…</remark>`. Она становится отдельной строкой таблицы с лейблом **Rem**; цвет лейбла совпадает с `<bridge>` (через `--color-bridge`, включая тему оформления). Чтобы добавить новый тип секции, синхронно обновите `sectionMap` и селекторы стиля лейбла в `music.css`.
+
+### Секционная транспозиция
+
+Внутри секции песни можно поставить открывающий `<transpose>` как маркер локальной транспозиции. Его кнопки `−`, `+` и сброс управляют секциями после маркера независимо от общей транспозиции песни; маркер не должен поглощать текст секции при преобразовании в таблицу. Это поведение реализовано в `convertSongToTable()` и помощниках транспозиции в `music.js`.
 
 ---
 

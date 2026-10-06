@@ -22,7 +22,8 @@ const sectionMap = {
     interlude: 'Inr',
     instr: 'Ins',
     coda: 'Cod',
-    bridge: 'Brd'
+    bridge: 'Brd',
+    remark: 'Rem'
 };
 
 const TransposeButtonDownSymbol = "⬇";
